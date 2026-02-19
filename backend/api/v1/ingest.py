@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from models.db import Document
@@ -23,6 +23,14 @@ def ingest_text(
     vectorstore=Depends(get_vectorstore),
     engine=Depends(get_engine),
 ):
+    with Session(engine) as session:
+        existing = session.query(Document).filter_by(name=request.name).first()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Document '{request.name}' déjà ingéré.",
+            )
+
     service = IngestionService(provider=provider, vectorstore=vectorstore)
     chunk_count = service.ingest_text(request.text, source=request.name)
     doc_id = str(uuid.uuid4())
