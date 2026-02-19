@@ -70,3 +70,29 @@ def test_get_logs(client):
     r = client.get("/api/logs")
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+
+
+def test_list_documents_empty(client):
+    r = client.get("/api/documents")
+    assert r.status_code == 200
+    assert r.json() == []
+
+
+def test_ingest_returns_document_id(client):
+    r = client.post("/api/ingest", json={"text": "Document test " * 20, "name": "test.md"})
+    assert r.status_code == 200
+    body = r.json()
+    assert "document_id" in body
+    assert "chunk_count" in body
+    assert body["chunk_count"] > 0
+
+
+def test_list_documents_after_ingest(client):
+    client.post("/api/ingest", json={"text": "Contenu important " * 20, "name": "doc-a.md"})
+    r = client.get("/api/documents")
+    assert r.status_code == 200
+    docs = r.json()
+    assert len(docs) == 1
+    assert docs[0]["name"] == "doc-a.md"
+    assert "id" in docs[0]
+    assert "ingested_at" in docs[0]
