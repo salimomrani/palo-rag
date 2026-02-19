@@ -1,6 +1,6 @@
 # Feature Specification: RAG Knowledge Assistant
 
-**Feature Branch**: `002-rag-assistant`
+**Feature Branch**: `001-rag-assistant`
 **Created**: 2026-02-19
 **Status**: Approved
 **Input**: User description: "RAG Knowledge Assistant: API + Angular UI for semantic search over internal documents with guardrails, traceability and auto-evaluation"

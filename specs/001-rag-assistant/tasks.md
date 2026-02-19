@@ -1,6 +1,6 @@
 # Tasks: RAG Knowledge Assistant
 
-**Input**: Design documents from `specs/002-rag-assistant/`
+**Input**: Design documents from `specs/001-rag-assistant/`
 **Prerequisites**: plan.md ✅, spec.md ✅
 
 ---
