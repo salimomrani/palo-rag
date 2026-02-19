@@ -13,8 +13,19 @@ def run_quality_check(
     vectorstore=Depends(get_vectorstore),
     engine=Depends(get_engine),
 ):
+    import os
     from quality.runner import run_quality_check as _run
+    from quality.report import generate_quality_report_md
+
     scores = _run(provider=provider, vectorstore=vectorstore, engine=engine)
+
+    # Generate the Markdown report
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    reports_dir = os.path.join(root_dir, "reports")
+    os.makedirs(reports_dir, exist_ok=True)
+    report_path = os.path.join(reports_dir, "eval.md")
+    generate_quality_report_md(scores=scores, output_path=report_path)
+
     return {"status": "completed", "scores": scores}
 
 
