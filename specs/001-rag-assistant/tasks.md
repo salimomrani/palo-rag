@@ -7,12 +7,12 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Create `.gitignore`, `.claudeignore` at repo root
-- [ ] T002 Create `backend/requirements.txt`, `requirements-dev.txt`, `.env.example`, `pytest.ini`
-- [ ] T003 [P] Create Python virtualenv, install deps (`python3.11 -m venv .venv && pip install -r requirements.txt`)
-- [ ] T004 [P] Initialize Angular project (`ng new frontend --standalone --routing --style=scss --skip-git`)
-- [ ] T005 Create `corpus/` directory with 15 synthetic Markdown documents
-- [ ] T006 **Commit**: `chore: project bootstrap — Python deps, Angular init, 15-doc corpus`
+- [x] T001 Create `.gitignore`, `.claudeignore` at repo root
+- [x] T002 Create `backend/requirements.txt`, `requirements-dev.txt`, `.env.example`, `pytest.ini`
+- [x] T003 [P] Create Python virtualenv, install deps (python3.12 used — 3.11 unavailable, SQLAlchemy pinned to 2.0.35)
+- [x] T004 [P] Initialize Angular project (`ng new frontend --standalone --routing --style=scss --skip-git --no-ssr`)
+- [x] T005 Create `corpus/` directory with 15 synthetic Markdown documents
+- [x] T006 **Commit**: `chore: project bootstrap — Python deps, Angular init, 15-doc corpus`
 
 ---
 
@@ -20,12 +20,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Write failing tests `backend/tests/test_models.py` (Document, QueryLog, EvaluationResult)
-- [ ] T008 Implement `backend/models/db.py` (SQLAlchemy models) — make T007 pass
-- [ ] T009 **Commit**: `feat: SQLAlchemy models — Document, QueryLog, EvaluationResult`
-- [ ] T010 Write failing tests `backend/tests/test_provider.py` (AIProvider, OllamaProvider)
-- [ ] T011 Implement `backend/rag/provider.py` (AIProvider protocol + OllamaProvider) — make T010 pass
-- [ ] T012 **Commit**: `feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)`
+- [x] T007 Write failing tests `backend/tests/test_models.py` (Document, QueryLog, EvaluationResult)
+- [x] T008 Implement `backend/models/db.py` (SQLAlchemy models) — make T007 pass
+- [x] T009 **Commit**: `feat: SQLAlchemy models — Document, QueryLog, EvaluationResult`
+- [x] T010 Write failing tests `backend/tests/test_provider.py` (AIProvider, OllamaProvider)
+- [x] T011 Implement `backend/rag/provider.py` (AIProvider protocol + OllamaProvider) — make T010 pass
+- [x] T012 **Commit**: `feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)`
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 
@@ -38,19 +38,19 @@
 
 ### Tests (write first, must FAIL)
 
-- [ ] T013 [P] Write failing tests `backend/tests/test_ingestion.py`
-- [ ] T014 [P] Write failing tests `backend/tests/test_pipeline.py`
+- [x] T013 [P] Write failing tests `backend/tests/test_ingestion.py`
+- [x] T014 [P] Write failing tests `backend/tests/test_pipeline.py`
 
 ### Implementation
 
-- [ ] T015 [US1] Implement `backend/rag/ingestion.py` — make T013 pass
-- [ ] T016 [US1] Implement `backend/rag/pipeline.py` — make T014 pass
-- [ ] T017 **Commit**: `feat: ingestion pipeline + RAG query pipeline with source attribution`
-- [ ] T018 [US1] Write failing tests `backend/tests/test_api.py` for `/api/query` endpoint
-- [ ] T019 [US1] Create `backend/dependencies.py` (FastAPI DI: provider, vectorstore, engine)
-- [ ] T020 [US1] Create `backend/api/query.py` — make T018 query tests pass
-- [ ] T021 [US1] Create `backend/main.py` with CORS and router registration
-- [ ] T022 **Commit**: `feat: POST /api/query endpoint — RAG pipeline wired to FastAPI`
+- [x] T015 [US1] Implement `backend/rag/ingestion.py` — make T013 pass
+- [x] T016 [US1] Implement `backend/rag/pipeline.py` — make T014 pass
+- [x] T017 **Commit**: `feat: ingestion pipeline + RAG query pipeline with source attribution`
+- [x] T018 [US1] Write failing tests `backend/tests/test_api.py` for `/api/query` endpoint
+- [x] T019 [US1] Create `backend/dependencies.py` (FastAPI DI: provider, vectorstore, engine)
+- [x] T020 [US1] Create `backend/api/query.py` — make T018 query tests pass
+- [x] T021 [US1] Create `backend/main.py` with CORS and router registration
+- [x] T022 **Commit**: `feat: POST /api/query endpoint — RAG pipeline wired to FastAPI`
 
 **Checkpoint**: `curl -X POST /api/query -d '{"question":"..."}'` returns answer + sources ✅
 

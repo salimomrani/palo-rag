@@ -12,6 +12,7 @@
 
 - Toujours utiliser **speckit** : `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
 - Ne jamais coder sans spec et plan validés
+- **Interdiction** d'utiliser `superpowers:writing-plans` ou `superpowers:executing-plans` — speckit remplace ces skills sur ce projet
 
 ### Frontend
 
