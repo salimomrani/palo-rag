@@ -158,6 +158,22 @@
 
 ---
 
+## Phase 8b: Streaming + Document Management (post-demo additions)
+
+- [x] T062 [US1] Add `stream_generate()` to `OllamaProvider` via `ChatOllama.stream()`
+- [x] T063 [US1] Add `stream_query()` SSE generator to `RAGPipeline` (meta→tokens→done events)
+- [x] T064 [US1] Create `POST /api/v1/query/stream` endpoint with `StreamingResponse` + post-stream logging
+- [x] T065 [US2] Add `DELETE /api/v1/documents/{id}` endpoint (removes from DB + ChromaDB by source filter)
+- [x] T066 [US2] Block duplicate ingestion: return HTTP 409 if document name already exists
+- [x] T067 [US6] Update `RagApiService`: `streamQuery()` using native fetch + ReadableStream SSE parser
+- [x] T068 [US6] Update `ChatComponent`: streaming by message ID, blinking cursor during generation
+- [x] T069 [US6] Update `IngestComponent`: delete button per document with confirmation dialog
+- [x] T070 **Commit**: `feat: streaming SSE + document delete + duplicate guard`
+
+**Checkpoint**: Chat streams token by token, ingest blocks duplicates, delete removes from KB ✅
+
+---
+
 ## Phase 9: Deliverables & Polish
 
 - [ ] T055 Create `README.md` (setup in 3 commands, API table, test command)

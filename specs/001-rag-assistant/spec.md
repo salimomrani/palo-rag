@@ -19,7 +19,8 @@ A company employee types a natural language question about internal products, pr
 
 1. **Given** the corpus is ingested, **When** a user submits a question within the corpus domain, **Then** the response contains a grounded answer, 1-4 source references with similarity scores, and a confidence score between 0 and 1
 2. **Given** a question outside the corpus domain, **When** submitted, **Then** the system responds with an explicit "I don't have information on this topic" message — not a hallucination
-3. **Given** a valid question, **When** submitted, **Then** the response arrives within 10 seconds
+3. **Given** a valid question, **When** submitted, **Then** the first tokens of the answer appear in the UI within 2 seconds and the response streams token by token until complete
+4. **Given** the answer is streaming, **When** displayed in the UI, **Then** a blinking cursor is visible during generation and disappears when the stream completes
 
 ---
 
@@ -131,6 +132,8 @@ A user or administrator can view recent query history, quality scores, and guard
 - **FR-016**: Frontend MUST provide three views: Chat, Ingest (with document list and delete action), and Logs
 - **FR-017**: System MUST reject ingestion of a document whose name already exists in the knowledge base with HTTP 409 and an explicit error message — no duplicate chunks may be created in the vector store
 - **FR-018**: System MUST expose a delete endpoint for documents; deleting a document MUST remove it from both the persistent store and the vector store so it can no longer appear in query results
+- **FR-019**: System MUST expose a streaming query endpoint that emits answer tokens progressively via Server-Sent Events; sources and confidence score MUST be sent before the first token
+- **FR-020**: The frontend chat view MUST display answer tokens as they arrive, with a visible blinking cursor during generation that disappears on completion
 
 ### Key Entities
 
@@ -152,6 +155,7 @@ A user or administrator can view recent query history, quality scores, and guard
 - **SC-007**: All log entries for queries containing email addresses store `[EMAIL]` instead of the raw address
 - **SC-008**: Attempting to ingest a document with an already-existing name returns HTTP 409 — the vector store contains no duplicate chunks
 - **SC-009**: Deleting a document removes it from the document list and it no longer appears as a source in subsequent query responses
+- **SC-010**: The first token of a streamed answer appears in the UI within 2 seconds of submission on the local AI stack
 
 ## Assumptions
 
