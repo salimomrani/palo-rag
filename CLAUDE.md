@@ -2,7 +2,7 @@
 
 ## Stack
 
-- **Backend**: Python 3.11, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, SQLite
+- **Backend**: Python 3.12, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, PostgreSQL 16
 - **AI**: Ollama local (`llama3.2` + `nomic-embed-text`) — `AIProvider` interface swappable
 - **Frontend**: Angular 21, standalone components, signals, OnPush, 2-space indent
 
@@ -31,6 +31,7 @@
 3. **Fail transparent** : jamais de réponse hallucinée, guardrail refusal = succès
 4. **Séparation des concerns** : RAG / guardrails / eval = modules indépendants
 5. **Reproductible** : 3 commandes depuis checkout propre
+6. **DB** : PostgreSQL 16 via `docker-compose up -d` (dévier de la spec "no Docker" — décision volontaire)
 
 ## Python Conventions
 
