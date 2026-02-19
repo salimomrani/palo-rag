@@ -9,7 +9,7 @@ def make_pipeline():
     mock_doc.page_content = "L'API supporte REST selon la spec v1."
     mock_doc.metadata = {"source": "spec-api-v1.md", "chunk_index": 0}
     vectorstore = MagicMock()
-    vectorstore.similarity_search_with_score.return_value = [(mock_doc, 0.87), (mock_doc, 0.72)]
+    vectorstore.similarity_search_with_relevance_scores.return_value = [(mock_doc, 0.87), (mock_doc, 0.72)]
     return RAGPipeline(provider=provider, vectorstore=vectorstore)
 
 
@@ -35,7 +35,7 @@ def test_query_no_results_returns_low_confidence():
     provider = MagicMock()
     provider.generate.return_value = "Je ne sais pas."
     vectorstore = MagicMock()
-    vectorstore.similarity_search_with_score.return_value = []
+    vectorstore.similarity_search_with_relevance_scores.return_value = []
     pipeline = RAGPipeline(provider=provider, vectorstore=vectorstore)
     result = pipeline.query("Hors corpus")
     assert result.confidence_score == 0.0

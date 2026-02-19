@@ -16,7 +16,7 @@ def client():
     mock_doc.page_content = "Contenu test"
     mock_doc.metadata = {"source": "test.md", "chunk_index": 0}
     mock_vs = MagicMock()
-    mock_vs.similarity_search_with_score.return_value = [(mock_doc, 0.85)]
+    mock_vs.similarity_search_with_relevance_scores.return_value = [(mock_doc, 0.85)]
     mock_vs.add_documents.return_value = ["id1"]
 
     engine = create_engine(

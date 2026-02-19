@@ -176,9 +176,9 @@
 
 ## Phase 9: Deliverables & Polish
 
-- [ ] T055 Create `README.md` (setup in 3 commands, API table, test command)
-- [ ] T056 Create `DECISIONS.md` (trade-offs, limits, next-steps)
-- [ ] T057 Run `pytest tests/ -v --tb=short` — all PASSED ✅
+- [x] T055 Create `README.md` (setup in 3 commands, API table, test command)
+- [x] T056 Create `DECISIONS.md` (trade-offs, limits, next-steps)
+- [x] T057 Run `pytest tests/ -v --tb=short` — all PASSED ✅
 - [ ] T058 Run quality check to generate `reports/eval.md`
 - [ ] T059 **Commit**: `docs: README, DECISIONS.md — deliverables complete`
 - [ ] T060 Run `/cost` in Claude Code terminal — copy session tokens/cost into `reports/costs.md`
