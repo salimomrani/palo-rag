@@ -17,7 +17,7 @@ def run_quality_check(
     from quality.runner import run_quality_check as _run
     from quality.report import generate_quality_report_md
 
-    scores = _run(provider=provider, vectorstore=vectorstore, engine=engine)
+    scores = _run(provider=provider, vectorstore=vectorstore, engine=engine, limit=None)
 
     # Generate the Markdown report
     root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
