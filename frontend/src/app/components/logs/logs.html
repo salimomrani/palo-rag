@@ -45,7 +45,7 @@
               <td class="cell-question">{{ log.question_masked }}</td>
               <td class="cell-answer">
                 @if (log.rejected) {
-                  <span class="rejection-reason">{{ log.rejection_reason }}</span>
+                  <span class="rejection-reason">{{ reasonLabel(log.rejection_reason) }}</span>
                 } @else {
                   <span [class.truncated]="expandedId() !== log.id">{{ log.answer }}</span>
                   @if ((log.answer?.length ?? 0) > 120) {

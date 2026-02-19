@@ -93,10 +93,25 @@ export class Chat implements AfterViewChecked {
       },
       error: (err) => {
         this.messages.update((msgs) => msgs.filter((m) => m.id !== msgId));
-        this.error.set(err?.detail ?? 'Erreur de communication avec le RAG.');
+        this.error.set(this._translateError(err?.detail));
         this.isLoading.set(false);
       },
     });
+  }
+
+  private _translateError(detail: string | undefined): string {
+    switch (detail) {
+      case 'guardrail:empty_question':
+        return 'Question vide.';
+      case 'guardrail:length_exceeded':
+        return 'Question trop longue (max 500 caractères).';
+      case 'guardrail:prompt_injection':
+        return "Tentative d'injection détectée.";
+      case 'guardrail:offensive_content':
+        return 'Contenu offensant détecté.';
+      default:
+        return detail || 'Erreur de communication avec le RAG.';
+    }
   }
 
   onKeydown(event: KeyboardEvent): void {

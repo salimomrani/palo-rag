@@ -40,4 +40,19 @@ export class Logs implements OnInit {
   toggleRow(id: number): void {
     this.expandedId.set(this.expandedId() === id ? null : id);
   }
+
+  reasonLabel(reason: string | null): string {
+    switch (reason) {
+      case 'guardrail:empty_question':
+        return 'Question vide';
+      case 'guardrail:length_exceeded':
+        return 'Question trop longue';
+      case 'guardrail:prompt_injection':
+        return 'Injection de prompt';
+      case 'guardrail:offensive_content':
+        return 'Contenu offensant';
+      default:
+        return reason ?? 'Refusé';
+    }
+  }
 }
