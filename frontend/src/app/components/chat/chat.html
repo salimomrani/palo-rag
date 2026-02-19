@@ -1,1 +1,36 @@
-<p>chat works!</p>
+<div class="chat-container">
+  <div class="messages">
+    <div *ngFor="let msg of messages" class="message" [ngClass]="msg.role">
+      <div class="message-content">{{ msg.content }}</div>
+
+      <div *ngIf="msg.sources?.length" class="sources">
+        <strong>Sources:</strong>
+        <ul>
+          <li *ngFor="let source of msg.sources">
+            {{ source.file }} (Confiance: {{ (source.score * 100) | number:'1.0-0' }}%)
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="message assistant loading">
+      <div class="message-content">L'assistant réfléchit...</div>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea
+      [(ngModel)]="prompt"
+      (keyup.enter)="sendMessage()"
+      placeholder="Posez une question à propos de Palo IT..."
+      [disabled]="isLoading">
+    </textarea>
+    <button (click)="sendMessage()" [disabled]="isLoading || !prompt.trim()">
+      Envoyer
+    </button>
+  </div>
+</div>

@@ -1,1 +1,47 @@
-<p>logs works!</p>
+<div class="logs-container">
+  <div class="header">
+    <h2>Historique des requêtes (Audit)</h2>
+    <button (click)="fetchLogs()" [disabled]="isLoading" class="refresh-btn">
+      Rafraîchir
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+
+  <div *ngIf="isLoading" class="loading">Chargement des logs...</div>
+
+  <div class="table-container" *ngIf="!isLoading && logs.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Question (Masquée)</th>
+          <th>Réponse</th>
+          <th>Confiance</th>
+          <th>Sources</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td class="date-cell">{{ log.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+          <td class="prompt-cell">{{ log.prompt }}</td>
+          <td class="answer-cell">{{ log.answer }}</td>
+          <td class="score-cell">
+            <span class="badge" [class.low]="log.average_score < 0.6">
+              {{ (log.average_score * 100) | number:'1.0-0' }}%
+            </span>
+          </td>
+          <td class="sources-cell">
+            <ul>
+              <li *ngFor="let source of log.sources">{{ source }}</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading && logs.length === 0" class="empty-state">
+    Aucune requête n'a encore été effectuée sur le RAG.
+  </div>
+</div>

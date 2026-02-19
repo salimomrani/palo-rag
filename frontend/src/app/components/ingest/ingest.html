@@ -1,1 +1,32 @@
-<p>ingest works!</p>
+<div class="ingest-container">
+  <h2>Ingestion de Connaissances</h2>
+  <p>Ajoutez de nouveaux documents (Markdown, texte) pour enrichir la base de connaissances du RAG.</p>
+
+  <div class="upload-area">
+    <label for="fileUpload" class="file-label">
+      Sélectionner un fichier
+    </label>
+    <input
+      type="file"
+      id="fileUpload"
+      (change)="onFileSelected($event)"
+      accept=".md,.txt"
+      [disabled]="isUploading"
+    >
+
+    <div *ngIf="selectedFile" class="selected-file">
+      Fichier sélectionné : <strong>{{ selectedFile.name }}</strong>
+    </div>
+
+    <button
+      (click)="uploadFile()"
+      [disabled]="!selectedFile || isUploading"
+      class="upload-btn">
+      <span *ngIf="!isUploading">Ingérer le document</span>
+      <span *ngIf="isUploading">Envoi en cours...</span>
+    </button>
+  </div>
+
+  <div *ngIf="message" class="alert success">{{ message }}</div>
+  <div *ngIf="error" class="alert error">{{ error }}</div>
+</div>
