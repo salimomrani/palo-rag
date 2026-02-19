@@ -1,4 +1,13 @@
-import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  ElementRef,
+  ViewChild,
+  ChangeDetectionStrategy,
+  AfterViewChecked,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { RagApiService } from '../../services/rag-api.service';
@@ -21,7 +30,8 @@ interface Message {
   styleUrls: ['./chat.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Chat {
+export class Chat implements AfterViewChecked {
+  @ViewChild('messagesEl') private messagesEl!: ElementRef<HTMLElement>;
   private readonly api = inject(RagApiService);
 
   prompt = signal('');
@@ -30,6 +40,11 @@ export class Chat {
   error = signal<string | null>(null);
 
   canSend = computed(() => this.prompt().trim().length > 0 && !this.isLoading());
+
+  ngAfterViewChecked(): void {
+    const el = this.messagesEl?.nativeElement;
+    if (el) el.scrollTop = el.scrollHeight;
+  }
 
   sendMessage(): void {
     if (!this.canSend()) return;
