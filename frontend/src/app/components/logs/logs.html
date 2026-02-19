@@ -35,14 +35,24 @@
         </thead>
         <tbody>
           @for (log of logs(); track log.id) {
-            <tr [class.rejected]="log.rejected">
+            <tr
+              [class.rejected]="log.rejected"
+              [class.expanded]="expandedId() === log.id"
+              (click)="toggleRow(log.id)"
+              class="clickable"
+            >
               <td class="cell-date">{{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}</td>
               <td class="cell-question">{{ log.question_masked }}</td>
               <td class="cell-answer">
                 @if (log.rejected) {
                   <span class="rejection-reason">{{ log.rejection_reason }}</span>
                 } @else {
-                  {{ log.answer }}
+                  <span [class.truncated]="expandedId() !== log.id">{{ log.answer }}</span>
+                  @if ((log.answer?.length ?? 0) > 120) {
+                    <span class="expand-hint">
+                      {{ expandedId() === log.id ? '▲ réduire' : '▼ voir tout' }}
+                    </span>
+                  }
                 }
               </td>
               <td class="cell-score">

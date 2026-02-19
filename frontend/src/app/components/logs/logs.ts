@@ -16,6 +16,7 @@ export class Logs implements OnInit {
   logs = signal<LogEntry[]>([]);
   isLoading = signal(true);
   error = signal<string | null>(null);
+  expandedId = signal<number | null>(null);
 
   ngOnInit(): void {
     this.fetchLogs();
@@ -34,5 +35,9 @@ export class Logs implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  toggleRow(id: number): void {
+    this.expandedId.set(this.expandedId() === id ? null : id);
   }
 }
