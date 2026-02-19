@@ -1,13 +1,17 @@
-<main class="main">
-  <div class="content">
-    <header>
-      <h1>Palo Assistant RAG</h1>
-      <nav style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-        <a routerLink="/chat" routerLinkActive="active">Chat</a>
-        <a routerLink="/ingest" routerLinkActive="active">Ingest</a>
-        <a routerLink="/logs" routerLinkActive="active">Logs</a>
-      </nav>
-    </header>
+<div class="shell">
+  <nav class="topnav">
+    <span class="brand">
+      <span class="brand-icon">◈</span>
+      Palo RAG
+    </span>
+    <div class="nav-links">
+      <a routerLink="/chat" routerLinkActive="active">Chat</a>
+      <a routerLink="/ingest" routerLinkActive="active">Ingest</a>
+      <a routerLink="/logs" routerLinkActive="active">Logs</a>
+    </div>
+  </nav>
+
+  <main class="view">
     <router-outlet />
-  </div>
-</main>
+  </main>
+</div>

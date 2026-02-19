@@ -124,15 +124,15 @@
 
 ### Tests (write first, must FAIL)
 
-- [ ] T039 [US5] Write failing tests `backend/tests/test_quality.py` (dataset + report generator)
+- [x] T039 [US5] Write failing tests `backend/tests/test_quality.py` (dataset + report generator)
 
 ### Implementation
 
-- [ ] T040 [US5] Implement `backend/quality/dataset.py` (15 reference Q&A pairs) — make T039 pass
-- [ ] T041 [US5] Implement `backend/quality/report.py` (generate_quality_report_md) — make T039 pass
-- [ ] T042 [US5] Implement `backend/quality/runner.py` (run_quality_check)
-- [ ] T043 [US5] Create `backend/api/evaluation.py` (POST /api/evaluation/run, GET /api/evaluation/report)
-- [ ] T044 **Commit**: `feat: quality runner, 15-Q reference dataset, eval.md report`
+- [x] T040 [US5] Implement `backend/quality/dataset.py` (15 reference Q&A pairs) — make T039 pass
+- [x] T041 [US5] Implement `backend/quality/report.py` (generate_quality_report_md) — make T039 pass
+- [x] T042 [US5] Implement `backend/quality/runner.py` (run_quality_check)
+- [x] T043 [US5] Create `backend/api/evaluation.py` (POST /api/evaluation/run, GET /api/evaluation/report)
+- [x] T044 **Commit**: `feat: quality runner, 15-Q reference dataset, eval.md report`
 
 **Checkpoint**: `POST /api/evaluation/run` returns scores, `reports/eval.md` is created ✅
 
@@ -143,16 +143,16 @@
 **Goal**: 3-view Angular 21 app (Chat, Ingest, Logs) connected to the API
 **Independent Test**: All 3 routes work at http://localhost:4200
 
-- [ ] T045 [US6] Create `frontend/src/environments/environment.ts`
-- [ ] T046 [US6] Create `frontend/src/app/services/rag-api.service.ts` (query, ingest, logs, documents)
-- [ ] T047 [US6] Update `app.config.ts` with `provideHttpClient()`
-- [ ] T048 [US6] Update `app.routes.ts` with lazy-loaded routes `/chat`, `/ingest`, `/logs`
-- [ ] T049 **Commit**: `feat: Angular API service + routing setup`
-- [ ] T050 [US6] Create `frontend/src/app/chat/chat.component.ts` (signals, OnPush, error handling)
-- [ ] T051 **Commit**: `feat: Angular ChatComponent — signals, source display, confidence scoring`
-- [ ] T052 [US6] Create `frontend/src/app/ingest/ingest.component.ts` (file paste + documents list)
-- [ ] T053 [US6] Create `frontend/src/app/logs/logs.component.ts` (table, rejected rows highlighted)
-- [ ] T054 **Commit**: `feat: Angular Ingest and Logs components`
+- [x] T045 [US6] Create `frontend/src/environments/environment.ts`
+- [x] T046 [US6] Create `frontend/src/app/services/rag-api.service.ts` (query, ingest, logs, documents)
+- [x] T047 [US6] Update `app.config.ts` with `provideHttpClient()`
+- [x] T048 [US6] Update `app.routes.ts` with lazy-loaded routes `/chat`, `/ingest`, `/logs`
+- [x] T049 **Commit**: `feat: Angular API service + routing setup`
+- [x] T050 [US6] Create `frontend/src/app/chat/chat.component.ts` (signals, OnPush, error handling)
+- [x] T051 **Commit**: `feat: Angular ChatComponent — signals, source display, confidence scoring`
+- [x] T052 [US6] Create `frontend/src/app/ingest/ingest.component.ts` (file paste + documents list)
+- [x] T053 [US6] Create `frontend/src/app/logs/logs.component.ts` (table, rejected rows highlighted)
+- [x] T054 **Commit**: `feat: Angular Ingest and Logs components`
 
 **Checkpoint**: All 3 routes functional at http://localhost:4200 ✅
 

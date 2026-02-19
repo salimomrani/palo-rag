@@ -1,11 +1,17 @@
 import { Routes } from '@angular/router';
-import { Chat } from './components/chat/chat';
-import { Ingest } from './components/ingest/ingest';
-import { Logs } from './components/logs/logs';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'chat', pathMatch: 'full' },
-  { path: 'chat', component: Chat },
-  { path: 'ingest', component: Ingest },
-  { path: 'logs', component: Logs },
+  {
+    path: 'chat',
+    loadComponent: () => import('./components/chat/chat').then((m) => m.Chat),
+  },
+  {
+    path: 'ingest',
+    loadComponent: () => import('./components/ingest/ingest').then((m) => m.Ingest),
+  },
+  {
+    path: 'logs',
+    loadComponent: () => import('./components/logs/logs').then((m) => m.Logs),
+  },
 ];
