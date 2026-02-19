@@ -3,6 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export type StreamEvent =
+  | {
+      type: 'meta';
+      sources: { source: string; excerpt: string; score: number }[];
+      confidence_score: number;
+      low_confidence: boolean;
+    }
+  | { type: 'token'; content: string }
+  | { type: 'done'; latency_ms: number; answer: string };
+
 export interface QueryResponse {
   answer: string;
   sources: { source: string; excerpt: string; score: number }[];
@@ -41,6 +51,47 @@ export class RagApiService {
 
   query(question: string): Observable<QueryResponse> {
     return this.http.post<QueryResponse>(`${this.apiUrl}/query`, { question });
+  }
+
+  streamQuery(question: string): Observable<StreamEvent> {
+    return new Observable((observer) => {
+      const controller = new AbortController();
+      fetch(`${this.apiUrl}/query/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+        signal: controller.signal,
+      })
+        .then((res) => {
+          if (!res.ok) return res.json().then((e) => observer.error(e));
+          const reader = res.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          const pump = (): Promise<void> =>
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                observer.complete();
+                return;
+              }
+              buffer += decoder.decode(value, { stream: true });
+              const parts = buffer.split('\n\n');
+              buffer = parts.pop() ?? '';
+              for (const part of parts) {
+                if (part.startsWith('data: ')) {
+                  try {
+                    observer.next(JSON.parse(part.slice(6)));
+                  } catch {}
+                }
+              }
+              return pump();
+            });
+          return pump();
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') observer.error(err);
+        });
+      return () => controller.abort();
+    });
   }
 
   ingest(file: File): Observable<IngestResponse> {

@@ -2,7 +2,9 @@
   <div class="messages" #messagesEl>
     @for (msg of messages(); track $index) {
       <div class="message" [class]="msg.role">
-        <div class="message-content">{{ msg.content }}</div>
+        <div class="message-content">
+          {{ msg.content }}<span class="cursor" [class.visible]="msg.streaming">▋</span>
+        </div>
 
         @if (msg.sources && msg.sources.length > 0) {
           <div class="sources">

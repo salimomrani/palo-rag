@@ -1,4 +1,6 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from rag.pipeline import RAGPipeline
 from guardrails.input import InputGuardrail
@@ -54,3 +56,57 @@ def query(
         "low_confidence": result.low_confidence,
         "latency_ms": result.latency_ms,
     }
+
+
+@router.post("/query/stream")
+def query_stream(
+    request: QueryRequest,
+    provider=Depends(get_provider),
+    vectorstore=Depends(get_vectorstore),
+    engine=Depends(get_engine),
+):
+    check = _guardrail.check(request.question)
+    if not check.passed:
+        LogStore(engine=engine).save(
+            question=request.question,
+            retrieved_chunk_ids=[],
+            similarity_scores=[],
+            answer="",
+            faithfulness_score=0.0,
+            latency_ms=0,
+            guardrail_triggered=check.reason,
+        )
+        raise HTTPException(status_code=400, detail=check.reason)
+
+    pipeline = RAGPipeline(provider=provider, vectorstore=vectorstore)
+    log_store = LogStore(engine=engine)
+
+    def generate():
+        meta = None
+        done = None
+        for event in pipeline.stream_query(request.question):
+            yield event
+            try:
+                payload = json.loads(event.removeprefix("data: ").strip())
+                if payload.get("type") == "meta":
+                    meta = payload
+                elif payload.get("type") == "done":
+                    done = payload
+            except Exception:
+                pass
+        if meta and done:
+            log_store.save(
+                question=request.question,
+                retrieved_chunk_ids=[s["source"] for s in meta.get("sources", [])],
+                similarity_scores=[s["score"] for s in meta.get("sources", [])],
+                answer=done.get("answer", ""),
+                faithfulness_score=meta.get("confidence_score", 0.0),
+                latency_ms=done.get("latency_ms", 0),
+                guardrail_triggered=None,
+            )
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )

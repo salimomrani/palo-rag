@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import Generator, Protocol
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from core.config import settings
 
@@ -6,6 +6,7 @@ from core.config import settings
 class AIProvider(Protocol):
     def embed(self, text: str) -> list[float]: ...
     def generate(self, prompt: str) -> str: ...
+    def stream_generate(self, prompt: str) -> Generator[str, None, None]: ...
     def get_embeddings(self): ...
 
 
@@ -25,6 +26,10 @@ class OllamaProvider:
 
     def generate(self, prompt: str) -> str:
         return self._llm.invoke(prompt).content
+
+    def stream_generate(self, prompt: str) -> Generator[str, None, None]:
+        for chunk in self._llm.stream(prompt):
+            yield chunk.content
 
     def get_embeddings(self):
         return self._embeddings

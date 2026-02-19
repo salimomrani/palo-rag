@@ -1,14 +1,16 @@
 import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
-import { RagApiService, QueryResponse } from '../../services/rag-api.service';
+import { RagApiService } from '../../services/rag-api.service';
 
 interface Message {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
   sources?: { source: string; excerpt: string; score: number }[];
   confidence?: number;
   lowConfidence?: boolean;
+  streaming?: boolean;
 }
 
 @Component({
@@ -33,34 +35,50 @@ export class Chat {
     if (!this.canSend()) return;
 
     const question = this.prompt().trim();
-    this.messages.update((msgs) => [...msgs, { role: 'user', content: question }]);
+    const msgId = crypto.randomUUID();
+
+    this.messages.update((msgs) => [
+      ...msgs,
+      { id: crypto.randomUUID(), role: 'user', content: question },
+      { id: msgId, role: 'assistant', content: '', streaming: true },
+    ]);
     this.prompt.set('');
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.api.query(question).subscribe({
-      next: (res: QueryResponse) => {
-        const seen = new Map<string, { source: string; excerpt: string; score: number }>();
-        for (const s of res.sources) {
-          if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) {
-            seen.set(s.source, s);
+    this.api.streamQuery(question).subscribe({
+      next: (event) => {
+        if (event.type === 'meta') {
+          const seen = new Map<string, { source: string; excerpt: string; score: number }>();
+          for (const s of event.sources) {
+            if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) seen.set(s.source, s);
           }
+          this.messages.update((msgs) =>
+            msgs.map((m) =>
+              m.id === msgId
+                ? {
+                    ...m,
+                    sources: [...seen.values()].sort((a, b) => b.score - a.score),
+                    confidence: event.confidence_score,
+                    lowConfidence: event.low_confidence,
+                  }
+                : m,
+            ),
+          );
+        } else if (event.type === 'token') {
+          this.messages.update((msgs) =>
+            msgs.map((m) => (m.id === msgId ? { ...m, content: m.content + event.content } : m)),
+          );
+        } else if (event.type === 'done') {
+          this.messages.update((msgs) =>
+            msgs.map((m) => (m.id === msgId ? { ...m, streaming: false } : m)),
+          );
+          this.isLoading.set(false);
         }
-        this.messages.update((msgs) => [
-          ...msgs,
-          {
-            role: 'assistant',
-            content: res.answer,
-            sources: [...seen.values()].sort((a, b) => b.score - a.score),
-            confidence: res.confidence_score,
-            lowConfidence: res.low_confidence,
-          },
-        ]);
-        this.isLoading.set(false);
       },
       error: (err) => {
-        const detail = err?.error?.detail;
-        this.error.set(detail ?? 'Erreur de communication avec le RAG.');
+        this.messages.update((msgs) => msgs.filter((m) => m.id !== msgId));
+        this.error.set(err?.detail ?? 'Erreur de communication avec le RAG.');
         this.isLoading.set(false);
       },
     });
