@@ -2,10 +2,10 @@
 
 ## Architectural Decisions
 
-### 1. PostgreSQL via Docker instead of SQLite
+### 1. PostgreSQL 16 via Docker
 
 **Decision**: PostgreSQL 16 via `docker-compose`
-**Rationale**: Demonstrates production-grade persistence; SQLite lacks proper connection pooling for concurrent FastAPI workers. Docker adds 1 command to setup, acceptable for a demo.
+**Rationale**: Production-grade persistence with proper connection pooling for concurrent FastAPI workers.
 
 ---
 
