@@ -1,0 +1,32 @@
+# Dependencies
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+**/.env
+
+# Build outputs
+**/dist/
+**/.angular/
+**/build/
+**/*.egg-info/
+
+# Git internals
+.git/
+
+# IDE
+.idea/
+.vscode/
+
+# DB & vector store (runtime data)
+**/*.db
+**/*.sqlite
+**/chroma_db/
+
+# Logs
+**/*.log
+**/logs/
+
+# OS
+.DS_Store

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Env & secrets
+.env
+*.env
+
+# Database & vector store
+*.db
+*.sqlite
+chroma_data/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
