@@ -79,4 +79,4 @@ def test_report_generates_markdown(mock_provider, mock_vectorstore, engine, tmp_
     assert report_path.exists()
     content = report_path.read_text()
     assert "faithfulness" in content.lower()
-    assert "answer_relevancy" in content.lower()
+    assert "answer relevancy" in content.lower()

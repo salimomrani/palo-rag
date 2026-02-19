@@ -19,9 +19,9 @@ def generate_quality_report_md(scores: dict, output_path: str) -> None:
         "",
         "| Metric | Score |",
         "|--------|-------|",
-        f"| Faithfulness | {faithfulness:.2f} |\n"
-        f"| Answer_Relevancy | {answer_relevancy:.2f} |\n"
-        f"| Context Recall | {context_recall:.2f} |"
+        f"| Faithfulness | {faithfulness:.2f} |",
+        f"| Answer Relevancy | {answer_relevancy:.2f} |",
+        f"| Context Recall | {context_recall:.2f} |",
         f"| **Average** | **{avg:.2f}** |",
         "",
         "## Per-Question Results",
