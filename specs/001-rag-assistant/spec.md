@@ -159,6 +159,6 @@ A user or administrator can view recent query history, quality scores, and guard
 
 - All AI inference MUST run locally — no calls to external AI APIs
 - The Gen-e2 provider MUST be mockable via an abstraction layer without code changes to the pipeline
-- Backend: Python 3.11+, FastAPI, LangChain, vector store library, SQL persistence layer
+- Backend: Python 3.12+, FastAPI, LangChain, vector store library, SQL persistence layer
 - Frontend: Angular 21 with standalone components, signals, OnPush change detection
 - No Docker or container runtime required for the demo environment

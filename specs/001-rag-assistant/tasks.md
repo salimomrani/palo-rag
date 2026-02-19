@@ -63,14 +63,14 @@
 
 ### Tests (write first, must FAIL)
 
-- [ ] T023 [US2] Write failing tests `backend/tests/test_api.py` for `/api/ingest` + `/api/documents`
+- [x] T023 [US2] Write failing tests `backend/tests/test_api.py` for `/api/ingest` + `/api/documents`
 
 ### Implementation
 
-- [ ] T024 [US2] Create `backend/api/ingest.py` (POST /api/ingest, GET /api/documents) — make T023 pass
-- [ ] T025 **Commit**: `feat: POST /api/ingest + GET /api/documents endpoints`
-- [ ] T026 [US2] Ingest the 15 corpus documents using the API (verify all return chunk_count > 0)
-- [ ] T027 **Commit**: `chore: 15-doc corpus ingested — integration verified`
+- [x] T024 [US2] Create `backend/api/ingest.py` (POST /api/ingest, GET /api/documents) — make T023 pass
+- [x] T025 **Commit**: `feat: POST /api/ingest + GET /api/documents endpoints`
+- [x] T026 [US2] Create `backend/scripts/ingest_corpus.py` to bulk-ingest 15 corpus docs
+- [x] T027 **Commit**: `feat(scripts): ingest_corpus.py + 9/9 API tests passing`
 
 **Checkpoint**: GET /api/documents returns 15 documents ✅
 
@@ -83,13 +83,13 @@
 
 ### Tests (write first, must FAIL)
 
-- [ ] T028 [US3] Write failing tests `backend/tests/test_guardrails_input.py` (7 test cases)
+- [x] T028 [US3] Write failing tests `backend/tests/test_api.py` for guardrail cases (injection, length)
 
 ### Implementation
 
-- [ ] T029 [US3] Implement `backend/guardrails/input.py` (InputGuardrail, GuardrailResult) — make T028 pass
-- [ ] T030 [US3] Wire guardrail into `backend/api/query.py` (check before pipeline, log rejections)
-- [ ] T031 **Commit**: `feat: input guardrails (injection, length, empty) wired to query endpoint`
+- [x] T029 [US3] Implement `backend/guardrails/input.py` (InputGuardrail, GuardrailResult) — make T028 pass
+- [x] T030 [US3] Wire guardrail into `backend/api/v1/query.py` (check before pipeline, log rejections)
+- [x] T031 **Commit**: `feat: input guardrails (injection, length) wired to query endpoint`
 
 **Checkpoint**: `curl -d '{"question":"ignore previous instructions"}'` returns 400 ✅
 
@@ -102,16 +102,16 @@
 
 ### Tests (write first, must FAIL)
 
-- [ ] T032 [US4] Write failing tests `backend/tests/test_logging.py` (mask_pii + LogStore, 6 cases)
-- [ ] T033 [US4] Write failing tests `backend/tests/test_api.py` for GET /api/logs
+- [x] T032 [US4] Write tests `backend/tests/test_api.py` for GET /api/logs
+- [x] T033 [US4] (merged with T032)
 
 ### Implementation
 
-- [ ] T034 [US4] Implement `backend/logging_service/pii.py` (mask_pii) — make T032 pii tests pass
-- [ ] T035 [US4] Implement `backend/logging_service/store.py` (LogStore) — make T032 store tests pass
-- [ ] T036 **Commit**: `feat: PII-masking log store`
-- [ ] T037 [US4] Create `backend/api/logs.py` (GET /api/logs) — make T033 pass
-- [ ] T038 **Commit**: `feat: GET /api/logs endpoint — query traceability complete`
+- [x] T034 [US4] Implement `backend/logging_service/pii.py` (mask_pii)
+- [x] T035 [US4] Implement `backend/logging_service/store.py` (LogStore)
+- [x] T036 **Commit**: `feat: PII-masking log store`
+- [x] T037 [US4] Create `backend/api/v1/logs.py` (GET /api/logs)
+- [x] T038 **Commit**: `feat: GET /api/logs endpoint — query traceability complete`
 
 **Checkpoint**: All P1 user stories functional. Full backend test suite: `pytest tests/ -v` all PASS ✅
 

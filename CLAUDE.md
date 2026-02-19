@@ -52,6 +52,12 @@
 - Conventional commits obligatoires
 - Tests verts avant tout commit
 
+## Source de vérité
+
+- **Code > plan.md > tasks.md** : en cas de divergence, le code fait foi
+- Avant tout fix de "mismatch" : lire le fichier réel, pas le plan
+- Paths et prefixes : vérifier avec `find`/`grep` sur le repo avant d'écrire
+
 ## Key Files
 
 - `specs/001-rag-assistant/spec.md` — source de vérité fonctionnelle

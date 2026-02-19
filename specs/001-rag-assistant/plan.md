@@ -3,15 +3,13 @@
 **Branch**: `001-rag-assistant` | **Date**: 2026-02-19 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `specs/001-rag-assistant/spec.md`
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
 ## Summary
 
 Build a local RAG API (FastAPI + LangChain + Ollama) with Angular 21 frontend. Ingests documents into ChromaDB, answers questions with grounded responses and source attribution, enforces input/output guardrails, logs all interactions to SQLite (with PII masking), and auto-generates quality evaluation reports.
 
 ## Technical Context
 
-**Language/Version**: Python 3.11 (backend), TypeScript 5.9 + Angular 21 (frontend)
+**Language/Version**: Python 3.12 (backend), TypeScript 5.9 + Angular 21 (frontend)
 **Primary Dependencies**: FastAPI, LangChain 0.3, langchain-ollama, ChromaDB 0.5, SQLAlchemy 2, python-dotenv, Angular 21, Angular HttpClient
 **Storage**: ChromaDB (vector store, file-based embedded), SQLite (query logs + evaluation results)
 **Testing**: pytest + httpx TestClient (backend), Angular default test runner (frontend — minimal)
@@ -23,7 +21,7 @@ Build a local RAG API (FastAPI + LangChain + Ollama) with Angular 21 frontend. I
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 - [x] **I. Local-First**: All inference via Ollama (localhost:11434) — no external calls
 - [x] **II. Traceability**: Every query produces a QueryLog entry with full context
@@ -117,8 +115,8 @@ reports/
 
 ## Complexity Tracking
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|--------------------------------------|
+| Violation                                  | Why Needed                                                  | Simpler Alternative Rejected Because                                                                              |
+| ------------------------------------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Two separate projects (backend + frontend) | RAG pipeline requires Python ecosystem; UI requires Angular | Single-language approach would force either Python UI (tkinter, not demo-friendly) or JS RAG (immature ecosystem) |
 
 ---
@@ -126,6 +124,7 @@ reports/
 ## Task 0: Project Bootstrap
 
 **Files to create:**
+
 - `backend/requirements.txt`
 - `backend/requirements-dev.txt`
 - `backend/.env.example`
@@ -134,6 +133,7 @@ reports/
 - `.claudeignore`
 
 **Step 1:** Create `.gitignore`:
+
 ```
 __pycache__/
 *.pyc
@@ -148,6 +148,7 @@ dist/
 ```
 
 Create `.claudeignore`:
+
 ```
 .venv/
 chroma_data/
@@ -158,6 +159,7 @@ __pycache__/
 ```
 
 **Step 2:** Create `backend/requirements.txt`:
+
 ```
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
@@ -173,6 +175,7 @@ python-dotenv==1.0.1
 ```
 
 Create `backend/requirements-dev.txt`:
+
 ```
 pytest==8.3.3
 pytest-asyncio==0.24.0
@@ -180,6 +183,7 @@ httpx==0.27.2
 ```
 
 **Step 3:** Create `backend/.env.example`:
+
 ```
 AI_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
@@ -190,6 +194,7 @@ DB_URL=sqlite:///./palo_rag.db
 ```
 
 **Step 4:** Create `backend/pytest.ini`:
+
 ```ini
 [pytest]
 testpaths = tests
@@ -197,14 +202,16 @@ asyncio_mode = auto
 ```
 
 **Step 5:** Install Python dependencies:
+
 ```bash
 cd backend
-python3.11 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
 **Step 6:** Initialize Angular project:
+
 ```bash
 cd /Users/salimomrani/code/_Autres/PALO
 ng new frontend --standalone --routing --style=scss --skip-git
@@ -212,6 +219,7 @@ ng new frontend --standalone --routing --style=scss --skip-git
 ```
 
 **Step 7:** Commit:
+
 ```bash
 git add .gitignore .claudeignore backend/
 git commit -m "chore: project bootstrap — Python deps, Angular init"
@@ -223,23 +231,24 @@ git commit -m "chore: project bootstrap — Python deps, Angular init"
 
 Create 15 Markdown files in `corpus/`:
 
-| File | Content type |
-|------|-------------|
-| `faq-produits.md` | Product FAQ (plans, languages, backup policy) |
-| `faq-support.md` | Support FAQ (ticket issues, Slack integration, export) |
-| `faq-onboarding.md` | Onboarding guide (steps 1-5) |
-| `spec-api-v1.md` | REST API specification (endpoints, auth, errors) |
-| `spec-auth.md` | Authentication & security spec (SSO, 2FA, passwords) |
-| `spec-notifications.md` | Notification system spec (channels, events, limits) |
-| `ticket-001.md` through `ticket-006.md` | 6 resolved/active support tickets |
-| `politique-donnees.md` | Data retention and GDPR policy |
-| `politique-securite.md` | Security policy (classification, controls, incidents) |
+| File                                    | Content type                                           |
+| --------------------------------------- | ------------------------------------------------------ |
+| `faq-produits.md`                       | Product FAQ (plans, languages, backup policy)          |
+| `faq-support.md`                        | Support FAQ (ticket issues, Slack integration, export) |
+| `faq-onboarding.md`                     | Onboarding guide (steps 1-5)                           |
+| `spec-api-v1.md`                        | REST API specification (endpoints, auth, errors)       |
+| `spec-auth.md`                          | Authentication & security spec (SSO, 2FA, passwords)   |
+| `spec-notifications.md`                 | Notification system spec (channels, events, limits)    |
+| `ticket-001.md` through `ticket-006.md` | 6 resolved/active support tickets                      |
+| `politique-donnees.md`                  | Data retention and GDPR policy                         |
+| `politique-securite.md`                 | Security policy (classification, controls, incidents)  |
 
 Each file MUST contain enough content (300-600 words) for meaningful chunking and retrieval.
 
 **Step 1:** Create all 15 corpus files (see full content in design doc `docs/plans/2026-02-19-palo-rag-design.md`)
 
 **Step 2:** Commit:
+
 ```bash
 git add corpus/
 git commit -m "feat: 15-document synthetic corpus (FAQ, specs, tickets, policies)"
@@ -252,6 +261,7 @@ git commit -m "feat: 15-document synthetic corpus (FAQ, specs, tickets, policies
 **Files:** `backend/models/__init__.py`, `backend/models/db.py`, `backend/tests/__init__.py`, `backend/tests/test_models.py`
 
 **Step 1:** Write failing test `backend/tests/test_models.py`:
+
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -309,12 +319,14 @@ def test_evaluation_result_creation():
 ```
 
 **Step 2:** Run — expect FAIL: `ModuleNotFoundError: No module named 'models'`
+
 ```bash
 cd backend && source .venv/bin/activate
 pytest tests/test_models.py -v
 ```
 
 **Step 3:** Create `backend/models/__init__.py` (empty) and `backend/models/db.py`:
+
 ```python
 import uuid
 from datetime import datetime, UTC
@@ -355,11 +367,13 @@ class EvaluationResult(Base):
 ```
 
 **Step 4:** Run — expect 3 PASSED:
+
 ```bash
 pytest tests/test_models.py -v
 ```
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/models/ backend/tests/
 git commit -m "feat: SQLAlchemy models — Document, QueryLog, EvaluationResult"
@@ -372,6 +386,7 @@ git commit -m "feat: SQLAlchemy models — Document, QueryLog, EvaluationResult"
 **Files:** `backend/rag/__init__.py`, `backend/rag/provider.py`, `backend/tests/test_provider.py`
 
 **Step 1:** Write failing test `backend/tests/test_provider.py`:
+
 ```python
 from unittest.mock import patch, MagicMock
 from rag.provider import OllamaProvider, get_provider
@@ -406,6 +421,7 @@ def test_ollama_provider_generate_returns_string(monkeypatch):
 **Step 2:** Run — expect FAIL: `ModuleNotFoundError: No module named 'rag'`
 
 **Step 3:** Create `backend/rag/__init__.py` (empty) and `backend/rag/provider.py`:
+
 ```python
 import os
 from typing import Protocol
@@ -442,6 +458,7 @@ def get_provider() -> OllamaProvider:
 **Step 4:** Run — expect 3 PASSED
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/rag/ backend/tests/test_provider.py
 git commit -m "feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)"
@@ -454,6 +471,7 @@ git commit -m "feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)"
 **Files:** `backend/rag/ingestion.py`, `backend/tests/test_ingestion.py`
 
 **Step 1:** Write failing test:
+
 ```python
 from unittest.mock import MagicMock
 from rag.ingestion import IngestionService
@@ -482,6 +500,7 @@ def test_ingest_text_splits_into_multiple_chunks():
 **Step 2:** Run — expect FAIL
 
 **Step 3:** Create `backend/rag/ingestion.py`:
+
 ```python
 import os, uuid
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -514,6 +533,7 @@ class IngestionService:
 **Step 4:** Run — expect 2 PASSED
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/rag/ingestion.py backend/tests/test_ingestion.py
 git commit -m "feat: document ingestion pipeline with RecursiveCharacterTextSplitter"
@@ -526,6 +546,7 @@ git commit -m "feat: document ingestion pipeline with RecursiveCharacterTextSpli
 **Files:** `backend/guardrails/__init__.py`, `backend/guardrails/input.py`, `backend/tests/test_guardrails_input.py`
 
 **Step 1:** Write failing tests:
+
 ```python
 from guardrails.input import InputGuardrail, GuardrailResult
 
@@ -556,6 +577,7 @@ def test_blocks_empty():
 **Step 2:** Run — expect 7 FAILED
 
 **Step 3:** Create `backend/guardrails/__init__.py` (empty) and `backend/guardrails/input.py`:
+
 ```python
 import re
 from dataclasses import dataclass
@@ -594,6 +616,7 @@ class InputGuardrail:
 **Step 4:** Run — expect 7 PASSED
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/guardrails/ backend/tests/test_guardrails_input.py
 git commit -m "feat: input guardrails (length, injection, empty)"
@@ -606,6 +629,7 @@ git commit -m "feat: input guardrails (length, injection, empty)"
 **Files:** `backend/rag/pipeline.py`, `backend/tests/test_pipeline.py`
 
 **Step 1:** Write failing tests:
+
 ```python
 from unittest.mock import MagicMock
 from rag.pipeline import RAGPipeline, QueryResult
@@ -649,6 +673,7 @@ def test_query_no_results_returns_low_confidence():
 **Step 2:** Run — expect 4 FAILED
 
 **Step 3:** Create `backend/rag/pipeline.py`:
+
 ```python
 import time
 from dataclasses import dataclass, field
@@ -710,6 +735,7 @@ class RAGPipeline:
 **Step 4:** Run — expect 4 PASSED
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/rag/pipeline.py backend/tests/test_pipeline.py
 git commit -m "feat: RAG query pipeline with source attribution and confidence scoring"
@@ -722,6 +748,7 @@ git commit -m "feat: RAG query pipeline with source attribution and confidence s
 **Files:** `backend/logging_service/__init__.py`, `backend/logging_service/pii.py`, `backend/logging_service/store.py`, `backend/tests/test_logging.py`
 
 **Step 1:** Write failing tests:
+
 ```python
 import json
 from sqlalchemy import create_engine
@@ -782,6 +809,7 @@ def test_log_store_masks_pii_on_save():
 **Step 3:** Create `backend/logging_service/__init__.py` (empty).
 
 Create `backend/logging_service/pii.py`:
+
 ```python
 import re
 
@@ -799,6 +827,7 @@ def mask_pii(text: str) -> str:
 ```
 
 Create `backend/logging_service/store.py`:
+
 ```python
 import json, uuid
 from sqlalchemy.orm import Session
@@ -833,6 +862,7 @@ class LogStore:
 **Step 4:** Run — expect 6 PASSED
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/logging_service/ backend/tests/test_logging.py
 git commit -m "feat: PII-masking log store for query traceability"
@@ -845,6 +875,7 @@ git commit -m "feat: PII-masking log store for query traceability"
 **Files:** `backend/main.py`, `backend/api/`, `backend/dependencies.py`, `backend/tests/test_api.py`
 
 **Step 1:** Write failing tests `backend/tests/test_api.py`:
+
 ```python
 import pytest
 from fastapi.testclient import TestClient
@@ -907,6 +938,7 @@ def test_get_logs(client):
 **Step 2:** Run — expect FAIL: import errors
 
 **Step 3:** Create `backend/dependencies.py`:
+
 ```python
 import os
 from functools import lru_cache
@@ -937,9 +969,12 @@ def get_engine():
     return engine
 ```
 
-Create `backend/api/__init__.py` (empty).
+Create `backend/api/__init__.py` (router aggregator with prefix `/api/v1`).
 
-Create `backend/api/ingest.py`:
+Create `backend/api/v1/__init__.py` (empty).
+
+Create `backend/api/v1/ingest.py`:
+
 ```python
 import uuid
 from fastapi import APIRouter
@@ -972,7 +1007,8 @@ def list_documents():
         return [{"id": d.id, "name": d.name, "chunk_count": d.chunk_count, "ingested_at": d.ingested_at.isoformat()} for d in docs]
 ```
 
-Create `backend/api/query.py`:
+Create `backend/api/v1/query.py`:
+
 ```python
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -1009,7 +1045,8 @@ def query(request: QueryRequest):
             "latency_ms": result.latency_ms}
 ```
 
-Create `backend/api/logs.py`:
+Create `backend/api/v1/logs.py`:
+
 ```python
 import json
 from fastapi import APIRouter
@@ -1030,7 +1067,8 @@ def get_logs(limit: int = 100):
     ]
 ```
 
-Create `backend/api/evaluation.py`:
+Create `backend/api/v1/evaluation.py`:
+
 ```python
 from fastapi import APIRouter
 from dependencies import get_engine
@@ -1038,12 +1076,16 @@ from sqlalchemy.orm import Session
 from models.db import EvaluationResult
 import json
 
-router = APIRouter(prefix="/api", tags=["evaluation"])
+router = APIRouter(tags=["evaluation"])
 
 @router.post("/evaluation/run")
-def run_quality_check():
+def run_quality_check(
+    provider=Depends(get_provider),
+    vectorstore=Depends(get_vectorstore),
+    engine=Depends(get_engine),
+):
     from quality.runner import run_quality_check as _run
-    scores = _run(provider=get_engine(), vectorstore=None, engine=get_engine())
+    scores = _run(provider=provider, vectorstore=vectorstore, engine=engine)
     return {"status": "completed", "scores": scores}
 
 @router.get("/evaluation/report")
@@ -1058,6 +1100,7 @@ def get_quality_report():
 ```
 
 Create `backend/main.py`:
+
 ```python
 import os
 from dotenv import load_dotenv
@@ -1083,11 +1126,13 @@ def health():
 ```
 
 **Step 4:** Run — expect 6 PASSED:
+
 ```bash
 pytest tests/test_api.py -v
 ```
 
 **Step 5:** Commit:
+
 ```bash
 git add backend/main.py backend/api/ backend/dependencies.py backend/tests/test_api.py
 git commit -m "feat: FastAPI app with ingest, query, logs, evaluation endpoints"
@@ -1100,6 +1145,7 @@ git commit -m "feat: FastAPI app with ingest, query, logs, evaluation endpoints"
 **Files:** `backend/quality/__init__.py`, `backend/quality/dataset.py`, `backend/quality/report.py`, `backend/quality/runner.py`, `backend/tests/test_quality.py`
 
 **Step 1:** Write failing tests:
+
 ```python
 from quality.dataset import REFERENCE_DATASET
 from quality.report import generate_quality_report_md
@@ -1128,6 +1174,7 @@ def test_generate_report_creates_markdown():
 Create `backend/quality/dataset.py` with 15 reference Q&A pairs covering all corpus documents (faq-produits, faq-support, faq-onboarding, spec-api-v1, spec-auth, spec-notifications, 6 tickets, 2 policies).
 
 Create `backend/quality/report.py`:
+
 ```python
 from datetime import datetime, UTC
 
@@ -1153,6 +1200,7 @@ def generate_quality_report_md(scores: dict) -> str:
 ```
 
 Create `backend/quality/runner.py`:
+
 ```python
 import json, uuid
 from pathlib import Path
@@ -1194,7 +1242,8 @@ def run_quality_check(provider, vectorstore, engine) -> dict:
     return scores
 ```
 
-Update `backend/api/evaluation.py` to properly inject provider and vectorstore:
+Update `backend/api/v1/evaluation.py` to properly inject provider and vectorstore:
+
 ```python
 from fastapi import APIRouter
 from dependencies import get_provider, get_vectorstore, get_engine
@@ -1224,8 +1273,9 @@ def get_quality_report():
 **Step 4:** Run — expect 2 PASSED
 
 **Step 5:** Commit:
+
 ```bash
-git add backend/quality/ backend/tests/test_quality.py backend/api/evaluation.py
+git add backend/quality/ backend/tests/test_quality.py backend/api/v1/evaluation.py
 git commit -m "feat: quality runner, 15-Q reference dataset, eval.md report generation"
 ```
 
@@ -1234,19 +1284,24 @@ git commit -m "feat: quality runner, 15-Q reference dataset, eval.md report gene
 ## Task 10: Backend Integration Verification
 
 **Step 1:** Run full test suite:
+
 ```bash
 cd backend && source .venv/bin/activate
 pytest tests/ -v --tb=short
 ```
+
 Expected: All PASSED.
 
 **Step 2:** Start API:
+
 ```bash
 cp .env.example .env && uvicorn main:app --reload --port 8000
 ```
+
 Open http://localhost:8000/docs — all endpoints visible.
 
 **Step 3:** Ingest corpus:
+
 ```bash
 for f in ../corpus/*.md; do
   name=$(basename "$f")
@@ -1258,14 +1313,17 @@ done
 ```
 
 **Step 4:** Test a live query:
+
 ```bash
 curl -X POST http://localhost:8000/api/query \
   -H "Content-Type: application/json" \
   -d '{"question": "Quels sont les plans tarifaires ?"}' | python3 -m json.tool
 ```
+
 Expected: JSON with `answer`, `sources`, `confidence_score`.
 
 **Step 5:** Commit:
+
 ```bash
 git commit -m "chore: backend integration verified — corpus ingested, RAG pipeline live"
 ```
@@ -1275,16 +1333,21 @@ git commit -m "chore: backend integration verified — corpus ingested, RAG pipe
 ## Task 11: Angular Frontend — Bootstrap & Chat View
 
 **Step 1:** Add environment file `frontend/src/environments/environment.ts`:
+
 ```typescript
-export const environment = { production: false, apiUrl: 'http://localhost:8000' };
+export const environment = {
+  production: false,
+  apiUrl: "http://localhost:8000",
+};
 ```
 
 **Step 2:** Create `frontend/src/app/services/rag-api.service.ts`:
+
 ```typescript
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../../environments/environment";
 
 export interface QueryResponse {
   answer: string;
@@ -1294,13 +1357,15 @@ export interface QueryResponse {
   latency_ms: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class RagApiService {
   private http = inject(HttpClient);
   private base = environment.apiUrl;
 
   query(question: string): Observable<QueryResponse> {
-    return this.http.post<QueryResponse>(`${this.base}/api/query`, { question });
+    return this.http.post<QueryResponse>(`${this.base}/api/query`, {
+      question,
+    });
   }
 
   ingestText(text: string, name: string): Observable<any> {
@@ -1326,6 +1391,7 @@ export class RagApiService {
 **Step 6:** Verify at http://localhost:4200/chat — chat interface visible and functional.
 
 **Step 7:** Commit:
+
 ```bash
 git add frontend/src/
 git commit -m "feat: Angular chat component with signals, source display, confidence scoring"
@@ -1336,12 +1402,14 @@ git commit -m "feat: Angular chat component with signals, source display, confid
 ## Task 12: Angular Frontend — Ingest & Logs Views
 
 **Step 1:** Create `frontend/src/app/ingest/ingest.component.ts` with:
+
 - Text area for document paste
 - Name input
 - Submit button with loading state
 - Documents list table (calls GET /api/documents on load)
 
 **Step 2:** Create `frontend/src/app/logs/logs.component.ts` with:
+
 - Table showing last 50 logs (timestamp, masked question, confidence, latency, guardrail status)
 - Rejected rows visually distinguished (red background or colored text)
 - Refresh button
@@ -1349,6 +1417,7 @@ git commit -m "feat: Angular chat component with signals, source display, confid
 **Step 3:** Verify all 3 routes work at http://localhost:4200.
 
 **Step 4:** Commit:
+
 ```bash
 git add frontend/src/app/ingest/ frontend/src/app/logs/
 git commit -m "feat: Angular Ingest and Logs components"
@@ -1359,6 +1428,7 @@ git commit -m "feat: Angular Ingest and Logs components"
 ## Task 13: Deliverables — README & DECISIONS.md
 
 **Step 1:** Create `README.md` covering:
+
 - Project description
 - Prerequisites (Ollama + models)
 - 3-command setup (backend, corpus ingest, frontend)
@@ -1366,6 +1436,7 @@ git commit -m "feat: Angular Ingest and Logs components"
 - Test command
 
 **Step 2:** Create `DECISIONS.md` covering:
+
 - ChromaDB vs pgvector (zero-config for demo)
 - Ollama vs Gen-e2 (local, AIProvider abstraction)
 - FastAPI vs Spring Boot (Python AI ecosystem maturity)
@@ -1375,12 +1446,15 @@ git commit -m "feat: Angular Ingest and Logs components"
 - Next steps: reranking, SSE streaming, full RAGAS, pgvector, auth, Gen-e2
 
 **Step 3:** Run full test suite one last time:
+
 ```bash
 cd backend && pytest tests/ -v --tb=short
 ```
+
 Expected: All PASSED.
 
 **Step 4:** Commit:
+
 ```bash
 git add README.md DECISIONS.md
 git commit -m "docs: README, DECISIONS.md — deliverables complete"
