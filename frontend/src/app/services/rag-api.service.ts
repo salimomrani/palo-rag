@@ -5,8 +5,9 @@ import { environment } from '../../environments/environment';
 
 export interface QueryResponse {
   answer: string;
-  sources: { file: string; score: number }[];
+  sources: { source: string; excerpt: string; score: number }[];
   confidence_score: number;
+  low_confidence: boolean;
 }
 
 export interface IngestResponse {

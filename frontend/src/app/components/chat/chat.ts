@@ -6,9 +6,9 @@ import { RagApiService, QueryResponse } from '../../services/rag-api.service';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  sources?: { file: string; score: number }[];
+  sources?: { source: string; excerpt: string; score: number }[];
   confidence?: number;
-  rejected?: boolean;
+  lowConfidence?: boolean;
 }
 
 @Component({
@@ -47,6 +47,7 @@ export class Chat {
             content: res.answer,
             sources: res.sources,
             confidence: res.confidence_score,
+            lowConfidence: res.low_confidence,
           },
         ]);
         this.isLoading.set(false);
