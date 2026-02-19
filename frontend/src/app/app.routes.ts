@@ -14,4 +14,8 @@ export const routes: Routes = [
     path: 'logs',
     loadComponent: () => import('./components/logs/logs').then((m) => m.Logs),
   },
+  {
+    path: 'eval',
+    loadComponent: () => import('./components/eval/eval').then((m) => m.Eval),
+  },
 ];

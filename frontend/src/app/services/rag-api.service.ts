@@ -33,6 +33,21 @@ export interface Document {
   ingested_at: string;
 }
 
+export interface EvalPerQuestion {
+  question: string;
+  expected_source: string;
+  source_found: boolean;
+  answer_length: number;
+}
+
+export interface EvalReport {
+  run_at: string;
+  faithfulness: number;
+  answer_relevancy: number;
+  context_recall: number;
+  per_question: EvalPerQuestion[];
+}
+
 export interface LogEntry {
   id: number;
   timestamp: string;
@@ -120,5 +135,13 @@ export class RagApiService {
 
   getLogs(): Observable<LogEntry[]> {
     return this.http.get<LogEntry[]>(`${this.apiUrl}/logs`);
+  }
+
+  getEvalReport(): Observable<EvalReport> {
+    return this.http.get<EvalReport>(`${this.apiUrl}/evaluation/report`);
+  }
+
+  runEval(): Observable<{ status: string; scores: unknown }> {
+    return this.http.post<{ status: string; scores: unknown }>(`${this.apiUrl}/evaluation/run`, {});
   }
 }
