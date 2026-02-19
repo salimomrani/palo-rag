@@ -5,13 +5,13 @@
 
 ## Summary
 
-Build a local RAG API (FastAPI + LangChain + Ollama) with Angular 21 frontend. Ingests documents into ChromaDB, answers questions with grounded responses and source attribution, enforces input/output guardrails, logs all interactions to SQLite (with PII masking), and auto-generates quality evaluation reports.
+Build a local RAG API (FastAPI + LangChain + Ollama) with Angular 21 frontend. Ingests documents into ChromaDB, answers questions with grounded responses and source attribution, enforces input/output guardrails, logs all interactions to PostgreSQL (with PII masking), and auto-generates quality evaluation reports.
 
 ## Technical Context
 
 **Language/Version**: Python 3.12 (backend), TypeScript 5.9 + Angular 21 (frontend)
 **Primary Dependencies**: FastAPI, LangChain 0.3, langchain-ollama, ChromaDB 0.5, SQLAlchemy 2, python-dotenv, Angular 21, Angular HttpClient
-**Storage**: ChromaDB (vector store, file-based embedded), SQLite (query logs + evaluation results)
+**Storage**: ChromaDB (vector store, file-based embedded), PostgreSQL 16 (query logs + evaluation results)
 **Testing**: pytest + httpx TestClient (backend), Angular default test runner (frontend — minimal)
 **Target Platform**: macOS / Linux local development, Ollama running locally
 **Project Type**: Web application (backend + frontend)
@@ -68,7 +68,7 @@ backend/
 ├── logging_service/
 │   ├── __init__.py
 │   ├── pii.py            (email + phone masking)
-│   └── store.py          (SQLite log persistence)
+│   └── store.py          (PostgreSQL log persistence)
 ├── models/
 │   ├── __init__.py
 │   └── db.py             (SQLAlchemy: Document, QueryLog, EvaluationResult)
@@ -140,7 +140,6 @@ __pycache__/
 .venv/
 chroma_data/
 *.db
-*.sqlite
 .env
 node_modules/
 dist/
@@ -190,7 +189,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 LLM_MODEL=llama3.2
 EMBED_MODEL=nomic-embed-text
 CHROMA_PATH=./chroma_data
-DB_URL=sqlite:///./palo_rag.db
+DB_URL=postgresql://palo:palo@localhost:5444/palo_rag
 ```
 
 **Step 4:** Create `backend/pytest.ini`:
@@ -962,9 +961,9 @@ def get_vectorstore():
 
 @lru_cache
 def get_engine():
-    db_url = os.getenv("DB_URL", "sqlite:///./palo_rag.db")
+    db_url = os.getenv("DB_URL", "postgresql://palo:palo@localhost:5444/palo_rag")
     from models.db import Base
-    engine = create_engine(db_url, connect_args={"check_same_thread": False})
+    engine = create_engine(db_url)
     Base.metadata.create_all(engine)
     return engine
 ```
@@ -1440,7 +1439,7 @@ git commit -m "feat: Angular Ingest and Logs components"
 - ChromaDB vs pgvector (zero-config for demo)
 - Ollama vs Gen-e2 (local, AIProvider abstraction)
 - FastAPI vs Spring Boot (Python AI ecosystem maturity)
-- SQLite vs PostgreSQL (zero-config for demo)
+- PostgreSQL 16 via Docker (production-grade persistence)
 - Quality metric proxies vs full RAGAS (latency trade-off)
 - Known limits: no reranking, no streaming, small reference dataset, no auth
 - Next steps: reranking, SSE streaming, full RAGAS, pgvector, auth, Gen-e2
@@ -1471,7 +1470,7 @@ git commit -m "docs: README, DECISIONS.md — deliverables complete"
 [ ] specs/001-rag-assistant/spec.md (spec-kit format)
 [ ] specs/001-rag-assistant/plan.md (this file)
 [ ] .specify/memory/constitution.md
-[ ] SQLite logs with PII masking verified
+[ ] PostgreSQL logs with PII masking verified
 [ ] Input guardrails verified (injection, length, empty)
 [ ] Angular 3 views functional (Chat, Ingest, Logs)
 [ ] Gen-e2 mockable via AIProvider interface
