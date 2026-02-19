@@ -1,14 +1,14 @@
 import json
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from logging_service.store import LogStore
 from dependencies import get_engine
 
-router = APIRouter(prefix="/api", tags=["logs"])
+router = APIRouter(tags=["logs"])
 
 
 @router.get("/logs")
-def get_logs(limit: int = 100):
-    logs = LogStore(engine=get_engine()).get_recent(limit=limit)
+def get_logs(limit: int = 100, engine=Depends(get_engine)):
+    logs = LogStore(engine=engine).get_recent(limit=limit)
     return [
         {
             "id": log.id,

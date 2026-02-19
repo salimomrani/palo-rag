@@ -1,9 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from models.db import Base
+from dependencies import get_provider, get_vectorstore, get_engine
 
 
 @pytest.fixture
@@ -25,23 +26,14 @@ def client():
     )
     Base.metadata.create_all(engine)
 
-    patches = [
-        patch("api.query.get_provider", return_value=mock_provider),
-        patch("api.query.get_vectorstore", return_value=mock_vs),
-        patch("api.query.get_engine", return_value=engine),
-        patch("api.ingest.get_provider", return_value=mock_provider),
-        patch("api.ingest.get_vectorstore", return_value=mock_vs),
-        patch("api.ingest.get_engine", return_value=engine),
-        patch("api.logs.get_engine", return_value=engine),
-    ]
-    for p in patches:
-        p.start()
-
     from main import app
+    app.dependency_overrides[get_provider] = lambda: mock_provider
+    app.dependency_overrides[get_vectorstore] = lambda: mock_vs
+    app.dependency_overrides[get_engine] = lambda: engine
+
     yield TestClient(app)
 
-    for p in patches:
-        p.stop()
+    app.dependency_overrides.clear()
 
 
 def test_health_check(client):
