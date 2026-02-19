@@ -4,7 +4,10 @@ from dataclasses import dataclass, field
 from typing import Generator
 
 LOW_CONFIDENCE_THRESHOLD = 0.5
+MIN_RETRIEVAL_SCORE = 0.3   # below this → no relevant context found
 TOP_K = 4
+
+NO_INFO = "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
 
 PROMPT_TEMPLATE = """Tu es un assistant de support interne. Réponds à la question en te basant UNIQUEMENT sur le contexte fourni.
 Si le contexte ne contient pas l'information, dis "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
@@ -26,6 +29,33 @@ class QueryResult:
     latency_ms: int = 0
 
 
+def _retrieve(vectorstore, question: str) -> tuple[list, float]:
+    """Return (results, avg_score) using relevance scores normalized to [0, 1]."""
+    results = vectorstore.similarity_search_with_relevance_scores(question, k=TOP_K)
+    if not results:
+        return [], 0.0
+    scores = [max(0.0, min(1.0, s)) for _, s in results]
+    return results, round(sum(scores) / len(scores), 3)
+
+
+def _build_sources(results) -> list[dict]:
+    return [
+        {
+            "source": doc.metadata.get("source", "unknown"),
+            "excerpt": doc.page_content[:200],
+            "score": round(max(0.0, min(1.0, score)), 3),
+        }
+        for doc, score in results
+    ]
+
+
+def _build_context(results) -> str:
+    return "\n\n".join(
+        f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
+        for doc, _ in results
+    )
+
+
 class RAGPipeline:
     def __init__(self, provider, vectorstore):
         self._provider = provider
@@ -33,38 +63,24 @@ class RAGPipeline:
 
     def query(self, question: str) -> QueryResult:
         start = time.time()
-        results = self._vectorstore.similarity_search_with_score(question, k=TOP_K)
+        results, avg_score = _retrieve(self._vectorstore, question)
 
-        if not results:
+        if not results or avg_score < MIN_RETRIEVAL_SCORE:
             return QueryResult(
-                answer="Je n'ai pas d'information sur ce sujet dans la base de connaissance.",
+                answer=NO_INFO,
                 sources=[],
                 confidence_score=0.0,
                 low_confidence=True,
                 latency_ms=int((time.time() - start) * 1000),
             )
 
-        scores = [s for _, s in results]
-        avg_score = sum(scores) / len(scores)
-        context = "\n\n".join(
-            f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
-            for doc, _ in results
-        )
         answer = self._provider.generate(
-            PROMPT_TEMPLATE.format(context=context, question=question)
+            PROMPT_TEMPLATE.format(context=_build_context(results), question=question)
         )
-        sources = [
-            {
-                "source": doc.metadata.get("source", "unknown"),
-                "excerpt": doc.page_content[:200],
-                "score": round(score, 3),
-            }
-            for doc, score in results
-        ]
         return QueryResult(
             answer=answer,
-            sources=sources,
-            confidence_score=round(avg_score, 3),
+            sources=_build_sources(results),
+            confidence_score=avg_score,
             low_confidence=avg_score < LOW_CONFIDENCE_THRESHOLD,
             latency_ms=int((time.time() - start) * 1000),
         )
@@ -72,29 +88,19 @@ class RAGPipeline:
     def stream_query(self, question: str) -> Generator[str, None, None]:
         """Yield SSE-formatted events: meta → tokens → done."""
         start = time.time()
-        results = self._vectorstore.similarity_search_with_score(question, k=TOP_K)
+        results, avg_score = _retrieve(self._vectorstore, question)
 
-        if not results:
+        if not results or avg_score < MIN_RETRIEVAL_SCORE:
             yield f"data: {json.dumps({'type': 'meta', 'sources': [], 'confidence_score': 0.0, 'low_confidence': True})}\n\n"
-            no_info = "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
-            yield f"data: {json.dumps({'type': 'token', 'content': no_info})}\n\n"
-            yield f"data: {json.dumps({'type': 'done', 'latency_ms': int((time.time() - start) * 1000), 'answer': no_info})}\n\n"
+            yield f"data: {json.dumps({'type': 'token', 'content': NO_INFO})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'latency_ms': int((time.time() - start) * 1000), 'answer': NO_INFO})}\n\n"
             return
 
-        scores = [s for _, s in results]
-        avg_score = sum(scores) / len(scores)
-        context = "\n\n".join(
-            f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
-            for doc, _ in results
-        )
-        sources = [
-            {"source": doc.metadata.get("source", "unknown"), "excerpt": doc.page_content[:200], "score": round(score, 3)}
-            for doc, score in results
-        ]
-        yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': round(avg_score, 3), 'low_confidence': avg_score < LOW_CONFIDENCE_THRESHOLD})}\n\n"
+        sources = _build_sources(results)
+        yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': avg_score, 'low_confidence': avg_score < LOW_CONFIDENCE_THRESHOLD})}\n\n"
 
         full_answer = ""
-        for token in self._provider.stream_generate(PROMPT_TEMPLATE.format(context=context, question=question)):
+        for token in self._provider.stream_generate(PROMPT_TEMPLATE.format(context=_build_context(results), question=question)):
             full_answer += token
             yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 
