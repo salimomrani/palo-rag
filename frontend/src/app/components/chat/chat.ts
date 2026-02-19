@@ -40,12 +40,18 @@ export class Chat {
 
     this.api.query(question).subscribe({
       next: (res: QueryResponse) => {
+        const seen = new Map<string, { source: string; excerpt: string; score: number }>();
+        for (const s of res.sources) {
+          if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) {
+            seen.set(s.source, s);
+          }
+        }
         this.messages.update((msgs) => [
           ...msgs,
           {
             role: 'assistant',
             content: res.answer,
-            sources: res.sources,
+            sources: [...seen.values()].sort((a, b) => b.score - a.score),
             confidence: res.confidence_score,
             lowConfidence: res.low_confidence,
           },
