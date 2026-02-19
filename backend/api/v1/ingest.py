@@ -42,6 +42,22 @@ def ingest_text(
     return {"name": request.name, "chunk_count": chunk_count, "document_id": doc_id}
 
 
+@router.delete("/documents/{doc_id}", status_code=204)
+def delete_document(
+    doc_id: str,
+    vectorstore=Depends(get_vectorstore),
+    engine=Depends(get_engine),
+):
+    with Session(engine) as session:
+        doc = session.get(Document, doc_id)
+        if not doc:
+            raise HTTPException(status_code=404, detail=f"Document '{doc_id}' introuvable.")
+        vectorstore._collection.delete(where={"source": doc.name})
+        session.delete(doc)
+        session.commit()
+    logger.info("Deleted document %s (%s)", doc_id, doc.name)
+
+
 @router.get("/documents")
 def list_documents(engine=Depends(get_engine)):
     with Session(engine) as session:

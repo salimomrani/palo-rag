@@ -11,15 +11,15 @@ export interface QueryResponse {
 
 export interface IngestResponse {
   document_id: string;
-  chunks_count: number;
-  message: string;
+  name: string;
+  chunk_count: number;
 }
 
 export interface Document {
   id: string;
-  filename: string;
-  chunks_count: number;
-  created_at: string;
+  name: string;
+  chunk_count: number;
+  ingested_at: string;
 }
 
 export interface LogEntry {
@@ -43,13 +43,27 @@ export class RagApiService {
   }
 
   ingest(file: File): Observable<IngestResponse> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post<IngestResponse>(`${this.apiUrl}/ingest`, formData);
+    return new Observable((observer) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.http
+          .post<IngestResponse>(`${this.apiUrl}/ingest`, {
+            text: reader.result as string,
+            name: file.name,
+          })
+          .subscribe(observer);
+      };
+      reader.onerror = () => observer.error(reader.error);
+      reader.readAsText(file);
+    });
   }
 
   getDocuments(): Observable<Document[]> {
     return this.http.get<Document[]>(`${this.apiUrl}/documents`);
+  }
+
+  deleteDocument(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
   }
 
   getLogs(): Observable<LogEntry[]> {

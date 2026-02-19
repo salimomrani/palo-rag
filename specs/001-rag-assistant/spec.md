@@ -36,6 +36,8 @@ A knowledge manager uploads or pastes documents (Markdown or plain text) so they
 1. **Given** a Markdown or plain text document, **When** ingested via the API, **Then** the system confirms the number of chunks created and the document appears in the document list
 2. **Given** an empty text body, **When** submitted for ingestion, **Then** the API returns a validation error
 3. **Given** a document is ingested, **When** a question is asked about its content, **Then** that document appears in the source references
+4. **Given** a document name that already exists in the knowledge base, **When** a second ingestion is attempted with the same name, **Then** the API returns HTTP 409 with an explicit "already ingested" message — no duplicate chunks are created
+5. **Given** a document exists in the knowledge base, **When** a knowledge manager deletes it, **Then** it is removed from both the document list and the vector store, and can no longer appear in query results
 
 ---
 
@@ -126,7 +128,9 @@ A user or administrator can view recent query history, quality scores, and guard
 - **FR-013**: System MUST compute quality metrics (faithfulness, answer relevancy, context recall) when evaluation is triggered
 - **FR-014**: Evaluation MUST produce a human-readable Markdown report at `reports/eval.md`
 - **FR-015**: The AI provider MUST be swappable via configuration without code changes
-- **FR-016**: Frontend MUST provide three views: Chat, Ingest, and Logs
+- **FR-016**: Frontend MUST provide three views: Chat, Ingest (with document list and delete action), and Logs
+- **FR-017**: System MUST reject ingestion of a document whose name already exists in the knowledge base with HTTP 409 and an explicit error message — no duplicate chunks may be created in the vector store
+- **FR-018**: System MUST expose a delete endpoint for documents; deleting a document MUST remove it from both the persistent store and the vector store so it can no longer appear in query results
 
 ### Key Entities
 
@@ -146,6 +150,8 @@ A user or administrator can view recent query history, quality scores, and guard
 - **SC-005**: Query response time is under 10 seconds at the 95th percentile on the local AI stack
 - **SC-006**: Complete setup from clean checkout to working demo takes under 5 minutes following the README
 - **SC-007**: All log entries for queries containing email addresses store `[EMAIL]` instead of the raw address
+- **SC-008**: Attempting to ingest a document with an already-existing name returns HTTP 409 — the vector store contains no duplicate chunks
+- **SC-009**: Deleting a document removes it from the document list and it no longer appears as a source in subsequent query responses
 
 ## Assumptions
 

@@ -41,7 +41,7 @@ export class Ingest implements OnInit {
 
     this.api.ingest(file).subscribe({
       next: (res) => {
-        this.successMsg.set(`"${file.name}" ingéré — ${res.chunks_count} chunks.`);
+        this.successMsg.set(`"${file.name}" ingéré — ${res.chunk_count} chunks.`);
         this.selectedFile.set(null);
         this.isUploading.set(false);
         this.loadDocuments();
@@ -52,6 +52,14 @@ export class Ingest implements OnInit {
         this.error.set(err?.error?.detail ?? "Erreur lors de l'envoi.");
         this.isUploading.set(false);
       },
+    });
+  }
+
+  deleteDocument(id: string, name: string): void {
+    if (!confirm(`Supprimer "${name}" de la base de connaissances ?`)) return;
+    this.api.deleteDocument(id).subscribe({
+      next: () => this.loadDocuments(),
+      error: (err) => this.error.set(err?.error?.detail ?? 'Erreur lors de la suppression.'),
     });
   }
 

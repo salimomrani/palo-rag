@@ -51,8 +51,11 @@
       <ul>
         @for (doc of documents(); track doc.id) {
           <li>
-            <span class="doc-name">{{ doc.filename }}</span>
-            <span class="doc-chunks">{{ doc.chunks_count }} chunks</span>
+            <span class="doc-name">{{ doc.name }}</span>
+            <span class="doc-meta">{{ doc.chunk_count }} chunks</span>
+            <button class="btn-delete" (click)="deleteDocument(doc.id, doc.name)" title="Supprimer">
+              ✕
+            </button>
           </li>
         }
       </ul>
