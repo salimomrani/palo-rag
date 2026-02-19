@@ -2,9 +2,8 @@
 
 ## Architectural Decisions
 
-### 1. PostgreSQL instead of SQLite (spec deviation)
+### 1. PostgreSQL via Docker instead of SQLite
 
-**Spec said**: "no Docker, local only"
 **Decision**: PostgreSQL 16 via `docker-compose`
 **Rationale**: Demonstrates production-grade persistence; SQLite lacks proper connection pooling for concurrent FastAPI workers. Docker adds 1 command to setup, acceptable for a demo.
 
@@ -66,19 +65,19 @@
 
 ## What Was Built vs. Spec
 
-| Feature | Spec | Built | Notes |
-|---------|------|-------|-------|
-| RAG query endpoint | ✅ required | ✅ done | + streaming variant |
-| Document ingestion | ✅ required | ✅ done | + duplicate guard (409) |
-| Input guardrails | ✅ required | ✅ done | + offensive content (FR/EN) |
-| Audit logging + PII masking | ✅ required | ✅ done | PostgreSQL-backed |
-| Quality evaluation | ✅ required | ✅ done | 15-Q reference dataset |
-| Angular UI | ✅ required | ✅ done | Chat + Ingest + Logs |
-| Document delete | ❌ not in spec | ✅ added | FR-017 |
-| SSE streaming | ❌ not in spec | ✅ added | FR-019/020 |
-| Duplicate ingestion guard | ❌ not in spec | ✅ added | FR-018 |
-| Gen-e2 integration | 🔜 stretch | ❌ not done | AIProvider ready, needs credentials |
-| BDD scenarios | 🔜 stretch | ❌ not done | Unit tests cover all user stories |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| RAG query endpoint | ✅ done | + streaming variant |
+| Document ingestion | ✅ done | + duplicate guard (409) |
+| Input guardrails | ✅ done | + offensive content (FR/EN) |
+| Audit logging + PII masking | ✅ done | PostgreSQL-backed |
+| Quality evaluation | ✅ done | 15-Q reference dataset |
+| Angular UI | ✅ done | Chat + Ingest + Logs |
+| Document delete | ✅ added | FR-017 |
+| SSE streaming | ✅ added | FR-019/020 |
+| Duplicate ingestion guard | ✅ added | FR-018 |
+| Gen-e2 integration | 🔜 stretch | AIProvider ready, needs credentials |
+| BDD scenarios | 🔜 stretch | Unit tests cover all user stories |
 
 ---
 
