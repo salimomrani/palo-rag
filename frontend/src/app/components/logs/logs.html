@@ -1,47 +1,70 @@
 <div class="logs-container">
-  <div class="header">
-    <h2>Historique des requêtes (Audit)</h2>
-    <button (click)="fetchLogs()" [disabled]="isLoading" class="refresh-btn">
-      Rafraîchir
+  <div class="logs-header">
+    <h2>Audit des requêtes</h2>
+    <button class="btn-refresh" (click)="fetchLogs()" [disabled]="isLoading()">
+      @if (isLoading()) {
+        Chargement…
+      } @else {
+        Rafraîchir
+      }
     </button>
   </div>
 
-  <div *ngIf="error" class="alert error">{{ error }}</div>
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
 
-  <div *ngIf="isLoading" class="loading">Chargement des logs...</div>
+  @if (!isLoading() && logs().length === 0 && !error()) {
+    <div class="empty-state">
+      <span class="empty-icon">◎</span>
+      <p>Aucune requête enregistrée.</p>
+    </div>
+  }
 
-  <div class="table-container" *ngIf="!isLoading && logs.length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Question (Masquée)</th>
-          <th>Réponse</th>
-          <th>Confiance</th>
-          <th>Sources</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let log of logs">
-          <td class="date-cell">{{ log.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-          <td class="prompt-cell">{{ log.prompt }}</td>
-          <td class="answer-cell">{{ log.answer }}</td>
-          <td class="score-cell">
-            <span class="badge" [class.low]="log.average_score < 0.6">
-              {{ (log.average_score * 100) | number:'1.0-0' }}%
-            </span>
-          </td>
-          <td class="sources-cell">
-            <ul>
-              <li *ngFor="let source of log.sources">{{ source }}</li>
-            </ul>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div *ngIf="!isLoading && logs.length === 0" class="empty-state">
-    Aucune requête n'a encore été effectuée sur le RAG.
-  </div>
+  @if (!isLoading() && logs().length > 0) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Question (masquée)</th>
+            <th>Réponse</th>
+            <th>Confiance</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr [class.rejected]="log.rejected">
+              <td class="cell-date">{{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}</td>
+              <td class="cell-question">{{ log.question_masked }}</td>
+              <td class="cell-answer">
+                @if (log.rejected) {
+                  <span class="rejection-reason">{{ log.rejection_reason }}</span>
+                } @else {
+                  {{ log.answer }}
+                }
+              </td>
+              <td class="cell-score">
+                @if (!log.rejected && log.faithfulness_score !== null) {
+                  <span class="badge" [class.low]="log.faithfulness_score! < 0.6">
+                    {{ log.faithfulness_score! * 100 | number: '1.0-0' }}%
+                  </span>
+                } @else if (log.rejected) {
+                  <span class="badge rejected">—</span>
+                }
+              </td>
+              <td class="cell-status">
+                @if (log.rejected) {
+                  <span class="tag rejected">Rejeté</span>
+                } @else {
+                  <span class="tag ok">OK</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>

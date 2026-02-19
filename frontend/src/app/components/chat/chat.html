@@ -1,36 +1,52 @@
 <div class="chat-container">
-  <div class="messages">
-    <div *ngFor="let msg of messages" class="message" [ngClass]="msg.role">
-      <div class="message-content">{{ msg.content }}</div>
+  <div class="messages" #messagesEl>
+    @for (msg of messages(); track $index) {
+      <div class="message" [class]="msg.role">
+        <div class="message-content">{{ msg.content }}</div>
 
-      <div *ngIf="msg.sources?.length" class="sources">
-        <strong>Sources:</strong>
-        <ul>
-          <li *ngFor="let source of msg.sources">
-            {{ source.file }} (Confiance: {{ (source.score * 100) | number:'1.0-0' }}%)
-          </li>
-        </ul>
+        @if (msg.sources && msg.sources.length > 0) {
+          <div class="sources">
+            <span class="sources-label">Sources</span>
+            <ul>
+              @for (source of msg.sources; track source.file) {
+                <li>
+                  <span class="source-file">{{ source.file }}</span>
+                  <span class="source-score">{{ source.score * 100 | number: '1.0-0' }}%</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (msg.confidence !== undefined) {
+          <div class="confidence" [class.low]="msg.confidence < 0.6">
+            Confiance : {{ msg.confidence * 100 | number: '1.0-0' }}%
+          </div>
+        }
       </div>
-    </div>
+    }
 
-    <div *ngIf="isLoading" class="message assistant loading">
-      <div class="message-content">L'assistant réfléchit...</div>
-    </div>
+    @if (isLoading()) {
+      <div class="message assistant loading">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    }
 
-    <div *ngIf="error" class="error-message">
-      {{ error }}
-    </div>
+    @if (error()) {
+      <div class="error-banner">{{ error() }}</div>
+    }
   </div>
 
   <div class="input-area">
     <textarea
-      [(ngModel)]="prompt"
-      (keyup.enter)="sendMessage()"
-      placeholder="Posez une question à propos de Palo IT..."
-      [disabled]="isLoading">
+      [value]="prompt()"
+      (input)="prompt.set($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      placeholder="Posez une question… (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
+      [disabled]="isLoading()"
+      rows="2"
+    >
     </textarea>
-    <button (click)="sendMessage()" [disabled]="isLoading || !prompt.trim()">
-      Envoyer
-    </button>
+    <button (click)="sendMessage()" [disabled]="!canSend()">Envoyer</button>
   </div>
 </div>

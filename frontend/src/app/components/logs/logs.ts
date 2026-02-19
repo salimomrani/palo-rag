@@ -1,36 +1,37 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ApiService } from '../../services/api.service';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { RagApiService, LogEntry } from '../../services/rag-api.service';
 
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe, DecimalPipe],
   templateUrl: './logs.html',
   styleUrls: ['./logs.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Logs implements OnInit {
-  logs: any[] = [];
-  isLoading = true;
-  error: string | null = null;
+  private readonly api = inject(RagApiService);
 
-  constructor(private api: ApiService) {}
+  logs = signal<LogEntry[]>([]);
+  isLoading = signal(true);
+  error = signal<string | null>(null);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.fetchLogs();
   }
 
-  fetchLogs() {
-    this.isLoading = true;
+  fetchLogs(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
     this.api.getLogs().subscribe({
       next: (data) => {
-        this.logs = data;
-        this.isLoading = false;
+        this.logs.set(data);
+        this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error(err);
-        this.error = 'Impossible de charger l\'historique des logs.';
-        this.isLoading = false;
+      error: () => {
+        this.error.set("Impossible de charger l'historique.");
+        this.isLoading.set(false);
       },
     });
   }

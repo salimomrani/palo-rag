@@ -1,46 +1,68 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
+import { DecimalPipe } from '@angular/common';
+import { RagApiService, QueryResponse } from '../../services/rag-api.service';
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: { file: string; score: number }[];
+  confidence?: number;
+  rejected?: boolean;
+}
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, DecimalPipe],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Chat {
-  prompt: string = '';
-  messages: Array<{ role: 'user' | 'assistant'; content: string; sources?: any[] }> = [];
-  isLoading: boolean = false;
-  error: string | null = null;
+  private readonly api = inject(RagApiService);
 
-  constructor(private api: ApiService) {}
+  prompt = signal('');
+  messages = signal<Message[]>([]);
+  isLoading = signal(false);
+  error = signal<string | null>(null);
 
-  sendMessage() {
-    if (!this.prompt.trim()) return;
+  canSend = computed(() => this.prompt().trim().length > 0 && !this.isLoading());
 
-    this.messages.push({ role: 'user', content: this.prompt });
-    const currentPrompt = this.prompt;
-    this.prompt = '';
-    this.isLoading = true;
-    this.error = null;
+  sendMessage(): void {
+    if (!this.canSend()) return;
 
-    this.api.query(currentPrompt).subscribe({
-      next: (res) => {
-        this.messages.push({
-          role: 'assistant',
-          content: res.answer,
-          sources: res.sources,
-        });
-        this.isLoading = false;
+    const question = this.prompt().trim();
+    this.messages.update((msgs) => [...msgs, { role: 'user', content: question }]);
+    this.prompt.set('');
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.api.query(question).subscribe({
+      next: (res: QueryResponse) => {
+        this.messages.update((msgs) => [
+          ...msgs,
+          {
+            role: 'assistant',
+            content: res.answer,
+            sources: res.sources,
+            confidence: res.confidence_score,
+          },
+        ]);
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error(err);
-        this.error = 'Une erreur est survenue lors de la communication avec le RAG.';
-        this.isLoading = false;
+        const detail = err?.error?.detail;
+        this.error.set(detail ?? 'Erreur de communication avec le RAG.');
+        this.isLoading.set(false);
       },
     });
+  }
+
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+    }
   }
 }

@@ -1,32 +1,61 @@
 <div class="ingest-container">
-  <h2>Ingestion de Connaissances</h2>
-  <p>Ajoutez de nouveaux documents (Markdown, texte) pour enrichir la base de connaissances du RAG.</p>
+  <section class="upload-card">
+    <h2>Ingestion de documents</h2>
+    <p>Ajoutez un fichier Markdown ou texte pour enrichir la base de connaissances.</p>
 
-  <div class="upload-area">
-    <label for="fileUpload" class="file-label">
-      Sélectionner un fichier
-    </label>
-    <input
-      type="file"
-      id="fileUpload"
-      (change)="onFileSelected($event)"
-      accept=".md,.txt"
-      [disabled]="isUploading"
-    >
-
-    <div *ngIf="selectedFile" class="selected-file">
-      Fichier sélectionné : <strong>{{ selectedFile.name }}</strong>
+    <div class="drop-zone" [class.has-file]="selectedFile()">
+      <input
+        type="file"
+        id="fileInput"
+        accept=".md,.txt"
+        (change)="onFileSelected($event)"
+        [disabled]="isUploading()"
+      />
+      <label for="fileInput">
+        @if (selectedFile()) {
+          <span class="file-name">{{ selectedFile()!.name }}</span>
+          <span class="file-hint">Cliquer pour changer</span>
+        } @else {
+          <span class="drop-icon">⊕</span>
+          <span class="drop-label">Sélectionner un fichier .md / .txt</span>
+        }
+      </label>
     </div>
 
-    <button
-      (click)="uploadFile()"
-      [disabled]="!selectedFile || isUploading"
-      class="upload-btn">
-      <span *ngIf="!isUploading">Ingérer le document</span>
-      <span *ngIf="isUploading">Envoi en cours...</span>
+    <button class="btn-ingest" (click)="uploadFile()" [disabled]="!selectedFile() || isUploading()">
+      @if (isUploading()) {
+        <span class="spinner"></span> Envoi…
+      } @else {
+        Ingérer
+      }
     </button>
-  </div>
 
-  <div *ngIf="message" class="alert success">{{ message }}</div>
-  <div *ngIf="error" class="alert error">{{ error }}</div>
+    @if (successMsg()) {
+      <div class="alert success">{{ successMsg() }}</div>
+    }
+    @if (error()) {
+      <div class="alert error">{{ error() }}</div>
+    }
+  </section>
+
+  <section class="doc-list">
+    <h3>
+      Base de connaissances <span class="count">{{ documents().length }}</span>
+    </h3>
+
+    @if (isLoadingDocs()) {
+      <p class="muted">Chargement…</p>
+    } @else if (documents().length === 0) {
+      <p class="muted">Aucun document ingéré.</p>
+    } @else {
+      <ul>
+        @for (doc of documents(); track doc.id) {
+          <li>
+            <span class="doc-name">{{ doc.filename }}</span>
+            <span class="doc-chunks">{{ doc.chunks_count }} chunks</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
 </div>
