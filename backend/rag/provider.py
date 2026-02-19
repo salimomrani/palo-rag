@@ -1,6 +1,6 @@
-import os
 from typing import Protocol
 from langchain_ollama import OllamaEmbeddings, ChatOllama
+from core.config import settings
 
 
 class AIProvider(Protocol):
@@ -11,14 +11,13 @@ class AIProvider(Protocol):
 
 class OllamaProvider:
     def __init__(self):
-        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         self._embeddings = OllamaEmbeddings(
-            base_url=base_url,
-            model=os.getenv("EMBED_MODEL", "nomic-embed-text"),
+            base_url=settings.ollama_base_url,
+            model=settings.embed_model,
         )
         self._llm = ChatOllama(
-            base_url=base_url,
-            model=os.getenv("LLM_MODEL", "llama3.2"),
+            base_url=settings.ollama_base_url,
+            model=settings.llm_model,
         )
 
     def embed(self, text: str) -> list[float]:
@@ -32,8 +31,7 @@ class OllamaProvider:
 
 
 def get_provider() -> OllamaProvider:
-    name = os.getenv("AI_PROVIDER", "ollama")
-    if name == "ollama":
+    if settings.ai_provider == "ollama":
         return OllamaProvider()
-    raise ValueError(f"Unknown AI provider: {name}")
+    raise ValueError(f"Unknown AI provider: {settings.ai_provider}")
     # Gen-e2 would be wired here via AI_PROVIDER=gen-e2
