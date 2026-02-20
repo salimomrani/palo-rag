@@ -23,6 +23,7 @@
 **/*.db
 **/*.sqlite
 **/chroma_db/
+corpus/
 
 # Logs
 **/*.log
