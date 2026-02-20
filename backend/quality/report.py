@@ -3,6 +3,13 @@ from datetime import datetime
 
 
 def generate_quality_report_md(scores: dict, output_path: str) -> None:
+    """Write a Markdown evaluation report to disk from the scores dict.
+
+    Args:
+        scores: Output of `run_quality_check()` — must contain faithfulness,
+                answer_relevancy, context_recall, and per_question keys.
+        output_path: Absolute path to the output file (e.g. "reports/eval.md").
+    """
     faithfulness = scores.get("faithfulness", 0.0)
     answer_relevancy = scores.get("answer_relevancy", 0.0)
     context_recall = scores.get("context_recall", 0.0)

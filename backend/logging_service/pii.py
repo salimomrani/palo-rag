@@ -9,6 +9,12 @@ _PHONE_RE = re.compile(
 
 
 def mask_pii(text: str) -> str:
+    """Replace emails and French/Belgian phone numbers with placeholder tokens.
+
+    Example:
+        >>> mask_pii("Contact alice@example.com ou 06 12 34 56 78")
+        'Contact [EMAIL] ou [PHONE]'
+    """
     text = _EMAIL_RE.sub("[EMAIL]", text)
     text = _PHONE_RE.sub("[PHONE]", text)
     return text

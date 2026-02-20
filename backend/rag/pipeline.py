@@ -3,21 +3,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Generator
 from core.config import settings
-
-PROMPT_TEMPLATE = """Tu es l'assistant de support de PALO Platform. Utilise le contexte fourni pour répondre à la question de manière directe et concise.
-
-Règles :
-- Réponds en français.
-- Base-toi sur le contexte fourni. Si une information est partielle, donne ce que tu sais et précise la limite.
-- Si le contexte ne contient vraiment aucune information pertinente, dis uniquement : "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
-- Ne répète pas la question. Ne commence pas par "Bien sûr" ou des formules creuses.
-
-Contexte :
-{context}
-
-Question : {question}
-
-Réponse :"""
+from rag.prompts import RAG_PROMPT
 
 
 @dataclass
@@ -39,6 +25,7 @@ def _retrieve(vectorstore, question: str) -> tuple[list, float]:
 
 
 def _build_sources(results) -> list[dict]:
+    """Build serializable source list with excerpt and clamped similarity score."""
     return [
         {
             "source": doc.metadata.get("source", "unknown"),
@@ -50,6 +37,7 @@ def _build_sources(results) -> list[dict]:
 
 
 def _build_context(results) -> str:
+    """Concatenate retrieved chunks into a single labelled context string for the prompt."""
     return "\n\n".join(
         f"[Source: {doc.metadata.get('source', 'unknown')}]\n{doc.page_content}"
         for doc, _ in results
@@ -58,10 +46,19 @@ def _build_context(results) -> str:
 
 class RAGPipeline:
     def __init__(self, provider, vectorstore):
+        """
+        Args:
+            provider: AIProvider implementation (OllamaProvider or any swappable backend).
+            vectorstore: LangChain-compatible vector store (ChromaDB).
+        """
         self._provider = provider
         self._vectorstore = vectorstore
 
     def query(self, question: str) -> QueryResult:
+        """Run a blocking RAG query: retrieve → generate → return structured result.
+
+        Returns a refusal QueryResult if retrieval confidence is below MIN_RETRIEVAL_SCORE.
+        """
         start = time.time()
         results, avg_score = _retrieve(self._vectorstore, question)
 
@@ -75,7 +72,7 @@ class RAGPipeline:
             )
 
         answer = self._provider.generate(
-            PROMPT_TEMPLATE.format(context=_build_context(results), question=question)
+            RAG_PROMPT.format(context=_build_context(results), question=question)
         )
         return QueryResult(
             answer=answer,
@@ -100,7 +97,7 @@ class RAGPipeline:
         yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': avg_score, 'low_confidence': avg_score < settings.low_confidence_threshold})}\n\n"
 
         full_answer = ""
-        for token in self._provider.stream_generate(PROMPT_TEMPLATE.format(context=_build_context(results), question=question)):
+        for token in self._provider.stream_generate(RAG_PROMPT.format(context=_build_context(results), question=question)):
             full_answer += token
             yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 

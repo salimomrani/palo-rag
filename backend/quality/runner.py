@@ -4,8 +4,23 @@ from sqlalchemy.orm import Session
 from quality.dataset import REFERENCE_DATASET
 
 def run_quality_check(provider, vectorstore, engine, limit: int = 3):
-    """
-    Simulates a quality check dataset extraction.
+    """Run the reference evaluation dataset and persist results to PostgreSQL.
+
+    For each question in REFERENCE_DATASET:
+      - Retrieves top-3 chunks from ChromaDB.
+      - Checks whether the expected source appears in retrieved docs (context recall).
+      - Generates a full answer via the provider (used for answer length only).
+
+    Args:
+        limit: Number of questions to evaluate (default 3 for tests, 0 = full dataset).
+
+    Returns:
+        dict with keys: faithfulness, answer_relevancy, context_recall (floats), per_question (list).
+
+    Example:
+        >>> scores = run_quality_check(provider, vectorstore, engine, limit=15)
+        >>> scores["context_recall"]   # fraction of questions where expected source was found
+        0.47
     """
     dataset_to_use = REFERENCE_DATASET[:limit] if limit else REFERENCE_DATASET
     total_questions = len(dataset_to_use)
