@@ -1,0 +1,78 @@
+<div class="eval-container">
+  <div class="eval-header">
+    <h2>Rapport d'évaluation</h2>
+    <button class="btn-run" (click)="runEval()" [disabled]="isRunning() || isLoading()">
+      @if (isRunning()) {
+        Évaluation en cours…
+      } @else {
+        Lancer l'évaluation
+      }
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="empty-state">
+      <span class="empty-icon">◎</span>
+      <p>Chargement…</p>
+    </div>
+  }
+
+  @if (!isLoading() && report()) {
+    <div class="report-date">
+      Généré le {{ report()!.run_at | date: 'dd/MM/yyyy à HH:mm:ss' }} —
+      {{ report()!.per_question.length }} questions
+    </div>
+
+    <div class="summary-grid">
+      <div class="metric-card" [class.low]="report()!.faithfulness < 0.6">
+        <span class="metric-label">Faithfulness</span>
+        <span class="metric-value">{{ report()!.faithfulness * 100 | number: '1.0-0' }}%</span>
+      </div>
+      <div class="metric-card" [class.low]="report()!.answer_relevancy < 0.6">
+        <span class="metric-label">Answer Relevancy</span>
+        <span class="metric-value">{{ report()!.answer_relevancy * 100 | number: '1.0-0' }}%</span>
+      </div>
+      <div class="metric-card" [class.low]="report()!.context_recall < 0.6">
+        <span class="metric-label">Context Recall</span>
+        <span class="metric-value">{{ report()!.context_recall * 100 | number: '1.0-0' }}%</span>
+      </div>
+      <div class="metric-card avg" [class.low]="avg() < 0.6">
+        <span class="metric-label">Moyenne</span>
+        <span class="metric-value">{{ avg() * 100 | number: '1.0-0' }}%</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>Source attendue</th>
+            <th>Trouvée</th>
+            <th>Longueur réponse</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of report()!.per_question; track $index) {
+            <tr [class.miss]="!item.source_found">
+              <td class="cell-num">{{ $index + 1 }}</td>
+              <td class="cell-question">{{ item.question }}</td>
+              <td class="cell-source">{{ item.expected_source }}</td>
+              <td class="cell-found">
+                <span class="tag" [class.ok]="item.source_found" [class.miss]="!item.source_found">
+                  {{ item.source_found ? '✓' : '✗' }}
+                </span>
+              </td>
+              <td class="cell-len">{{ item.answer_length }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

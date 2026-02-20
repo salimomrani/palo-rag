@@ -1,0 +1,70 @@
+<div class="chat-container">
+  <div class="messages" #messagesEl>
+    @if (messages().length === 0 && !isLoading()) {
+      <div class="suggestions-empty">
+        <p class="suggestions-label">Questions fréquentes</p>
+        <div class="suggestions-grid">
+          @for (q of suggestions; track q) {
+            <button class="suggestion-chip" (click)="selectSuggestion(q)">{{ q }}</button>
+          }
+        </div>
+      </div>
+    }
+
+    @for (msg of messages(); track $index) {
+      <div class="message" [class]="msg.role">
+        <div class="message-content">
+          @if (msg.role === 'assistant') {
+            <markdown [data]="msg.content"></markdown>
+          } @else {
+            {{ msg.content }}
+          }
+          <span class="cursor" [class.visible]="msg.streaming">▋</span>
+        </div>
+
+        @if (msg.sources && msg.sources.length > 0) {
+          <div class="sources">
+            <span class="sources-label">Sources</span>
+            <ul>
+              @for (source of msg.sources; track source.source) {
+                <li>
+                  <span class="source-file">{{ source.source }}</span>
+                  <span class="source-score">{{ source.score * 100 | number: '1.0-0' }}%</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (msg.confidence !== undefined) {
+          <div class="confidence" [class.low]="msg.confidence < 0.6">
+            Confiance : {{ msg.confidence * 100 | number: '1.0-0' }}%
+          </div>
+        }
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="message assistant loading">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-banner">{{ error() }}</div>
+    }
+  </div>
+
+  <div class="input-area">
+    <textarea
+      [value]="prompt()"
+      (input)="prompt.set($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      placeholder="Posez une question… (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
+      [disabled]="isLoading()"
+      rows="2"
+    >
+    </textarea>
+    <button (click)="sendMessage()" [disabled]="!canSend()">Envoyer</button>
+  </div>
+</div>

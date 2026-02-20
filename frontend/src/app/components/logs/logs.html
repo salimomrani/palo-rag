@@ -1,0 +1,80 @@
+<div class="logs-container">
+  <div class="logs-header">
+    <h2>Audit des requêtes</h2>
+    <button class="btn-refresh" (click)="fetchLogs()" [disabled]="isLoading()">
+      @if (isLoading()) {
+        Chargement…
+      } @else {
+        Rafraîchir
+      }
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="alert error">{{ error() }}</div>
+  }
+
+  @if (!isLoading() && logs().length === 0 && !error()) {
+    <div class="empty-state">
+      <span class="empty-icon">◎</span>
+      <p>Aucune requête enregistrée.</p>
+    </div>
+  }
+
+  @if (!isLoading() && logs().length > 0) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Question (masquée)</th>
+            <th>Réponse</th>
+            <th>Confiance</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr
+              [class.rejected]="log.rejected"
+              [class.expanded]="expandedId() === log.id"
+              (click)="toggleRow(log.id)"
+              class="clickable"
+            >
+              <td class="cell-date">{{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}</td>
+              <td class="cell-question">{{ log.question_masked }}</td>
+              <td class="cell-answer">
+                @if (log.rejected) {
+                  <span class="rejection-reason">{{ reasonLabel(log.rejection_reason) }}</span>
+                } @else {
+                  <span [class.truncated]="expandedId() !== log.id">{{ log.answer }}</span>
+                  @if (log.answer.length > 120) {
+                    <span class="expand-hint">
+                      {{ expandedId() === log.id ? '▲ réduire' : '▼ voir tout' }}
+                    </span>
+                  }
+                }
+              </td>
+              <td class="cell-score">
+                @if (!log.rejected) {
+                  <span class="badge" [class.low]="log.faithfulness_score < 0.6">
+                    {{ log.faithfulness_score * 100 | number: '1.0-0' }}%
+                  </span>
+                } @else if (log.rejected) {
+                  <span class="badge rejected">—</span>
+                }
+              </td>
+              <td class="cell-status">
+                @if (log.rejected) {
+                  <span class="tag rejected">Rejeté</span>
+                } @else {
+                  <span class="tag ok">OK</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
