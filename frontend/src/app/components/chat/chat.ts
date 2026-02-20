@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
+import { MarkdownComponent } from 'ngx-markdown';
 import { RagApiService } from '../../services/rag-api.service';
 
 interface Message {
@@ -25,7 +26,7 @@ interface Message {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule, DecimalPipe],
+  imports: [FormsModule, DecimalPipe, MarkdownComponent],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +41,15 @@ export class Chat implements AfterViewChecked {
   error = signal<string | null>(null);
 
   canSend = computed(() => this.prompt().trim().length > 0 && !this.isLoading());
+
+  readonly suggestions = [
+    'Quels sont les plans disponibles sur PALO Platform et leurs différences ?',
+    'Comment créer un compte et inviter des membres dans mon organisation ?',
+    'Quels endpoints API sont disponibles pour gérer les projets et tickets ?',
+    'Comment configurer le SSO et la double authentification ?',
+    'Comment créer un webhook et valider sa signature HMAC ?',
+    'Quels sont les SLA de support selon la priorité du ticket ?',
+  ];
 
   ngAfterViewChecked(): void {
     const el = this.messagesEl?.nativeElement;
@@ -112,6 +122,11 @@ export class Chat implements AfterViewChecked {
       default:
         return detail || 'Erreur de communication avec le RAG.';
     }
+  }
+
+  selectSuggestion(q: string): void {
+    this.prompt.set(q);
+    this.sendMessage();
   }
 
   onKeydown(event: KeyboardEvent): void {

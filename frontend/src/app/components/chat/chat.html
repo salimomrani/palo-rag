@@ -1,9 +1,25 @@
 <div class="chat-container">
   <div class="messages" #messagesEl>
+    @if (messages().length === 0 && !isLoading()) {
+      <div class="suggestions-empty">
+        <p class="suggestions-label">Questions fréquentes</p>
+        <div class="suggestions-grid">
+          @for (q of suggestions; track q) {
+            <button class="suggestion-chip" (click)="selectSuggestion(q)">{{ q }}</button>
+          }
+        </div>
+      </div>
+    }
+
     @for (msg of messages(); track $index) {
       <div class="message" [class]="msg.role">
         <div class="message-content">
-          {{ msg.content }}<span class="cursor" [class.visible]="msg.streaming">▋</span>
+          @if (msg.role === 'assistant') {
+            <markdown [data]="msg.content"></markdown>
+          } @else {
+            {{ msg.content }}
+          }
+          <span class="cursor" [class.visible]="msg.streaming">▋</span>
         </div>
 
         @if (msg.sources && msg.sources.length > 0) {
