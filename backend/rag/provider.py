@@ -34,6 +34,7 @@ class OllamaProvider:
             base_url=settings.ollama_base_url,
             model=settings.llm_model,
             temperature=settings.llm_temperature,
+            keep_alive=-1,
         )
 
     def embed(self, text: str) -> list[float]:

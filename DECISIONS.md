@@ -49,6 +49,22 @@
 
 ---
 
+### 7. LLM temperature = 0.1
+
+**Default**: Ollama default ~0.8 (creative)
+**Decision**: `llm_temperature=0.1` (configurable via `LLM_TEMPERATURE` env var)
+**Rationale**: RAG requires deterministic, factual answers. High temperature increases hallucination risk. 0.1 gives quasi-deterministic output while preserving minimal paraphrasing variety. Configurable to allow A/B testing without code changes.
+
+---
+
+### 8. `keep_alive=-1` on ChatOllama (LLM stays in GPU)
+
+**Default**: Ollama evicts models after ~5 min of inactivity
+**Decision**: `keep_alive=-1` on `ChatOllama` only (model stays loaded indefinitely while the backend runs)
+**Rationale**: Without this, the LLM is unloaded from GPU between requests → 20–45s cold-start latency per query, unacceptable for a demo. `OllamaEmbeddings` does not support `keep_alive` in the installed LangChain version; the embed model (762 MB) reloads quickly enough to be acceptable.
+
+---
+
 ## Known Limitations
 
 | Limitation | Impact | Mitigation |
@@ -77,7 +93,7 @@
 | SSE streaming | ✅ added | FR-019/020 |
 | Duplicate ingestion guard | ✅ added | FR-018 |
 | Gen-e2 integration | 🔜 stretch | AIProvider ready, needs credentials |
-| BDD scenarios | 🔜 stretch | Unit tests cover all user stories |
+| BDD scenarios | ✅ done | pytest unit tests cover all user stories (no Gherkin format) |
 
 ---
 
