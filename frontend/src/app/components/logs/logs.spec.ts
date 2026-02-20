@@ -7,22 +7,28 @@ import { RagApiService, LogEntry } from '../../services/rag-api.service';
 
 const mockLogs: LogEntry[] = [
   {
-    id: 1,
+    id: '1',
     timestamp: '2024-01-01T10:00:00Z',
     question_masked: 'Qu***s sont les plans ?',
+    retrieved_sources: ['doc1.md'],
+    similarity_scores: [0.85],
     answer: 'Il existe 3 plans.',
     faithfulness_score: 0.9,
-    similarity_scores: [{ document_id: 'doc1', score: 0.85 }],
+    latency_ms: 100,
+    guardrail_triggered: null,
     rejected: false,
     rejection_reason: null,
   },
   {
-    id: 2,
+    id: '2',
     timestamp: '2024-01-02T11:00:00Z',
     question_masked: 'C***ent créer un compte ?',
-    answer: null,
-    faithfulness_score: null,
+    retrieved_sources: [],
     similarity_scores: [],
+    answer: '',
+    faithfulness_score: 0,
+    latency_ms: 0,
+    guardrail_triggered: 'guardrail:prompt_injection',
     rejected: true,
     rejection_reason: 'guardrail:prompt_injection',
   },
@@ -58,20 +64,20 @@ describe('Logs', () => {
   });
 
   it('toggleRow expands a row', () => {
-    component.toggleRow(1);
-    expect(component.expandedId()).toBe(1);
+    component.toggleRow('1');
+    expect(component.expandedId()).toBe('1');
   });
 
   it('toggleRow collapses an already expanded row', () => {
-    component.toggleRow(1);
-    component.toggleRow(1);
+    component.toggleRow('1');
+    component.toggleRow('1');
     expect(component.expandedId()).toBeNull();
   });
 
   it('toggleRow switches to a different row', () => {
-    component.toggleRow(1);
-    component.toggleRow(2);
-    expect(component.expandedId()).toBe(2);
+    component.toggleRow('1');
+    component.toggleRow('2');
+    expect(component.expandedId()).toBe('2');
   });
 
   it('reasonLabel returns correct label for known reasons', () => {

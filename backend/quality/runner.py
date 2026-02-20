@@ -56,14 +56,13 @@ def run_quality_check(provider, vectorstore, engine, limit: int = 3):
         "per_question": per_question
     }
 
-    import json
     # Persist to DB
     with Session(engine) as session:
         result = EvaluationResult(
             faithfulness=avg_faithfulness,
             answer_relevancy=avg_relevancy,
             context_recall=avg_recall,
-            per_question=json.dumps(per_question, ensure_ascii=False)
+            per_question=per_question,
         )
         session.add(result)
         session.commit()

@@ -1,11 +1,15 @@
 import uuid
 from datetime import datetime, UTC
-from sqlalchemy import String, Float, Integer, Text, DateTime
+from sqlalchemy import DateTime, Float, Integer, JSON, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
     pass
+
+
+JSON_ARRAY = JSON().with_variant(JSONB(), "postgresql")
 
 
 class Document(Base):
@@ -24,8 +28,9 @@ class QueryLog(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     question_masked: Mapped[str] = mapped_column(Text, nullable=False)
-    retrieved_chunk_ids: Mapped[str] = mapped_column(Text, default="[]")
-    similarity_scores: Mapped[str] = mapped_column(Text, default="[]")
+    # Column name kept for compatibility; value semantics are retrieved sources.
+    retrieved_sources: Mapped[list[str]] = mapped_column("retrieved_chunk_ids", JSON_ARRAY, default=list)
+    similarity_scores: Mapped[list[float]] = mapped_column(JSON_ARRAY, default=list)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     faithfulness_score: Mapped[float] = mapped_column(Float, default=0.0)
     latency_ms: Mapped[int] = mapped_column(Integer, default=0)
@@ -40,4 +45,4 @@ class EvaluationResult(Base):
     faithfulness: Mapped[float] = mapped_column(Float, default=0.0)
     answer_relevancy: Mapped[float] = mapped_column(Float, default=0.0)
     context_recall: Mapped[float] = mapped_column(Float, default=0.0)
-    per_question: Mapped[str] = mapped_column(Text, default="[]")
+    per_question: Mapped[list[dict[str, object]]] = mapped_column(JSON_ARRAY, default=list)

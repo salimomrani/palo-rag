@@ -29,7 +29,7 @@ def query(
     if not check.passed:
         LogStore(engine=engine).save(
             question=request.question,
-            retrieved_chunk_ids=[],
+            retrieved_sources=[],
             similarity_scores=[],
             answer="",
             faithfulness_score=0.0,
@@ -41,7 +41,7 @@ def query(
     result = RAGPipeline(provider=provider, vectorstore=vectorstore).query(request.question)
     LogStore(engine=engine).save(
         question=request.question,
-        retrieved_chunk_ids=[s["source"] for s in result.sources],
+        retrieved_sources=[s["source"] for s in result.sources],
         similarity_scores=[s["score"] for s in result.sources],
         answer=result.answer,
         faithfulness_score=result.confidence_score,
@@ -69,7 +69,7 @@ def query_stream(
     if not check.passed:
         LogStore(engine=engine).save(
             question=request.question,
-            retrieved_chunk_ids=[],
+            retrieved_sources=[],
             similarity_scores=[],
             answer="",
             faithfulness_score=0.0,
@@ -97,7 +97,7 @@ def query_stream(
         if meta and done:
             log_store.save(
                 question=request.question,
-                retrieved_chunk_ids=[s["source"] for s in meta.get("sources", [])],
+                retrieved_sources=[s["source"] for s in meta.get("sources", [])],
                 similarity_scores=[s["score"] for s in meta.get("sources", [])],
                 answer=done.get("answer", ""),
                 faithfulness_score=meta.get("confidence_score", 0.0),

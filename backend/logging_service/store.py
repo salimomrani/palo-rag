@@ -1,4 +1,3 @@
-import json
 import uuid
 from sqlalchemy.orm import Session
 from models.db import QueryLog
@@ -12,8 +11,8 @@ class LogStore:
     def save(
         self,
         question: str,
-        retrieved_chunk_ids: list,
-        similarity_scores: list,
+        retrieved_sources: list[str],
+        similarity_scores: list[float],
         answer: str,
         faithfulness_score: float,
         latency_ms: int,
@@ -22,8 +21,8 @@ class LogStore:
         log = QueryLog(
             id=str(uuid.uuid4()),
             question_masked=mask_pii(question),
-            retrieved_chunk_ids=json.dumps(retrieved_chunk_ids),
-            similarity_scores=json.dumps(similarity_scores),
+            retrieved_sources=retrieved_sources,
+            similarity_scores=similarity_scores,
             answer=answer,
             faithfulness_score=faithfulness_score,
             latency_ms=latency_ms,

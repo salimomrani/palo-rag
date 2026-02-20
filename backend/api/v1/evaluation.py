@@ -7,6 +7,18 @@ from dependencies import get_provider, get_vectorstore, get_engine
 router = APIRouter(tags=["evaluation"])
 
 
+def _parse_per_question(value):
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else []
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
 @router.post("/evaluation/run")
 def run_quality_check(
     provider=Depends(get_provider),
@@ -44,5 +56,5 @@ def get_quality_report(engine=Depends(get_engine)):
             "faithfulness": result.faithfulness,
             "answer_relevancy": result.answer_relevancy,
             "context_recall": result.context_recall,
-            "per_question": json.loads(result.per_question),
+            "per_question": _parse_per_question(result.per_question),
         }

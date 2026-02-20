@@ -70,6 +70,8 @@ def test_get_logs(client):
     r = client.get("/api/v1/logs")
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+    assert "rejected" in r.json()[0]
+    assert "rejection_reason" in r.json()[0]
 
 
 def test_list_documents_empty(client):

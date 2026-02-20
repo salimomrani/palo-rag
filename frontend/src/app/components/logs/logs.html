@@ -48,7 +48,7 @@
                   <span class="rejection-reason">{{ reasonLabel(log.rejection_reason) }}</span>
                 } @else {
                   <span [class.truncated]="expandedId() !== log.id">{{ log.answer }}</span>
-                  @if ((log.answer?.length ?? 0) > 120) {
+                  @if (log.answer.length > 120) {
                     <span class="expand-hint">
                       {{ expandedId() === log.id ? '▲ réduire' : '▼ voir tout' }}
                     </span>
@@ -56,9 +56,9 @@
                 }
               </td>
               <td class="cell-score">
-                @if (!log.rejected && log.faithfulness_score !== null) {
-                  <span class="badge" [class.low]="log.faithfulness_score! < 0.6">
-                    {{ log.faithfulness_score! * 100 | number: '1.0-0' }}%
+                @if (!log.rejected) {
+                  <span class="badge" [class.low]="log.faithfulness_score < 0.6">
+                    {{ log.faithfulness_score * 100 | number: '1.0-0' }}%
                   </span>
                 } @else if (log.rejected) {
                   <span class="badge rejected">—</span>

@@ -30,8 +30,8 @@ def test_query_log_creation():
         log = QueryLog(
             id=str(uuid.uuid4()),
             question_masked="Comment fonctionne [EMAIL] ?",
-            retrieved_chunk_ids='["doc1#chunk0"]',
-            similarity_scores="[0.87]",
+            retrieved_sources=["doc1.md"],
+            similarity_scores=[0.87],
             answer="L'API utilise REST.",
             faithfulness_score=0.91,
             latency_ms=1240,
@@ -50,7 +50,7 @@ def test_evaluation_result_creation():
             faithfulness=0.85,
             answer_relevancy=0.78,
             context_recall=0.82,
-            per_question="[]",
+            per_question=[],
         )
         session.add(result)
         session.commit()

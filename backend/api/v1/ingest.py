@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from models.db import Document
 from rag.ingestion import IngestionService
+from rag.vectorstore import delete_by_source
 from dependencies import get_provider, get_vectorstore, get_engine
 from core.logging import get_logger
 
@@ -52,7 +53,7 @@ def delete_document(
         doc = session.get(Document, doc_id)
         if not doc:
             raise HTTPException(status_code=404, detail=f"Document '{doc_id}' introuvable.")
-        vectorstore._collection.delete(where={"source": doc.name})
+        delete_by_source(vectorstore, doc.name)
         session.delete(doc)
         session.commit()
     logger.info("Deleted document %s (%s)", doc_id, doc.name)

@@ -49,12 +49,15 @@ export interface EvalReport {
 }
 
 export interface LogEntry {
-  id: number;
+  id: string;
   timestamp: string;
   question_masked: string;
-  answer: string | null;
-  faithfulness_score: number | null;
-  similarity_scores: { document_id: string; score: number }[];
+  retrieved_sources: string[];
+  similarity_scores: number[];
+  answer: string;
+  faithfulness_score: number;
+  latency_ms: number;
+  guardrail_triggered: string | null;
   rejected: boolean;
   rejection_reason: string | null;
 }
