@@ -177,8 +177,6 @@ curl -X POST http://localhost:8000/api/v1/evaluation/run
       -> PostgreSQL (documents, query logs, evaluation results)
 ```
 
-Detailed architecture: see `ARCHITECTURE.md`.
-
 ---
 
 ## How It Works
