@@ -2,17 +2,15 @@ import os
 import uuid
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document as LCDocument
-
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+from core.config import settings
 
 
 class IngestionService:
     def __init__(self, provider, vectorstore):
         self._vectorstore = vectorstore
         self._splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CHUNK_SIZE,
-            chunk_overlap=CHUNK_OVERLAP,
+            chunk_size=settings.chunk_size,
+            chunk_overlap=settings.chunk_overlap,
         )
 
     def ingest_text(self, text: str, source: str) -> int:

@@ -2,6 +2,7 @@ import json
 from fastapi import APIRouter, Depends
 from logging_service.store import LogStore
 from dependencies import get_engine
+from core.config import settings
 
 router = APIRouter(tags=["logs"])
 
@@ -19,7 +20,7 @@ def _parse_json_list(value, default):
 
 
 @router.get("/logs")
-def get_logs(limit: int = 100, engine=Depends(get_engine)):
+def get_logs(limit: int = settings.default_logs_limit, engine=Depends(get_engine)):
     logs = LogStore(engine=engine).get_recent(limit=limit)
     return [
         {

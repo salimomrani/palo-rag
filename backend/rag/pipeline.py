@@ -4,11 +4,6 @@ from dataclasses import dataclass, field
 from typing import Generator
 from core.config import settings
 
-LOW_CONFIDENCE_THRESHOLD = 0.5
-TOP_K = 4
-
-NO_INFO = "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
-
 PROMPT_TEMPLATE = """Tu es l'assistant de support de PALO Platform. Utilise le contexte fourni pour répondre à la question de manière directe et concise.
 
 Règles :
@@ -36,7 +31,7 @@ class QueryResult:
 
 def _retrieve(vectorstore, question: str) -> tuple[list, float]:
     """Return (results, avg_score) using relevance scores normalized to [0, 1]."""
-    results = vectorstore.similarity_search_with_relevance_scores(question, k=TOP_K)
+    results = vectorstore.similarity_search_with_relevance_scores(question, k=settings.top_k)
     if not results:
         return [], 0.0
     scores = [max(0.0, min(1.0, s)) for _, s in results]
@@ -72,7 +67,7 @@ class RAGPipeline:
 
         if not results or avg_score < settings.min_retrieval_score:
             return QueryResult(
-                answer=NO_INFO,
+                answer=settings.no_info_message,
                 sources=[],
                 confidence_score=0.0,
                 low_confidence=True,
@@ -86,7 +81,7 @@ class RAGPipeline:
             answer=answer,
             sources=_build_sources(results),
             confidence_score=avg_score,
-            low_confidence=avg_score < LOW_CONFIDENCE_THRESHOLD,
+            low_confidence=avg_score < settings.low_confidence_threshold,
             latency_ms=int((time.time() - start) * 1000),
         )
 
@@ -97,12 +92,12 @@ class RAGPipeline:
 
         if not results or avg_score < settings.min_retrieval_score:
             yield f"data: {json.dumps({'type': 'meta', 'sources': [], 'confidence_score': 0.0, 'low_confidence': True})}\n\n"
-            yield f"data: {json.dumps({'type': 'token', 'content': NO_INFO})}\n\n"
-            yield f"data: {json.dumps({'type': 'done', 'latency_ms': int((time.time() - start) * 1000), 'answer': NO_INFO})}\n\n"
+            yield f"data: {json.dumps({'type': 'token', 'content': settings.no_info_message})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'latency_ms': int((time.time() - start) * 1000), 'answer': settings.no_info_message})}\n\n"
             return
 
         sources = _build_sources(results)
-        yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': avg_score, 'low_confidence': avg_score < LOW_CONFIDENCE_THRESHOLD})}\n\n"
+        yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': avg_score, 'low_confidence': avg_score < settings.low_confidence_threshold})}\n\n"
 
         full_answer = ""
         for token in self._provider.stream_generate(PROMPT_TEMPLATE.format(context=_build_context(results), question=question)):

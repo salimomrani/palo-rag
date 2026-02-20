@@ -13,6 +13,7 @@ from core.exceptions import (
     vectorstore_exception_handler,
 )
 from core.logging import get_logger
+from core.config import settings
 
 logger = get_logger(__name__)
 
@@ -20,7 +21,7 @@ app = FastAPI(title="PALO RAG API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=settings.cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

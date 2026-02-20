@@ -66,6 +66,18 @@ npm start
 
 Open **http://localhost:4200**
 
+Optional runtime tuning (`backend/.env`):
+```bash
+TOP_K=4
+MIN_RETRIEVAL_SCORE=0.3
+LOW_CONFIDENCE_THRESHOLD=0.5
+CHUNK_SIZE=500
+CHUNK_OVERLAP=50
+GUARDRAIL_MAX_LENGTH=500
+DEFAULT_LOGS_LIMIT=100
+CORS_ALLOW_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+```
+
 ---
 
 ## API

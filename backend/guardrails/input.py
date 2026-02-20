@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
+from core.config import settings
 
-MAX_LENGTH = 500
 OFFENSIVE_PATTERNS = [
     r"\bfuck\b", r"\bshit\b", r"\basshole\b", r"\bbitch\b",
     r"\bcunt\b", r"\bdick\b", r"\bputa\b", r"\bputain\b",
@@ -33,7 +33,7 @@ class InputGuardrail:
     def check(self, question: str) -> GuardrailResult:
         if not question or not question.strip():
             return GuardrailResult(passed=False, reason="guardrail:empty_question")
-        if len(question) > MAX_LENGTH:
+        if len(question) > settings.guardrail_max_length:
             return GuardrailResult(passed=False, reason="guardrail:length_exceeded")
         if self._injection_re.search(question):
             return GuardrailResult(passed=False, reason="guardrail:prompt_injection")
