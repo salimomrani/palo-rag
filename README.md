@@ -1,33 +1,69 @@
-# PALO RAG — Knowledge Assistant
+# PALO RAG — Enterprise Knowledge Assistant
 
-RAG API + Angular UI demo for Palo IT technical interview.
+RAG API + Angular UI for enterprise knowledge bases — answers questions from internal documents, refuses when confidence is too low.
 
-**Stack**: Python 3.12 · FastAPI · LangChain 0.3 · ChromaDB (embedded) · PostgreSQL 16 · Ollama · Angular 21
-
----
-
-## Objective
-
-This project demonstrates a reliable Retrieval-Augmented Generation (RAG) assistant for enterprise knowledge bases.
-
-The goal is not to build a generic chatbot, but to explore how LLMs can be integrated into a real software system with strong engineering constraints:
-
-- hallucination control
-- traceability
-- answer quality evaluation
-
-The assistant answers from an internal documentation corpus and refuses to answer when confidence is too low.
+**Stack**: Python 3.12 · FastAPI · LangChain 0.3 · ChromaDB · PostgreSQL 16 · Ollama · Angular 21
 
 ---
 
-## What This Project Is Not
+## Overview
 
-This project is **not** a general AI assistant.
+This project demonstrates a production-minded RAG assistant built around three engineering constraints: **hallucination control**, **traceability**, and **answer quality evaluation**.
 
-The system is intentionally constrained and only answers using retrieved documents.  
-If the knowledge is not present in the corpus, the assistant must refuse.
+The assistant is intentionally constrained — it only answers using retrieved documents. If the information is absent from the corpus, it refuses rather than hallucinating. Reliability over creativity.
 
-This is a deliberate design choice: prioritize reliability over creativity.
+---
+
+## Architecture
+
+```
+             ┌─────────────────────────────────┐
+             │          Angular UI             │
+             │  Chat · Ingest · Logs · Eval    │
+             └────────────────┬────────────────┘
+                              │ HTTP / SSE
+             ┌────────────────▼────────────────┐
+             │        FastAPI  /api/v1          │
+             │                                 │
+             │  question                        │
+             │     │                           │
+             │     ▼                           │
+             │  Guardrails ── ✗ ──▶ rejection  │
+             │     │ ✓                         │
+             │     ▼                           │
+             │  Embed (Ollama)                 │
+             │     │                           │
+             │     ▼                           │
+             │  ChromaDB ──▶ top-k chunks      │
+             │                   │             │
+             │                   ▼             │
+             │  Ollama LLM ──▶ answer          │
+             │                   │             │
+             │                   ▼             │
+             │  PostgreSQL ◀─ log entry        │
+             └─────────────────────────────────┘
+```
+
+---
+
+## How It Works
+
+### 1. Ingestion
+- Upload a `.md` file via the UI or API (`/ingest`)
+- Backend splits text into chunks (500 chars, overlap 50)
+- Chunks are embedded via Ollama and stored in ChromaDB
+- Document metadata is persisted in PostgreSQL
+
+### 2. Query (RAG)
+- User submits a question (`/query` or `/query/stream`)
+- Guardrails validate input: length, injection patterns, offensive content
+- Top-4 chunks retrieved from ChromaDB by semantic similarity
+- If retrieval score < `MIN_RETRIEVAL_SCORE` (default `0.3`), the system refuses
+- Otherwise, Ollama generates the answer grounded in retrieved context
+
+### 3. Traceability
+- Every query is logged in PostgreSQL: masked question, retrieved sources, confidence score, latency, guardrail status
+- Evaluation suite available at `/evaluation/run`
 
 ---
 
@@ -45,16 +81,16 @@ ollama pull mxbai-embed-large
 
 ---
 
-## Setup (3 étapes)
+## Setup (3 steps)
 
 ```bash
 # 1. Start PostgreSQL
 docker-compose up -d
 
-# 2. Start backend (first run: creates venv + installs deps)
+# 2. Start backend
 cd backend
 python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env          # uses defaults: localhost:5444, palo/palo
+cp .env.example .env          # defaults: localhost:5444, palo/palo
 .venv/bin/python scripts/ingest_corpus.py   # load 15 corpus docs
 .venv/bin/uvicorn main:app --reload --port 8000
 
@@ -64,19 +100,20 @@ npm install
 npm start
 ```
 
-Open **http://localhost:4200**
+Open **http://localhost:4200** · API docs: **http://localhost:8000/docs**
 
-Optional runtime tuning (`backend/.env`):
+### Runtime tuning (`backend/.env`)
+
 ```bash
-LLM_TEMPERATURE=0.1           # [0.0–2.0]  lower = more deterministic (recommended for RAG)
-TOP_K=4                       # [1–20]     number of chunks retrieved from ChromaDB per query
-MIN_RETRIEVAL_SCORE=0.3       # [0.0–1.0]  below this score, the system refuses to answer
-LOW_CONFIDENCE_THRESHOLD=0.5  # [0.0–1.0]  above MIN but below this = answer flagged as uncertain
-CHUNK_SIZE=500                # [100–2000] max characters per document chunk at ingestion
-CHUNK_OVERLAP=50              # [0–500]    overlap between consecutive chunks (context continuity)
-GUARDRAIL_MAX_LENGTH=500      # [50–5000]  max characters allowed in a user question
-DEFAULT_LOGS_LIMIT=100        # [1–1000]   max entries returned by GET /logs
-CORS_ALLOW_ORIGINS=http://localhost:4200,http://127.0.0.1:4200  # comma-separated list of allowed frontend origins
+LLM_TEMPERATURE=0.1           # [0.0–2.0]  lower = more deterministic
+TOP_K=4                       # [1–20]     chunks retrieved per query
+MIN_RETRIEVAL_SCORE=0.3       # [0.0–1.0]  below this = refusal
+LOW_CONFIDENCE_THRESHOLD=0.5  # [0.0–1.0]  above MIN but uncertain = flagged
+CHUNK_SIZE=500                # [100–2000] chars per chunk at ingestion
+CHUNK_OVERLAP=50              # [0–500]    overlap between chunks
+GUARDRAIL_MAX_LENGTH=500      # [50–5000]  max question length
+DEFAULT_LOGS_LIMIT=100        # [1–1000]   max entries from GET /logs
+CORS_ALLOW_ORIGINS=http://localhost:4200
 ```
 
 ---
@@ -95,29 +132,21 @@ Base URL: `http://localhost:8000/api/v1`
 | `GET` | `/logs` | Audit log of all queries |
 | `POST` | `/evaluation/run` | Run quality evaluation |
 | `GET` | `/evaluation/report` | Get latest evaluation report |
-
-Health check (outside `/api/v1`): `GET http://localhost:8000/health`
-
-Interactive docs: **http://localhost:8000/docs**
+| `GET` | `/health` | Health check |
 
 ### Example
 
 ```bash
-# Ingest a document
 curl -X POST http://localhost:8000/api/v1/ingest \
   -H "Content-Type: application/json" \
   -d '{"text": "PALO IT est une ESN fondée en 2009.", "name": "about.md"}'
 
-# Ask a question
 curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
   -d '{"question": "Quand PALO IT a-t-il été fondé ?"}'
-
-# Read logs
-curl -X GET http://localhost:8000/api/v1/logs
 ```
 
-Sample `GET /api/v1/logs` item:
+Sample log entry (`GET /api/v1/logs`):
 ```json
 {
   "id": "24369911-0190-42bb-8b32-b069b192b3d3",
@@ -129,163 +158,39 @@ Sample `GET /api/v1/logs` item:
   "faithfulness_score": 0.443,
   "latency_ms": 14263,
   "guardrail_triggered": null,
-  "rejected": false,
-  "rejection_reason": null
+  "rejected": false
 }
 ```
 
 ---
 
-## Tests
+## Tests & Quality
 
 ```bash
-cd backend
-.venv/bin/pytest tests/ -v
-```
+# Backend tests (TDD — 31 tests)
+cd backend && .venv/bin/pytest tests/ -v
 
-Expected: **30 passed**
+# Frontend lint
+cd frontend && npm run lint
+# Expected: 0 errors
 
-## Lint (Frontend)
-
-```bash
-cd frontend
-npm run lint
-```
-
-Expected: **0 errors** (1 warning: `ViewChild` non-null assertion — documented in DECISIONS.md)
-
----
-
-## Quality Evaluation
-
-```bash
+# Quality evaluation
 curl -X POST http://localhost:8000/api/v1/evaluation/run
 # Report saved to reports/eval.md
 ```
 
 ---
 
-## Architecture (quick view)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Angular UI                           │
-│          Chat · Ingest · Logs · Eval (port 4200)            │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTP / SSE
-┌──────────────────────────▼──────────────────────────────────┐
-│                  FastAPI  /api/v1  (port 8000)               │
-│                                                             │
-│  ┌─────────────┐   ┌──────────────────────────────────────┐ │
-│  │  Guardrails │──▶│            RAG Pipeline              │ │
-│  │  · length   │   │  embed question                      │ │
-│  │  · injection│   │       │                              │ │
-│  │  · offensive│   │       ▼                              │ │
-│  └─────────────┘   │  ┌─────────┐   top-k chunks          │ │
-│                    │  │ ChromaDB│──────────────────┐      │ │
-│                    │  └─────────┘                  │      │ │
-│                    │  (local disk)          ┌──────▼────┐ │ │
-│                    │                        │   Ollama  │ │ │
-│                    │                        │  qwen2.5  │ │ │
-│                    │                        │  + embed  │ │ │
-│                    │                        └──────┬────┘ │ │
-│                    │                               │answer│ │
-│                    └───────────────────────────────┘      │ │
-│                                                           │ │
-│  ┌─────────────────────────────────────────────────────┐  │ │
-│  │                    PostgreSQL                       │  │ │
-│  │    documents · query_logs · evaluation_results      │  │ │
-│  └─────────────────────────────────────────────────────┘  │ │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## How It Works
-
-### 1) Ingestion flow
-- User uploads a `.md` file from the UI (`/ingest`)
-- Backend splits text into chunks (`500` chars, overlap `50`)
-- Chunks are embedded and stored in Chroma
-- Document metadata is saved in PostgreSQL (`documents`)
-
-### 2) Query flow (RAG)
-- User asks a question (`/query` or `/query/stream`)
-- Guardrails validate input (empty, too long, injection-like, offensive)
-- Top-`k=4` chunks are retrieved from Chroma
-- If retrieval confidence is too low (default: `< 0.3`), fallback answer is returned
-- Otherwise, Ollama generates the final answer from retrieved context
-
-### 3) Traceability & quality
-- Each query is logged in PostgreSQL (`query_logs`) with masked question, confidence, latency, and guardrail status
-- Evaluation suite can be run via `/evaluation/run`
-- Latest report is available via `/evaluation/report` and `reports/eval.md`
-
----
-
-## Technical Choices & Trade-offs
-
-- **FastAPI + Angular**: fast to implement and demo, good separation front/back
-- **Ollama local**: no external API dependency for the interview, reproducible offline-like setup
-- **Chroma embedded**: lightweight and simple for a small corpus
-- **PostgreSQL for logs/eval**: structured persistence and easy querying
-- **Trade-off**: optimized for demo speed and clarity, not yet production-grade operations
-
----
-
-## Storage Strategy
-
-The project intentionally separates storage responsibilities:
-
-- **ChromaDB** stores vector embeddings for semantic retrieval
-- **PostgreSQL** stores business data (document metadata, audit logs, evaluation results)
-
-A vector store does not replace a transactional database; it complements it.
-
----
-
-## Hallucination Handling
-
-The assistant never answers blindly.
-
-If semantic retrieval confidence is below a threshold (default `0.3`), the system returns a refusal response instead of generating an answer.
-The threshold can be overridden via `.env` with `MIN_RETRIEVAL_SCORE`.
-
-This is a deliberate design decision to reduce hallucinations and favor correctness over completeness.
-
----
-
-## Security & Guardrails
+## Security
 
 Implemented:
-- input guardrails (`empty`, `max length`, prompt-injection patterns, offensive content)
-- PII masking in logs (`email`, `phone`)
-- CORS restricted to frontend dev origin (`http://localhost:4200`)
+- Input guardrails (length, prompt-injection patterns, offensive content)
+- PII masking in logs (email, phone)
+- CORS restricted to configured origins
 
-Not implemented yet (production scope):
-- authentication/authorization
-- rate limiting
-- secrets manager / key rotation
-- stricter audit and retention policies
-
----
-
-## Observability
-
-- App logs: backend structured logs (`backend/core/logging.py`)
-- Query audit: `GET /api/v1/logs`
-- Evaluation report: `GET /api/v1/evaluation/report`
-- Markdown report output: `reports/eval.md`
-
----
-
-## Limitations & Next Steps
-
-- Add authentication on ingest/delete/log/eval endpoints
-- Add migration tooling (Alembic) for schema evolution
-- Improve retrieval quality metrics and threshold calibration
-- Add request tracing + metrics dashboard (latency, errors, guardrail hit rate)
-- Support pluggable providers (Gen-e2 integration path in `provider.py`)
+Out of scope (production):
+- Authentication / authorization on management endpoints
+- Rate limiting, secrets rotation, data retention policy
 
 ---
 
@@ -296,17 +201,22 @@ PALO/
 ├── backend/
 │   ├── api/v1/          # FastAPI routers (query, ingest, logs, evaluation)
 │   ├── rag/             # Pipeline, provider (Ollama), ingestion
-│   ├── guardrails/      # Input validation (injection, length, offensive)
-│   ├── logging_service/ # PII masking + audit log store
+│   ├── guardrails/      # Input validation
+│   ├── logging_service/ # PII masking + audit log
 │   ├── quality/         # Reference dataset, runner, report generator
 │   ├── models/          # SQLAlchemy models
-│   └── tests/           # 30 tests (TDD)
+│   └── tests/           # 31 tests (TDD)
 ├── frontend/
 │   └── src/app/
-│       ├── components/  # Chat, Ingest, Logs (Angular 21 signals)
+│       ├── components/  # Chat, Ingest, Logs, Eval (Angular 21 signals)
 │       └── services/    # RagApiService
 ├── corpus/              # 15 synthetic Markdown knowledge base docs
-├── specs/               # speckit: spec.md, plan.md, tasks.md
 ├── reports/             # eval.md, costs.md
 └── docker-compose.yml   # PostgreSQL 16
 ```
+
+---
+
+## Trade-offs & Decisions
+
+See [DECISIONS.md](DECISIONS.md) — architectural decisions, known limitations, and production roadmap.
