@@ -6,6 +6,18 @@
 - **AI**: Ollama local (`qwen2.5:7b` + `mxbai-embed-large`) — `AIProvider` interface swappable
 - **Frontend**: Angular 21, standalone components, signals, OnPush, 2-space indent
 
+## TDD (obligatoire — frontend et backend)
+
+**Loi d'airain : aucun code de production sans un test qui échoue d'abord.**
+
+Cycle strict : **RED** (test échoue) → **GREEN** (code minimal) → **REFACTOR**
+
+- Écrire le test → vérifier qu'il échoue → écrire le code → vérifier qu'il passe
+- Jamais de code avant le test, jamais de test ajouté après coup
+- Backend : `pytest` — `cd backend && python -m pytest tests/ -v`
+- Frontend : Vitest — `cd frontend && npx ng test`
+- Skill à invoquer : `superpowers:test-driven-development`
+
 ## Workflow Skills (mandatory)
 
 ### Spécification & planification
