@@ -2,9 +2,9 @@ import json
 import time
 from dataclasses import dataclass, field
 from typing import Generator
+from core.config import settings
 
 LOW_CONFIDENCE_THRESHOLD = 0.5
-MIN_RETRIEVAL_SCORE = 0.3   # below this → no relevant context found
 TOP_K = 4
 
 NO_INFO = "Je n'ai pas d'information sur ce sujet dans la base de connaissance."
@@ -70,7 +70,7 @@ class RAGPipeline:
         start = time.time()
         results, avg_score = _retrieve(self._vectorstore, question)
 
-        if not results or avg_score < MIN_RETRIEVAL_SCORE:
+        if not results or avg_score < settings.min_retrieval_score:
             return QueryResult(
                 answer=NO_INFO,
                 sources=[],
@@ -95,7 +95,7 @@ class RAGPipeline:
         start = time.time()
         results, avg_score = _retrieve(self._vectorstore, question)
 
-        if not results or avg_score < MIN_RETRIEVAL_SCORE:
+        if not results or avg_score < settings.min_retrieval_score:
             yield f"data: {json.dumps({'type': 'meta', 'sources': [], 'confidence_score': 0.0, 'low_confidence': True})}\n\n"
             yield f"data: {json.dumps({'type': 'token', 'content': NO_INFO})}\n\n"
             yield f"data: {json.dumps({'type': 'done', 'latency_ms': int((time.time() - start) * 1000), 'answer': NO_INFO})}\n\n"
