@@ -22,8 +22,8 @@ app = FastAPI(title="PALO RAG API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type"],
 )
 
 app.add_exception_handler(GuardrailException, guardrail_exception_handler)

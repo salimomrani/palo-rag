@@ -23,12 +23,15 @@ class IngestionService:
             chunk_overlap=settings.chunk_overlap,
         )
 
-    def ingest_text(self, text: str, source: str) -> int:
+    def ingest_text(self, text: str, source: str, doc_id: str | None = None) -> int:
         """Split text into chunks and add them to the vector store.
 
         Args:
             text: Raw document content.
             source: Document name used as metadata (e.g. "onboarding.md").
+            doc_id: Optional UUID to use as the document identifier in Chroma metadata.
+                    If not provided, a new UUID is generated. Pass the DB Document.id
+                    to keep Chroma metadata and PostgreSQL in sync.
 
         Returns:
             Number of chunks created and stored.
@@ -37,7 +40,7 @@ class IngestionService:
             >>> svc.ingest_text("Palo IT est une ESN fondée en 2009.", "about.md")
             1
         """
-        doc_id = str(uuid.uuid4())
+        doc_id = doc_id or str(uuid.uuid4())
         chunks = self._splitter.split_text(text)
         documents = [
             LCDocument(

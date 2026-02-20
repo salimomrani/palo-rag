@@ -32,9 +32,9 @@ def ingest_text(
                 detail=f"Document '{request.name}' déjà ingéré.",
             )
 
-    service = IngestionService(provider=provider, vectorstore=vectorstore)
-    chunk_count = service.ingest_text(request.text, source=request.name)
     doc_id = str(uuid.uuid4())
+    service = IngestionService(provider=provider, vectorstore=vectorstore)
+    chunk_count = service.ingest_text(request.text, source=request.name, doc_id=doc_id)
     doc = Document(id=doc_id, name=request.name, source=request.name, chunk_count=chunk_count)
     with Session(engine) as session:
         session.add(doc)

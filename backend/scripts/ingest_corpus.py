@@ -37,9 +37,8 @@ def main():
     for path in docs:
         text = path.read_text(encoding="utf-8")
         source = path.name
-        chunk_count = service.ingest_text(text, source=source)
-
         doc_id = str(uuid.uuid4())
+        chunk_count = service.ingest_text(text, source=source, doc_id=doc_id)
         with Session(engine) as session:
             session.add(Document(id=doc_id, name=source, source=source, chunk_count=chunk_count))
             session.commit()

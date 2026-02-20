@@ -22,3 +22,14 @@ def test_ingest_text_splits_into_multiple_chunks():
     assert len(captured) > 1
     for doc in captured:
         assert len(doc.page_content) <= 3000
+
+
+def test_ingest_text_uses_provided_doc_id():
+    provider = MagicMock()
+    captured = []
+    vectorstore = MagicMock()
+    vectorstore.add_documents.side_effect = lambda docs: captured.extend(docs)
+    service = IngestionService(provider=provider, vectorstore=vectorstore)
+    fixed_id = "test-doc-id-123"
+    service.ingest_text("Hello world. " * 10, source="test.md", doc_id=fixed_id)
+    assert all(doc.metadata["doc_id"] == fixed_id for doc in captured)
