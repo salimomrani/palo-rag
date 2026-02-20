@@ -33,6 +33,7 @@ class OllamaProvider:
         self._llm = ChatOllama(
             base_url=settings.ollama_base_url,
             model=settings.llm_model,
+            temperature=settings.llm_temperature,
         )
 
     def embed(self, text: str) -> list[float]:

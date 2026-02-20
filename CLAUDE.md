@@ -32,6 +32,7 @@ Cycle strict : **RED** (test échoue) → **GREEN** (code minimal) → **REFACTO
 - Utiliser le skill **`frontend-design`** pour TOUT travail UI (composants, pages, layouts)
 - Angular 21 strict : `input()`/`output()`, `inject()`, `@if`/`@for`, OnPush obligatoire
   composants standalone par défaut, signals pour la réactivité
+- **Subscriptions** : préférer `toSignal()` pour les observables de services HTTP ; si `subscribe()` est inévitable, utiliser `takeUntilDestroyed()` pour éviter les fuites mémoire
 - Vérifier les APIs Angular/PrimeNG avec **Context7** avant d'implémenter
 
 ### Documentation

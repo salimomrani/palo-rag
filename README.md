@@ -68,14 +68,15 @@ Open **http://localhost:4200**
 
 Optional runtime tuning (`backend/.env`):
 ```bash
-TOP_K=4
-MIN_RETRIEVAL_SCORE=0.3
-LOW_CONFIDENCE_THRESHOLD=0.5
-CHUNK_SIZE=500
-CHUNK_OVERLAP=50
-GUARDRAIL_MAX_LENGTH=500
-DEFAULT_LOGS_LIMIT=100
-CORS_ALLOW_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+LLM_TEMPERATURE=0.1           # [0.0–2.0]  lower = more deterministic (recommended for RAG)
+TOP_K=4                       # [1–20]     number of chunks retrieved from ChromaDB per query
+MIN_RETRIEVAL_SCORE=0.3       # [0.0–1.0]  below this score, the system refuses to answer
+LOW_CONFIDENCE_THRESHOLD=0.5  # [0.0–1.0]  above MIN but below this = answer flagged as uncertain
+CHUNK_SIZE=500                # [100–2000] max characters per document chunk at ingestion
+CHUNK_OVERLAP=50              # [0–500]    overlap between consecutive chunks (context continuity)
+GUARDRAIL_MAX_LENGTH=500      # [50–5000]  max characters allowed in a user question
+DEFAULT_LOGS_LIMIT=100        # [1–1000]   max entries returned by GET /logs
+CORS_ALLOW_ORIGINS=http://localhost:4200,http://127.0.0.1:4200  # comma-separated list of allowed frontend origins
 ```
 
 ---

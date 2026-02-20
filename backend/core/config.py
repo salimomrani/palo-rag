@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     chroma_path: str = "./chroma_data"
     db_url: str = "postgresql://palo:palo@localhost:5444/palo_rag"
 
+    # LLM tuning
+    llm_temperature: float = 0.1
+
     # RAG tuning
     top_k: int = 4
     min_retrieval_score: float = 0.3
