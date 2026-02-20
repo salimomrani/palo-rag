@@ -228,6 +228,13 @@
     }
   }
 
+  .table-scroll {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    max-height: clamp(200px, 45vh, 480px);
+  }
+
   .doc-table {
     width: 100%;
     border-collapse: collapse;
