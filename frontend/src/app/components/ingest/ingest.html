@@ -39,26 +39,80 @@
   </section>
 
   <section class="doc-list">
-    <h3>
-      Base de connaissances <span class="count">{{ documents().length }}</span>
-    </h3>
+    <div class="doc-list-header">
+      <h3>
+        Base de connaissances <span class="count">{{ documents().length }}</span>
+      </h3>
+      <div class="toolbar">
+        <button
+          class="btn-delete-selected"
+          (click)="deleteSelected()"
+          [disabled]="noneSelected() || isDeleting()"
+        >
+          @if (isDeleting()) {
+            <span class="spinner spinner--dark"></span>
+          }
+          Supprimer ({{ selectedIds().size }})
+        </button>
+        <button
+          class="btn-delete-all"
+          (click)="deleteAll()"
+          [disabled]="documents().length === 0 || isDeleting()"
+        >
+          @if (isDeleting()) {
+            <span class="spinner spinner--light"></span>
+          }
+          Tout supprimer
+        </button>
+      </div>
+    </div>
 
     @if (isLoadingDocs()) {
       <p class="muted">Chargement…</p>
     } @else if (documents().length === 0) {
       <p class="muted">Aucun document ingéré.</p>
     } @else {
-      <ul>
-        @for (doc of documents(); track doc.id) {
-          <li>
-            <span class="doc-name">{{ doc.name }}</span>
-            <span class="doc-meta">{{ doc.chunk_count }} chunks</span>
-            <button class="btn-delete" (click)="deleteDocument(doc.id, doc.name)" title="Supprimer">
-              ✕
-            </button>
-          </li>
-        }
-      </ul>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th class="th-checkbox">
+              <input
+                type="checkbox"
+                [checked]="allSelected()"
+                [indeterminate]="someSelected()"
+                (change)="toggleAll()"
+              />
+            </th>
+            <th>Nom</th>
+            <th>Chunks</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of documents(); track doc.id) {
+            <tr [class.selected]="selectedIds().has(doc.id)">
+              <td class="td-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="selectedIds().has(doc.id)"
+                  (change)="toggleSelection(doc.id)"
+                />
+              </td>
+              <td class="doc-name">{{ doc.name }}</td>
+              <td class="doc-meta">{{ doc.chunk_count }} chunks</td>
+              <td>
+                <button
+                  class="btn-delete"
+                  (click)="deleteDocument(doc.id, doc.name)"
+                  title="Supprimer"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   </section>
 </div>

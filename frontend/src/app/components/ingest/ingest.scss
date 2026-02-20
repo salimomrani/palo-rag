@@ -127,6 +127,16 @@
   border-top-color: #0d1117;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+
+  &--dark {
+    border-color: rgba(0, 0, 0, 0.15);
+    border-top-color: var(--color-text);
+  }
+
+  &--light {
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+    border-top-color: var(--color-danger);
+  }
 }
 
 @keyframes spin {
@@ -154,6 +164,121 @@
 }
 
 .doc-list {
+  .doc-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .btn-delete-selected {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+      background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-delete-all {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+    color: var(--color-danger);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover:not(:disabled) {
+      opacity: 0.8;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+
+    thead tr {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.4rem 0.5rem;
+      color: var(--color-muted);
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--color-border);
+      transition: background 0.1s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+      }
+
+      &.selected {
+        background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+      }
+    }
+
+    td {
+      padding: 0.45rem 0.5rem;
+      vertical-align: middle;
+    }
+  }
+
+  .th-checkbox,
+  .td-checkbox {
+    width: 2rem;
+    text-align: center;
+
+    input[type='checkbox'] {
+      cursor: pointer;
+      accent-color: var(--color-accent);
+    }
+  }
+
   h3 {
     display: flex;
     align-items: center;
@@ -173,26 +298,6 @@
       font-weight: 700;
       font-family: var(--font-mono);
     }
-  }
-
-  ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    max-height: 320px;
-    overflow-y: auto;
-  }
-
-  li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 0.82rem;
   }
 
   .doc-name {

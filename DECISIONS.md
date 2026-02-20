@@ -17,11 +17,11 @@
 
 ---
 
-### 3. Ollama local models (llama3.2 + nomic-embed-text)
+### 3. Ollama local models (qwen2.5:7b + mxbai-embed-large)
 
 **Spec option**: Ollama or Gen-e2 (Palo IT's internal LLM)
-**Decision**: Ollama with `llama3.2` for generation, `nomic-embed-text` for embeddings
-**Rationale**: 100% local, zero cost, no API keys. The `AIProvider` protocol (`backend/rag/provider.py`) isolates the LLM behind an interface — swapping to Gen-e2 requires only a new class implementing `generate()`, `stream_generate()`, and `embed()`.
+**Decision**: Ollama with `qwen2.5:7b` for generation, `mxbai-embed-large` for embeddings
+**Rationale**: 100% local, zero cost, no API keys. `qwen2.5:7b` offers strong multilingual support (29 languages including French) and 128K context window vs `llama3.2` 3B. `mxbai-embed-large` scores +5pts retrieval on MTEB (54.39 vs 49.01) vs `nomic-embed-text`. The `AIProvider` protocol (`backend/rag/provider.py`) isolates the LLM behind an interface — swapping to Gen-e2 requires only a new class implementing `generate()`, `stream_generate()`, and `embed()`.
 
 ---
 
@@ -58,7 +58,7 @@
 | Single-turn chat | No conversation memory; each query is independent | Add `ConversationBufferMemory` or pass last N turns in the prompt |
 | No authentication | Any client can ingest/delete documents | Add API key middleware or OAuth2 for production |
 | Corpus is synthetic | 15 Markdown docs created for the demo | Replace with real internal docs |
-| llama3.2 3B quality | Smaller model, occasional hallucinations | Switch to llama3.2:8b or mistral:7b for better quality |
+| mxbai-embed-large context limit | 512-token context window (vs 8192 nomic) | Ensure chunk_size ≤ 400 tokens in ingestion |
 | Regex guardrails | Injection/offensive detection via patterns, bypassable | Add a secondary LLM-based content moderation layer |
 
 ---

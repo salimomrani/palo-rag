@@ -1,4 +1,12 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { RagApiService, Document } from '../../services/rag-api.service';
 
 @Component({
@@ -18,6 +26,17 @@ export class Ingest implements OnInit {
   error = signal<string | null>(null);
   documents = signal<Document[]>([]);
   isLoadingDocs = signal(false);
+
+  // T001 — selection state
+  selectedIds = signal<Set<string>>(new Set());
+  isDeleting = signal(false);
+
+  // T002 — derived selection state
+  allSelected = computed(
+    () => this.documents().length > 0 && this.selectedIds().size === this.documents().length,
+  );
+  someSelected = computed(() => this.selectedIds().size > 0 && !this.allSelected());
+  noneSelected = computed(() => this.selectedIds().size === 0);
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -60,6 +79,75 @@ export class Ingest implements OnInit {
     this.api.deleteDocument(id).subscribe({
       next: () => this.loadDocuments(),
       error: (err) => this.error.set(err?.error?.detail ?? 'Erreur lors de la suppression.'),
+    });
+  }
+
+  // T003 — selection helpers
+  toggleSelection(id: string): void {
+    const next = new Set(this.selectedIds());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  // T013 — select all / deselect all
+  toggleAll(): void {
+    if (this.allSelected()) {
+      this.clearSelection();
+    } else {
+      this.selectedIds.set(new Set(this.documents().map((d) => d.id)));
+    }
+  }
+
+  // T006 — delete selected
+  deleteSelected(): void {
+    const ids = [...this.selectedIds()];
+    if (ids.length === 0) return;
+    if (!confirm(`Supprimer ${ids.length} document(s) de la base de connaissances ?`)) return;
+    this.isDeleting.set(true);
+    this.error.set(null);
+    forkJoin(ids.map((id) => this.api.deleteDocument(id))).subscribe({
+      next: () => {
+        this.clearSelection();
+        this.isDeleting.set(false);
+        this.loadDocuments();
+      },
+      error: (err) => {
+        this.error.set(err?.error?.detail ?? 'Erreur lors de la suppression.');
+        this.clearSelection();
+        this.isDeleting.set(false);
+        this.loadDocuments();
+      },
+    });
+  }
+
+  // T010 — delete all
+  deleteAll(): void {
+    const docs = this.documents();
+    if (docs.length === 0) return;
+    if (!confirm(`Supprimer tous les ${docs.length} documents de la base de connaissances ?`))
+      return;
+    this.isDeleting.set(true);
+    this.error.set(null);
+    forkJoin(docs.map((d) => this.api.deleteDocument(d.id))).subscribe({
+      next: () => {
+        this.clearSelection();
+        this.isDeleting.set(false);
+        this.loadDocuments();
+      },
+      error: (err) => {
+        this.error.set(err?.error?.detail ?? 'Erreur lors de la suppression.');
+        this.clearSelection();
+        this.isDeleting.set(false);
+        this.loadDocuments();
+      },
     });
   }
 

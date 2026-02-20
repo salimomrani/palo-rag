@@ -6,8 +6,8 @@ def test_get_provider_returns_ollama_by_default():
     with patch("rag.provider.settings") as mock_settings:
         mock_settings.ai_provider = "ollama"
         mock_settings.ollama_base_url = "http://localhost:11434"
-        mock_settings.embed_model = "nomic-embed-text"
-        mock_settings.llm_model = "llama3.2"
+        mock_settings.embed_model = "mxbai-embed-large"
+        mock_settings.llm_model = "qwen2.5:7b"
         with patch("rag.provider.OllamaEmbeddings"), patch("rag.provider.ChatOllama"):
             provider = get_provider()
             assert isinstance(provider, OllamaProvider)

@@ -14,8 +14,8 @@ RAG API + Angular UI demo for Palo IT technical interview.
 
 ```bash
 # Pull required models once
-ollama pull llama3.2
-ollama pull nomic-embed-text
+ollama pull qwen2.5:7b
+ollama pull mxbai-embed-large
 ```
 
 ---
@@ -85,6 +85,15 @@ cd backend
 ```
 
 Expected: **26 passed**
+
+## Lint (Frontend)
+
+```bash
+cd frontend
+npm run lint
+```
+
+Expected: **0 errors** (1 warning: `ViewChild` non-null assertion — documented in DECISIONS.md)
 
 ---
 

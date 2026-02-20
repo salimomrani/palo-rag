@@ -79,6 +79,7 @@ export class RagApiService {
       })
         .then((res) => {
           if (!res.ok) return res.json().then((e) => observer.error(e));
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const reader = res.body!.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
@@ -95,7 +96,9 @@ export class RagApiService {
                 if (part.startsWith('data: ')) {
                   try {
                     observer.next(JSON.parse(part.slice(6)));
-                  } catch {}
+                  } catch {
+                    /* ignore malformed SSE chunks */
+                  }
                 }
               }
               return pump();

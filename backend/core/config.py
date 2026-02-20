@@ -10,8 +10,8 @@ class Settings(BaseSettings):
 
     ai_provider: str = "ollama"
     ollama_base_url: str = "http://localhost:11434"
-    llm_model: str = "llama3.2"
-    embed_model: str = "nomic-embed-text"
+    llm_model: str = "qwen2.5:7b"
+    embed_model: str = "mxbai-embed-large"
     chroma_path: str = "./chroma_data"
     db_url: str = "postgresql://palo:palo@localhost:5432/palo_rag"
 

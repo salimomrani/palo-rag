@@ -3,15 +3,16 @@
 ## Stack
 
 - **Backend**: Python 3.12, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, PostgreSQL 16
-- **AI**: Ollama local (`llama3.2` + `nomic-embed-text`) — `AIProvider` interface swappable
+- **AI**: Ollama local (`qwen2.5:7b` + `mxbai-embed-large`) — `AIProvider` interface swappable
 - **Frontend**: Angular 21, standalone components, signals, OnPush, 2-space indent
 
 ## Workflow Skills (mandatory)
 
 ### Spécification & planification
 
-- Toujours utiliser **speckit** : `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
-- Ne jamais coder sans spec et plan validés
+- **Feature ou gros changement** → toujours passer par speckit : `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
+- **Petit fix** (typo, label, 1-2 lignes) → modif directe sans spec
+- Ne jamais coder une feature sans spec et plan validés
 - **Interdiction** d'utiliser `superpowers:writing-plans` ou `superpowers:executing-plans` — speckit remplace ces skills sur ce projet
 
 ### Frontend
