@@ -167,14 +167,36 @@ curl -X POST http://localhost:8000/api/v1/evaluation/run
 
 ## Architecture (quick view)
 
-```text
-[Angular UI]
-   -> /api/v1 (FastAPI)
-      -> Guardrails (input checks)
-      -> RAG pipeline (retrieve + generate)
-         -> Chroma (vector store, local disk)
-         -> Ollama (LLM + embeddings)
-      -> PostgreSQL (documents, query logs, evaluation results)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Angular UI                           │
+│          Chat · Ingest · Logs · Eval (port 4200)            │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ HTTP / SSE
+┌──────────────────────────▼──────────────────────────────────┐
+│                  FastAPI  /api/v1  (port 8000)               │
+│                                                             │
+│  ┌─────────────┐   ┌──────────────────────────────────────┐ │
+│  │  Guardrails │──▶│            RAG Pipeline              │ │
+│  │  · length   │   │  embed question                      │ │
+│  │  · injection│   │       │                              │ │
+│  │  · offensive│   │       ▼                              │ │
+│  └─────────────┘   │  ┌─────────┐   top-k chunks          │ │
+│                    │  │ ChromaDB│──────────────────┐      │ │
+│                    │  └─────────┘                  │      │ │
+│                    │  (local disk)          ┌──────▼────┐ │ │
+│                    │                        │   Ollama  │ │ │
+│                    │                        │  qwen2.5  │ │ │
+│                    │                        │  + embed  │ │ │
+│                    │                        └──────┬────┘ │ │
+│                    │                               │answer│ │
+│                    └───────────────────────────────┘      │ │
+│                                                           │ │
+│  ┌─────────────────────────────────────────────────────┐  │ │
+│  │                    PostgreSQL                       │  │ │
+│  │    documents · query_logs · evaluation_results      │  │ │
+│  └─────────────────────────────────────────────────────┘  │ │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
