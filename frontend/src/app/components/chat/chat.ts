@@ -43,12 +43,12 @@ export class Chat implements AfterViewChecked {
   canSend = computed(() => this.prompt().trim().length > 0 && !this.isLoading());
 
   readonly suggestions = [
-    'Quels sont les plans disponibles sur PALO Platform et leurs différences ?',
-    'Comment créer un compte et inviter des membres dans mon organisation ?',
-    'Quels endpoints API sont disponibles pour gérer les projets et tickets ?',
-    'Comment configurer le SSO et la double authentification ?',
-    'Comment créer un webhook et valider sa signature HMAC ?',
-    'Quels sont les SLA de support selon la priorité du ticket ?',
+    'Comment contacter le support technique ?',
+    "Quelles sont les étapes d'onboarding pour un nouveau client ?",
+    "Quels sont les endpoints disponibles dans l'API v1 ?",
+    'Comment configurer un webhook pour recevoir des événements ?',
+    'Quelles données personnelles sont collectées et comment sont-elles protégées ?',
+    'Quelles sont les mesures de sécurité mises en place pour protéger les accès ?',
   ];
 
   ngAfterViewChecked(): void {
