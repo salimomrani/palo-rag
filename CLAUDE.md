@@ -4,79 +4,72 @@
 
 - **Backend**: Python 3.12, FastAPI, LangChain 0.3, ChromaDB (embedded), SQLAlchemy 2, PostgreSQL 16
 - **AI**: Ollama local (`qwen2.5:7b` + `mxbai-embed-large`) — `AIProvider` interface swappable
-- **Frontend**: Angular 21, standalone components, signals, OnPush, 2-space indent
+- **Frontend**: Angular 21, PrimeNG v21
 
-## TDD (obligatoire — frontend et backend)
+## TDD (mandatory — frontend and backend)
 
-**Loi d'airain : aucun code de production sans un test qui échoue d'abord.**
+**Iron law: no production code without a failing test first.**
 
-Cycle strict : **RED** (test échoue) → **GREEN** (code minimal) → **REFACTOR**
+Cycle: **RED** → **GREEN** → **REFACTOR**
 
-- Écrire le test → vérifier qu'il échoue → écrire le code → vérifier qu'il passe
-- Jamais de code avant le test, jamais de test ajouté après coup
-- Backend : `pytest` — `cd backend && python -m pytest tests/ -v`
-- Frontend : Vitest — `cd frontend && npx ng test`
-- Skill à invoquer : `superpowers:test-driven-development`
+- Backend: `cd backend && .venv/bin/pytest tests/ -v`
+- Frontend: `cd frontend && npx ng test`
+- Invoke skill: `superpowers:test-driven-development`
 
 ## Workflow Skills (mandatory)
 
-### Spécification & planification
+### Spec & planning
 
-- **Feature ou gros changement** → toujours passer par speckit : `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
-- **Petit fix** (typo, label, 1-2 lignes) → modif directe sans spec
-- Ne jamais coder une feature sans spec et plan validés
-- **Interdiction** d'utiliser `superpowers:writing-plans` ou `superpowers:executing-plans` — speckit remplace ces skills sur ce projet
+- **Feature or large change** → speckit: `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
+- **Small fix** (typo, label, 1-2 lines) → direct edit, no spec
+- **Forbidden**: `superpowers:writing-plans` and `superpowers:executing-plans` — speckit replaces them on this project
 
 ### Frontend
 
-- Utiliser le skill **`frontend-design`** pour TOUT travail UI (composants, pages, layouts)
-- Angular 21 strict : `input()`/`output()`, `inject()`, `@if`/`@for`, OnPush obligatoire
-  composants standalone par défaut, signals pour la réactivité
-- **Subscriptions** : préférer `toSignal()` pour les observables de services HTTP ; si `subscribe()` est inévitable, utiliser `takeUntilDestroyed()` pour éviter les fuites mémoire
-- Vérifier les APIs Angular/PrimeNG avec **Context7** avant d'implémenter
+- Use skill **`frontend-design`** for ALL UI work (components, pages, layouts)
+- **Subscriptions**: prefer `toSignal()`; if `subscribe()` unavoidable → `takeUntilDestroyed()`
+- Check Angular/PrimeNG APIs with **Context7** before implementing
 
 ### Documentation
 
-- Vérifier les docs avec **Context7** (`mcp__context7__resolve-library-id` + `mcp__context7__query-docs`) pour : FastAPI, LangChain, ChromaDB, Angular, SQLAlchemy
+- Use Context7 for: FastAPI, LangChain, ChromaDB, Angular, SQLAlchemy
 
 ## Architecture Constraints (constitution.md)
 
-1. **Local-first** : aucune donnée ne quitte la machine, Ollama uniquement
-2. **Tracabilité** : chaque query → log entry (question PII-masquée, context IDs, score, latence)
-3. **Fail transparent** : jamais de réponse hallucinée, guardrail refusal = succès
-4. **Séparation des concerns** : RAG / guardrails / eval = modules indépendants
-5. **Reproductible** : 3 commandes depuis checkout propre
-6. **DB** : PostgreSQL 16 via `docker-compose up -d` (dévier de la spec "no Docker" — décision volontaire)
+1. **Local-first**: no data leaves the machine, Ollama only
+2. **Traceability**: each query → log entry (PII-masked question, context IDs, score, latency)
+3. **Transparent failure**: no hallucinated answers, guardrail refusal = success
+4. **Separation of concerns**: RAG / guardrails / eval = independent modules
+5. **Reproducible**: 3 commands from a clean checkout
+6. **DB**: PostgreSQL 16 via `docker-compose up -d`
 
 ## Python Conventions
 
-- Type hints partout, Pydantic v2 pour les schémas
-- `pytest` + `pytest-asyncio` pour les tests, TDD obligatoire
-- `ruff` pour le linting
-- Variables d'env via `.env` (jamais de secrets commitées)
+- Type hints everywhere, Pydantic v2 for schemas
+- `pytest` + `pytest-asyncio`, `ruff` for linting
+- Env vars via `.env`
 
-## Task Tracking (obligatoire)
+## Task Tracking (mandatory)
 
-- Après chaque tâche complétée : mettre à jour `specs/001-rag-assistant/tasks.md` (status `[x]`)
-- Marquer `in_progress` avant de commencer, `done` dès que terminé et testé
+- Update `specs/<feature>/tasks.md` after each task (`in_progress` → `done`)
 
 ## Git
 
-- Branches : `feature/`, `fix/`, `chore/`
-- Conventional commits obligatoires
-- Tests verts avant tout commit
+- Tests must pass before any commit
 
-## Source de vérité
+## Source of Truth
 
-- **Code > plan.md > tasks.md** : en cas de divergence, le code fait foi
-- Avant tout fix de "mismatch" : lire le fichier réel, pas le plan
-- Paths et prefixes : vérifier avec `find`/`grep` sur le repo avant d'écrire
+- **Code > plan.md > tasks.md**: code wins on any divergence
+- Before any fix: read the actual file, not the plan
+- Paths: verify with `find`/`grep` on the repo before writing
 
 ## Key Files
 
-- `specs/001-rag-assistant/spec.md` — source de vérité fonctionnelle
-- `specs/001-rag-assistant/plan.md` — plan d'implémentation
-- `specs/001-rag-assistant/tasks.md` — 61 tâches T001–T061
-- `.specify/memory/constitution.md` — 5 principes architecturaux
-- `DECISIONS.md` — tout écart à la spec documenté ici
-- `reports/costs.md` — `/cost` en fin de session
+- `specs/001-rag-assistant/` — RAG core (spec, plan, tasks)
+- `specs/002-angular-eslint-rules/` — Angular ESLint rules
+- `specs/003-bulk-delete-docs/` — bulk document deletion
+- `specs/004-chat-markdown-render/` — markdown rendering in chat
+- `specs/005-frontend-unit-tests/` — frontend unit tests
+- `.specify/memory/constitution.md` — 5 architectural principles
+- `DECISIONS.md` — all deviations from spec documented here
+- `reports/costs.md` — run `/cost` at end of each session
