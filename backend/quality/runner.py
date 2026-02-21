@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from quality.dataset import REFERENCE_DATASET
 from core.config import settings
 
-def run_quality_check(provider, vectorstore, engine, limit: int = 3):
+def run_quality_check(provider, vectorstore, engine, limit: int = 0):
     """Run the reference evaluation dataset and persist results to PostgreSQL.
 
     For each question in REFERENCE_DATASET:
