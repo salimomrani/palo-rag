@@ -44,7 +44,7 @@ class IngestionService:
         chunks = self._splitter.split_text(text)
         documents = [
             LCDocument(
-                page_content=chunk,
+                page_content=f"[{source}] {chunk}",
                 metadata={"source": source, "doc_id": doc_id, "chunk_index": i},
             )
             for i, chunk in enumerate(chunks)
