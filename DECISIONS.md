@@ -119,12 +119,16 @@
 | Input guardrails            | ✅ done    | + offensive content (FR/EN)                                  |
 | Audit logging + PII masking | ✅ done    | PostgreSQL-backed                                            |
 | Quality evaluation          | ✅ done    | 15-Q reference dataset                                       |
-| Angular UI                  | ✅ done    | Chat + Ingest + Logs                                         |
+| Angular UI                  | ✅ done    | Chat + Ingest + Logs + Eval views                            |
 | Document delete             | ✅ added   | FR-017                                                       |
 | SSE streaming               | ✅ added   | FR-019/020                                                   |
 | Duplicate ingestion guard   | ✅ added   | FR-018                                                       |
 | BDD scenarios               | ✅ done    | pytest unit tests cover all user stories (no Gherkin format) |
 | Gen-e2 integration          | 🔜 stretch | AIProvider ready, needs credentials                          |
+| Angular ESLint rules        | ✅ added   | Best-practice ruleset (002)                                  |
+| Bulk document delete        | ✅ added   | Multi-select delete with confirmation (003)                  |
+| Chat markdown rendering     | ✅ added   | Markdown + code highlighting in chat answers (004)           |
+| Frontend unit tests         | ✅ added   | Vitest-based test suite for Angular components (005)         |
 
 ---
 
@@ -141,3 +145,5 @@
 9. **LLM-as-judge guardrail**: Replace regex with an `is_relevant(question)` call to the local LLM for semantic detection of off-scope questions and paraphrased injections
 10. **Semantic cache**: Embed the incoming question, look up nearest cached entry (cosine similarity above threshold), return cached answer if hit — eliminates LLM call for repeated or paraphrased questions; invalidate cache on document ingest/delete
 11. **MLOps pipeline**: Model versioning (track embed/LLM model per log entry), prompt version registry, A/B testing harness for prompt variants, automated drift detection on quality scores
+12. **Multi-tenancy**: Isolate documents, logs, and RAG context per organisation — single instance serving multiple clients with strict data separation
+13. **Cloud/production deployment**: Containerise backend + frontend (Docker Compose → Kubernetes), add secrets management (Vault or cloud KMS), CI/CD pipeline, health checks, and horizontal scaling
