@@ -55,6 +55,7 @@ Cycle: **RED** → **GREEN** → **REFACTOR**
 
 ## Git
 
+- **Never push directly to `master`** — always open a PR
 - Tests must pass before any commit
 
 ## Source of Truth
