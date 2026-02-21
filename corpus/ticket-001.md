@@ -1,5 +1,7 @@
 # Ticket TKT-00142 — Connexion SSO impossible après migration Okta
 
+**Référence interne** : ticket-001
+
 **Statut** : Résolu
 **Priorité** : P1 — Critique
 **Date d'ouverture** : 2026-01-08 09:14

@@ -2,8 +2,9 @@ import math
 from models.db import EvaluationResult
 from sqlalchemy.orm import Session
 from quality.dataset import REFERENCE_DATASET
+from core.config import settings
 
-def run_quality_check(provider, vectorstore, engine, limit: int = 3):
+def run_quality_check(provider, vectorstore, engine, limit: int = 0):
     """Run the reference evaluation dataset and persist results to PostgreSQL.
 
     For each question in REFERENCE_DATASET:
@@ -34,7 +35,7 @@ def run_quality_check(provider, vectorstore, engine, limit: int = 3):
         expected_source = item["expected_source"]
 
         # 1. Retrieve context
-        docs_and_scores = vectorstore.similarity_search_with_score(question, k=3)
+        docs_and_scores = vectorstore.similarity_search_with_score(question, k=settings.top_k)
 
         # 2. Extract sources
         retrieved_sources = [doc.metadata.get("source", "") for doc, _ in docs_and_scores]

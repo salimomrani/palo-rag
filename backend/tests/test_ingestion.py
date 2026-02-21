@@ -24,6 +24,18 @@ def test_ingest_text_splits_into_multiple_chunks():
         assert len(doc.page_content) <= 3000
 
 
+def test_ingest_text_prefixes_chunks_with_source():
+    provider = MagicMock()
+    captured = []
+    vectorstore = MagicMock()
+    vectorstore.add_documents.side_effect = lambda docs: captured.extend(docs)
+    service = IngestionService(provider=provider, vectorstore=vectorstore)
+    service.ingest_text("Hello world. " * 10, source="ticket-001.md")
+    assert len(captured) > 0
+    for doc in captured:
+        assert doc.page_content.startswith("[ticket-001.md]")
+
+
 def test_ingest_text_uses_provided_doc_id():
     provider = MagicMock()
     captured = []

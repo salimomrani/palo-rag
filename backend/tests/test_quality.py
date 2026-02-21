@@ -33,6 +33,22 @@ def mock_vectorstore():
     return vs
 
 
+def test_runner_evaluates_full_dataset_by_default(mock_provider, mock_vectorstore, engine):
+    from quality.runner import run_quality_check
+    from quality.dataset import REFERENCE_DATASET
+    scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
+    assert len(scores["per_question"]) == len(REFERENCE_DATASET)
+
+
+def test_runner_uses_top_k_for_retrieval(mock_provider, mock_vectorstore, engine):
+    from quality.runner import run_quality_check
+    from core.config import settings
+    run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
+    call_args = mock_vectorstore.similarity_search_with_score.call_args
+    k_used = call_args[1].get("k") or call_args[0][1]
+    assert k_used == settings.top_k
+
+
 def test_dataset_has_15_questions():
     from quality.dataset import REFERENCE_DATASET
     assert len(REFERENCE_DATASET) == 15
