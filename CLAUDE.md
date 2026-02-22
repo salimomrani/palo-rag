@@ -18,7 +18,10 @@
 **Iron law: no production code without a failing test first.** RED → GREEN → REFACTOR
 
 - Backend: `cd backend && .venv/bin/pytest tests/ -v`
+- Backend lint: `cd backend && .venv/bin/ruff check .`
 - Frontend: `cd frontend && npm test -- --watch=false`
+- Frontend lint: `cd frontend && npm run lint`
+- Lint must pass before any commit
 - Skill: `superpowers:test-driven-development`
 
 ## Git
@@ -27,12 +30,18 @@
 - Tests must pass before any commit
 - Update `specs/<feature>/tasks.md` after each task
 
-## Architecture (see `.specify/memory/constitution.md` for full details)
+## Architecture (read `.specify/memory/constitution.md` before any architectural decision)
 
 1. Local-first — Ollama only, no data leaves the machine
 2. Traceability — every query logged (PII-masked)
 3. Transparent failure — no hallucinated answers
 4. Separation of concerns — RAG / guardrails / eval = independent modules
+
+## Environment
+
+- Backend needs `backend/.env` — copy from `backend/.env.example` if missing
+- DB: `docker-compose up -d` (PostgreSQL 16, port 5444)
+- Ports: 8000 (backend), 4200 (frontend)
 
 ## Source of Truth
 
