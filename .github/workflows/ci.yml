@@ -123,3 +123,22 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test -- --watch=false
+
+  # ── Gate ───────────────────────────────────────────────────────────────────
+
+  ci-ok:
+    name: CI OK
+    needs: [backend-lint, backend-test, frontend-lint, frontend-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all jobs passed or were skipped
+        run: |
+          results="${{ join(needs.*.result, ' ') }}"
+          for r in $results; do
+            if [[ "$r" == "failure" || "$r" == "cancelled" ]]; then
+              echo "❌ A required job failed: $r"
+              exit 1
+            fi
+          done
+          echo "✅ All jobs passed or were skipped"
