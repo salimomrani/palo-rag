@@ -179,7 +179,10 @@ Sample log entry (`GET /api/v1/logs`):
 # Backend tests (TDD — 31 tests)
 cd backend && .venv/bin/pytest tests/ -v
 
-# Frontend lint
+# Frontend tests (Angular)
+cd frontend && npm test
+
+# Frontend lint (ESLint / angular-eslint)
 cd frontend && npm run lint
 # Expected: 0 errors
 
