@@ -19,10 +19,12 @@
 | Item | Cost |
 |------|------|
 | Claude Code Pro subscription | €15/month (flat rate, unlimited usage) |
-| Sessions used for this project | ~1 month |
+| Sessions used for this project | ~1 month (6 specs implemented: 001–006) |
 | **Total development** | **~€15** |
 
 > Token-level tracking not applicable — Pro subscription is flat rate.
+>
+> Scope: RAG core (001), Angular ESLint rules (002), bulk delete (003), chat markdown rendering (004), frontend unit tests (005), GitHub Actions CI pipeline (006).
 
 ---
 
@@ -34,6 +36,7 @@
 | PostgreSQL / ChromaDB | €0 (embedded, local) |
 | Ollama | €0 (open source) |
 | Angular CLI | €0 (open source) |
+| GitHub Actions CI | €0 (free tier — public repo, < 2,000 min/month) |
 | **Total infrastructure** | **€0** |
 
 ---
@@ -44,7 +47,7 @@
 |----------|------|
 | AI runtime (Ollama, local) | €0 |
 | Development (Claude Code Pro) | ~€15 |
-| Infrastructure | €0 |
+| Infrastructure (local + GitHub Actions) | €0 |
 | **TOTAL** | **~€15** |
 
 ---

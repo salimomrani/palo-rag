@@ -1,5 +1,7 @@
 # PALO RAG — Enterprise Knowledge Assistant
 
+[![CI](https://github.com/salimomrani/palo-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/salimomrani/palo-rag/actions/workflows/ci.yml)
+
 RAG API + Angular UI for enterprise knowledge bases — answers questions from internal documents, refuses when confidence is too low.
 
 **Stack**: Python 3.12 · FastAPI · LangChain 0.3 · ChromaDB · PostgreSQL 16 · Ollama · Angular 21
@@ -179,7 +181,10 @@ Sample log entry (`GET /api/v1/logs`):
 # Backend tests (TDD — 31 tests)
 cd backend && .venv/bin/pytest tests/ -v
 
-# Frontend tests (Angular)
+# Backend lint (ruff)
+cd backend && ruff check .
+
+# Frontend tests (vitest)
 cd frontend && npm test
 
 # Frontend lint (ESLint / angular-eslint)
@@ -190,6 +195,18 @@ cd frontend && npm run lint
 curl -X POST http://localhost:8000/api/v1/evaluation/run
 # Report saved to reports/eval.md
 ```
+
+### CI/CD (GitHub Actions)
+
+Push or PR on any branch triggers path-filtered jobs:
+
+| Changed path | Jobs triggered |
+|---|---|
+| `backend/**` | `backend-lint` (ruff) → `backend-test` (pytest + PostgreSQL) |
+| `frontend/**` | `frontend-lint` (ESLint) → `frontend-test` (vitest) |
+| Both | All four jobs in parallel |
+
+Lint gates tests: tests only run when lint passes. No deployment.
 
 ---
 
@@ -210,6 +227,8 @@ Out of scope (production):
 
 ```
 PALO/
+├── .github/workflows/
+│   └── ci.yml           # GitHub Actions: path-filtered lint + test jobs
 ├── backend/
 │   ├── api/v1/          # FastAPI routers (query, ingest, logs, evaluation)
 │   ├── rag/             # Pipeline, provider (Ollama), ingestion
@@ -217,6 +236,7 @@ PALO/
 │   ├── logging_service/ # PII masking + audit log
 │   ├── quality/         # Reference dataset, runner, report generator
 │   ├── models/          # SQLAlchemy models
+│   ├── ruff.toml        # Linter config (E/F/I rules, Python 3.12)
 │   └── tests/           # 31 tests (TDD)
 ├── frontend/
 │   └── src/app/

@@ -103,6 +103,16 @@
 
 ---
 
+### 13. GitHub Actions CI — path filtering, no deployment
+
+**Decision**: Single `ci.yml` with 5 jobs: `changes` (path detection) + `backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`
+**Path filtering**: `dorny/paths-filter@v3` — backend jobs fire only on `backend/**` changes, frontend jobs only on `frontend/**`
+**Lint gating**: `backend-test` and `frontend-test` both declare `needs: [changes, <lint-job>]` — tests are skipped when lint fails
+**No deployment**: CI validates quality only; no staging or production push
+**Rationale**: Path filtering avoids running the full pipeline on unrelated changes (e.g., a doc edit does not trigger pytest). `ruff --output-format=github` produces inline PR annotations. The single-file approach keeps the workflow self-contained without matrix complexity.
+
+---
+
 ## Known Limitations
 
 | Limitation                      | Impact                                                 | Mitigation                                                                  |
@@ -138,6 +148,7 @@
 | Bulk document delete        | ✅ added   | Multi-select delete with confirmation (003)                  |
 | Chat markdown rendering     | ✅ added   | Markdown + code highlighting in chat answers (004)           |
 | Frontend unit tests         | ✅ added   | Vitest-based test suite for Angular components (005)         |
+| CI/CD pipeline              | ✅ added   | GitHub Actions: path-filtered lint + test jobs (006)         |
 
 ---
 
@@ -155,4 +166,4 @@
 10. **Semantic cache**: Embed the incoming question, look up nearest cached entry (cosine similarity above threshold), return cached answer if hit — eliminates LLM call for repeated or paraphrased questions; invalidate cache on document ingest/delete
 11. **MLOps pipeline**: Model versioning (track embed/LLM model per log entry), prompt version registry, A/B testing harness for prompt variants, automated drift detection on quality scores
 12. **Multi-tenancy**: Isolate documents, logs, and RAG context per organisation — single instance serving multiple clients with strict data separation
-13. **Cloud/production deployment**: Containerise backend + frontend (Docker Compose → Kubernetes), add secrets management (Vault or cloud KMS), CI/CD pipeline, health checks, and horizontal scaling
+13. **Cloud/production deployment**: Containerise backend + frontend (Docker Compose → Kubernetes), add secrets management (Vault or cloud KMS), extend CI with deployment jobs (staging → prod), health checks, and horizontal scaling

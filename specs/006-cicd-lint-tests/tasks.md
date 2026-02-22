@@ -54,7 +54,7 @@
 
 **Independent Test**: Open a PR modifying both directories — four jobs appear simultaneously in the Actions tab.
 
-- [ ] T008 [US3] Empirically validate that all four jobs (`backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`) run in parallel on a full-stack PR (verify in Actions tab after T009)
+- [x] T008 [US3] Empirically validate that all four jobs (`backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`) run in parallel on a full-stack PR (verified on PR #9 in Actions tab)
 
 **Checkpoint**: All four jobs run simultaneously.
 
@@ -62,8 +62,10 @@
 
 ## Phase 5: Polish
 
-- [ ] T009 [P] Open PR `006-cicd-lint-tests` → `master` to trigger CI validation
-- [ ] T010 Validate SC-003: pipeline duration < 5 min (check in Actions history with warm cache)
+- [x] T009 [P] Open PR `006-cicd-lint-tests` → `master` to trigger CI validation (PR #7 — merged)
+- [x] T010 Validate SC-003: pipeline duration < 5 min (confirmed ~2 min with warm cache)
+- [x] T011 Add `ci-ok` gate job (`if: always()`) aggregating all conditional jobs for branch protection
+- [x] T012 Enable branch protection on `master`: require `CI OK` status check before merge
 
 ---
 
@@ -85,3 +87,4 @@ T001 → T002 → T003 → T004 → T005: backend pipeline operational.
 - `dorny/paths-filter@v3` is the standard approach for conditional path filtering in a single file.
 - Backend tests use SQLite in-memory — the PostgreSQL service in CI exists for future integration tests but is not used by current tests.
 - Ollama is not available in CI — all Ollama calls are mocked in tests (verified).
+- `ci-ok` gate job required because GitHub branch protection cannot handle skipped jobs (conditional on path filter) — the gate always runs and passes if all jobs passed or were skipped.

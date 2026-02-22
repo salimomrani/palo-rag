@@ -6,7 +6,6 @@ import {
   ElementRef,
   ViewChild,
   ChangeDetectionStrategy,
-  AfterViewChecked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
@@ -31,7 +30,7 @@ interface Message {
   styleUrls: ['./chat.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Chat implements AfterViewChecked {
+export class Chat {
   @ViewChild('messagesEl') private messagesEl!: ElementRef<HTMLElement>;
   private readonly api = inject(RagApiService);
 
@@ -51,9 +50,11 @@ export class Chat implements AfterViewChecked {
     'Quelles sont les mesures de sécurité mises en place pour protéger les accès ?',
   ];
 
-  ngAfterViewChecked(): void {
-    const el = this.messagesEl?.nativeElement;
-    if (el) el.scrollTop = el.scrollHeight;
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      const el = this.messagesEl?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
   }
 
   sendMessage(): void {
@@ -70,6 +71,7 @@ export class Chat implements AfterViewChecked {
     this.prompt.set('');
     this.isLoading.set(true);
     this.error.set(null);
+    this.scrollToBottom();
 
     this.api.streamQuery(question).subscribe({
       next: (event) => {
@@ -94,6 +96,7 @@ export class Chat implements AfterViewChecked {
           this.messages.update((msgs) =>
             msgs.map((m) => (m.id === msgId ? { ...m, content: m.content + event.content } : m)),
           );
+          this.scrollToBottom();
         } else if (event.type === 'done') {
           this.messages.update((msgs) =>
             msgs.map((m) => (m.id === msgId ? { ...m, streaming: false } : m)),
@@ -113,6 +116,8 @@ export class Chat implements AfterViewChecked {
     switch (detail) {
       case 'guardrail:empty_question':
         return 'Question vide.';
+      case 'guardrail:too_short':
+        return 'Question trop courte (min 6 caractères).';
       case 'guardrail:length_exceeded':
         return 'Question trop longue (max 500 caractères).';
       case 'guardrail:prompt_injection':

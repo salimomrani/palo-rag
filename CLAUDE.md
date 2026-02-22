@@ -71,6 +71,8 @@ Cycle: **RED** → **GREEN** → **REFACTOR**
 - `specs/003-bulk-delete-docs/` — bulk document deletion
 - `specs/004-chat-markdown-render/` — markdown rendering in chat
 - `specs/005-frontend-unit-tests/` — frontend unit tests
+- `specs/006-cicd-lint-tests/` — GitHub Actions CI pipeline (path filtering)
+- `.github/workflows/ci.yml` — 5-job CI: changes + lint + test (backend & frontend)
 - `.specify/memory/constitution.md` — 5 architectural principles
 - `DECISIONS.md` — all deviations from spec documented here
 - `reports/costs.md` — run `/cost` at end of each session
