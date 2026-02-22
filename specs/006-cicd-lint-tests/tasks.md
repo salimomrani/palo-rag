@@ -5,83 +5,83 @@
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: Peut tourner en parallèle
+- **[P]**: Can run in parallel
 - **[US1]**: Backend change → backend checks only
 - **[US2]**: Frontend change → frontend checks only
-- **[US3]**: Full-stack change → les deux pipelines en parallèle
+- **[US3]**: Full-stack change → both pipelines in parallel
 
 ---
 
 ## Phase 1: Setup
 
-**Purpose**: Créer la structure GitHub Actions
+**Purpose**: Create GitHub Actions structure
 
-- [x] T001 Créer le répertoire `.github/workflows/`
+- [x] T001 Create `.github/workflows/` directory
 
 ---
 
 ## Phase 2: User Story 1 — Backend change triggers only backend checks (P1) 🎯 MVP
 
-**Goal**: Un commit sur `backend/` déclenche ruff + pytest via le job `changes`, et rien d'autre.
+**Goal**: A commit on `backend/` triggers ruff + pytest via the `changes` job, and nothing else.
 
-**Independent Test**: Ouvrir une PR avec un seul fichier `backend/` modifié — seuls `backend-lint` et `backend-test` s'exécutent dans l'onglet Actions.
+**Independent Test**: Open a PR with only a `backend/` file changed — only `backend-lint` and `backend-test` run in the Actions tab.
 
-- [x] T002 [US1] Créer `.github/workflows/ci.yml` avec le job `changes` (dorny/paths-filter@v3) qui expose les outputs `backend` et `frontend`
-- [x] T003 [US1] Ajouter le job `backend-lint` dans `ci.yml` : `needs: changes`, `if: needs.changes.outputs.backend == 'true'`, `setup-python@v5` (Python 3.12, cache pip), `ruff check .`
-- [x] T004 [US1] Ajouter le job `backend-test` dans `ci.yml` : `needs: changes`, `if: needs.changes.outputs.backend == 'true'`, service PostgreSQL 16, install deps, `pytest tests/ -v --tb=short`
-- [x] T005 [US1] Ajouter `backend/ruff.toml` : `target-version = "py312"`, règles E/F/I, exclure `chroma_data` et `scripts`
+- [x] T002 [US1] Create `.github/workflows/ci.yml` with `changes` job (dorny/paths-filter@v3) exposing `backend` and `frontend` outputs
+- [x] T003 [US1] Add `backend-lint` job in `ci.yml`: `needs: changes`, `if: needs.changes.outputs.backend == 'true'`, `setup-python@v5` (Python 3.12, pip cache), `ruff check .`
+- [x] T004 [US1] Add `backend-test` job in `ci.yml`: `needs: changes`, `if: needs.changes.outputs.backend == 'true'`, PostgreSQL 16 service, install deps, `pytest tests/ -v --tb=short`
+- [x] T005 [US1] Add `backend/ruff.toml`: `target-version = "py312"`, E/F/I rules, exclude `chroma_data` and `scripts`
 
-**Checkpoint**: Pipeline backend déclenchée et réussie sur une PR ne touchant que `backend/`.
+**Checkpoint**: Backend pipeline triggered and passing on a PR touching only `backend/`.
 
 ---
 
 ## Phase 3: User Story 2 — Frontend change triggers only frontend checks (P1)
 
-**Goal**: Un commit sur `frontend/` déclenche ESLint + vitest, et rien d'autre.
+**Goal**: A commit on `frontend/` triggers ESLint + vitest, and nothing else.
 
-**Independent Test**: Ouvrir une PR avec un seul fichier `frontend/` modifié — seuls `frontend-lint` et `frontend-test` s'exécutent dans l'onglet Actions.
+**Independent Test**: Open a PR with only a `frontend/` file changed — only `frontend-lint` and `frontend-test` run in the Actions tab.
 
-- [x] T006 [US2] Ajouter le job `frontend-lint` dans `ci.yml` : `needs: changes`, `if: needs.changes.outputs.frontend == 'true'`, `setup-node@v4` (Node 22, cache npm), `npm run lint`
-- [x] T007 [US2] Ajouter le job `frontend-test` dans `ci.yml` : `needs: changes`, `if: needs.changes.outputs.frontend == 'true'`, `setup-node@v4` (Node 22, cache npm), `npm test -- --watch=false`
+- [x] T006 [US2] Add `frontend-lint` job in `ci.yml`: `needs: changes`, `if: needs.changes.outputs.frontend == 'true'`, `setup-node@v4` (Node 22, npm cache), `npm run lint`
+- [x] T007 [US2] Add `frontend-test` job in `ci.yml`: `needs: changes`, `if: needs.changes.outputs.frontend == 'true'`, `setup-node@v4` (Node 22, npm cache), `npm test -- --watch=false`
 
-**Checkpoint**: Pipeline frontend déclenchée et réussie sur une PR ne touchant que `frontend/`.
+**Checkpoint**: Frontend pipeline triggered and passing on a PR touching only `frontend/`.
 
 ---
 
 ## Phase 4: User Story 3 — Full-stack change triggers both pipelines (P2)
 
-**Goal**: Un commit touchant `backend/` et `frontend/` déclenche les quatre jobs en parallèle.
+**Goal**: A commit touching both `backend/` and `frontend/` triggers all four jobs in parallel.
 
-**Independent Test**: Ouvrir une PR modifiant les deux dossiers — quatre jobs apparaissent simultanément dans l'onglet Actions.
+**Independent Test**: Open a PR modifying both directories — four jobs appear simultaneously in the Actions tab.
 
-- [ ] T008 [US3] Valider empiriquement que les quatre jobs (`backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`) s'exécutent en parallèle sur une PR full-stack (validation dans l'onglet Actions après ouverture de la PR T009)
+- [ ] T008 [US3] Empirically validate that all four jobs (`backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`) run in parallel on a full-stack PR (verify in Actions tab after T009)
 
-**Checkpoint**: Les quatre jobs s'exécutent simultanément.
+**Checkpoint**: All four jobs run simultaneously.
 
 ---
 
 ## Phase 5: Polish
 
-- [ ] T009 [P] Ouvrir la PR `006-cicd-lint-tests` → `master` pour déclencher la validation CI
-- [ ] T010 Valider SC-003 : durée pipeline < 5 min (vérifier dans l'historique Actions après cache chaud)
+- [ ] T009 [P] Open PR `006-cicd-lint-tests` → `master` to trigger CI validation
+- [ ] T010 Validate SC-003: pipeline duration < 5 min (check in Actions history with warm cache)
 
 ---
 
 ## Dependencies & Execution Order
 
-- **T001** → T002 → T003, T004, T005 (parallélisable après T002)
-- **T002** → T003 → T004 (séquentiel dans US1 pour le même fichier)
-- **T006, T007** : parallélisables entre eux (jobs différents dans le même fichier)
-- **T008** nécessite T004 + T007 (US1 + US2 complets)
+- **T001** → T002 → T003, T004, T005 (parallelizable after T002)
+- **T002** → T003 → T004 (sequential within US1, same file)
+- **T006, T007**: parallelizable (different jobs, same file)
+- **T008** requires T004 + T007 (US1 + US2 complete)
 
 ### MVP
 
-T001 → T002 → T003 → T004 → T005 : pipeline backend opérationnelle.
+T001 → T002 → T003 → T004 → T005: backend pipeline operational.
 
 ---
 
 ## Notes
 
-- `dorny/paths-filter@v3` est l'approche standard pour le path filtering conditionnel dans un fichier unique.
-- Les tests backend utilisent SQLite in-memory — le service PostgreSQL en CI est présent pour les futurs tests d'intégration mais pas utilisé par les tests actuels.
-- Ollama n'est pas disponible en CI — tous les appels Ollama sont mockés dans les tests (vérifié).
+- `dorny/paths-filter@v3` is the standard approach for conditional path filtering in a single file.
+- Backend tests use SQLite in-memory — the PostgreSQL service in CI exists for future integration tests but is not used by current tests.
+- Ollama is not available in CI — all Ollama calls are mocked in tests (verified).

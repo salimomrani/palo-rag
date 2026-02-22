@@ -15,16 +15,16 @@
 ```
 .github/
   workflows/
-    ci.yml   # fichier unique — changes job + 4 jobs conditionnels
+    ci.yml   # single file — changes job + 4 conditional jobs
 ```
 
 ## Decisions
 
-- Fichier unique `ci.yml` : un seul point d'entrée CI, lisible en un coup d'œil
-- Job `changes` (dorny/paths-filter@v3) : détecte quels périmètres ont changé
-- Backend jobs (`backend-lint`, `backend-test`) : `if: needs.changes.outputs.backend == 'true'`
-- Frontend jobs (`frontend-lint`, `frontend-test`) : `if: needs.changes.outputs.frontend == 'true'`
-- Lint et tests = jobs séparés (fail fast, lisibilité)
-- Cache dépendances activé (pip + npm)
-- PostgreSQL 16 service container pour les tests backend
-- Pas de déploiement
+- Single `ci.yml`: one CI entry point, readable at a glance
+- `changes` job (dorny/paths-filter@v3): detects which scopes changed
+- Backend jobs (`backend-lint`, `backend-test`): `if: needs.changes.outputs.backend == 'true'`
+- Frontend jobs (`frontend-lint`, `frontend-test`): `if: needs.changes.outputs.frontend == 'true'`
+- Lint and tests as separate jobs (fail fast, clear visibility)
+- Dependency caching enabled (pip + npm)
+- PostgreSQL 16 service container for backend tests
+- No deployment
