@@ -83,26 +83,23 @@ jobs:
         run: pytest tests/ -v --tb=short
 
   backend-review:
-    name: Backend — AI Code Review (non-blocking)
+    name: Backend — Code Review (non-blocking)
     needs: changes
-    if: needs.changes.outputs.backend == 'true' && github.event_name == 'pull_request'
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
-    permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 1
-      - uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
-          plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          python-version: '3.12'
+      - name: Install ruff
+        run: pip install ruff
+      - name: Extended analysis (complexity, conventions)
+        run: ruff check . --select=ALL --ignore=D,ANN,COM,ERA,FIX,TD,S,T20,E402,E501 --output-format=github
 
   # ── Frontend ───────────────────────────────────────────────────────────────
 
@@ -147,24 +144,23 @@ jobs:
         run: npm test -- --watch=false
 
   frontend-review:
-    name: Frontend — AI Code Review (non-blocking)
+    name: Frontend — Code Review (non-blocking)
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' && github.event_name == 'pull_request'
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     continue-on-error: true
-    permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 1
-      - uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
-          plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Extended ESLint analysis
+        run: npm run lint -- --max-warnings=0
 
