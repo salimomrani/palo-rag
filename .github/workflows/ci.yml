@@ -83,23 +83,32 @@ jobs:
         run: pytest tests/ -v --tb=short
 
   backend-review:
-    name: Backend — Code Review (non-blocking)
+    name: Backend — AI Code Review (non-blocking)
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     continue-on-error: true
-    defaults:
-      run:
-        working-directory: backend
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - name: Install ruff
-        run: pip install ruff
-      - name: Extended analysis (complexity, conventions)
-        run: ruff check . --select=ALL --ignore=D,ANN,COM,ERA,FIX,TD,S,T20,E402,E501 --output-format=github
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            Review the backend changes in this PR (Python 3.12 / FastAPI / LangChain / ChromaDB).
+            Focus on:
+            - Type hints completeness (Pydantic v2, SQLAlchemy 2)
+            - RAG pipeline correctness and guardrail logic
+            - No PII leaks in logs (check masking)
+            - pytest coverage for new code paths
+            - Local-first constraint: no external API calls outside the AIProvider interface
+            Refer to CLAUDE.md for project conventions.
 
   # ── Frontend ───────────────────────────────────────────────────────────────
 
@@ -144,25 +153,33 @@ jobs:
         run: npm test -- --watch=false
 
   frontend-review:
-    name: Frontend — Code Review (non-blocking)
+    name: Frontend — AI Code Review (non-blocking)
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.frontend == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     continue-on-error: true
-    defaults:
-      run:
-        working-directory: frontend
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install dependencies
-        run: npm ci
-      - name: Extended ESLint analysis
-        run: npm run lint -- --max-warnings=0
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            Review the frontend changes in this PR (Angular 21 / PrimeNG v21 / TypeScript 5.9).
+            Focus on:
+            - Standalone components, signals, OnPush change detection
+            - input()/output() and inject() usage (no constructor DI)
+            - toSignal() preferred; if subscribe() is used, verify takeUntilDestroyed()
+            - No memory leaks (subscription cleanup)
+            - PrimeNG v21 API correctness
+            - 2-space indentation, strict TypeScript
+            Refer to CLAUDE.md for project conventions.
 
   # ── Project Conventions (CLAUDE.md) ────────────────────────────────────────
 
