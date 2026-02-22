@@ -5,40 +5,40 @@
 
 ---
 
-## Context observé
+## Observed Context
 
 - Angular 21.1.0 / TypeScript 5.9.2 / RxJS 7.8.0
-- Pas de configuration ESLint existante (ni `eslint.config.*`, ni cible `lint` dans `angular.json`)
-- ESLint v9 = flat config obligatoire (`eslint.config.mjs`)
+- No existing ESLint configuration (neither `eslint.config.*` nor a `lint` target in `angular.json`)
+- ESLint v9 = flat config mandatory (`eslint.config.mjs`)
 
 ---
 
-## Decision 1 — Packages ESLint
+## Decision 1 — ESLint Packages
 
-**Decision**: ESLint v9 flat config avec les packages suivants :
+**Decision**: ESLint v9 flat config with the following packages:
 
-| Package | Version | Rôle |
+| Package | Version | Role |
 |---------|---------|------|
 | `eslint` | `^9.0.0` | Core linter |
-| `@angular-eslint/eslint-plugin` | `^21.0.0` | Règles Angular |
-| `@angular-eslint/eslint-plugin-template` | `^21.0.0` | Règles templates HTML |
-| `@angular-eslint/builder` | `^21.0.0` | Intégration `ng lint` |
+| `@angular-eslint/eslint-plugin` | `^21.0.0` | Angular rules |
+| `@angular-eslint/eslint-plugin-template` | `^21.0.0` | HTML template rules |
+| `@angular-eslint/builder` | `^21.0.0` | `ng lint` integration |
 | `angular-eslint` | `^21.0.0` | Meta-package flat config |
-| `typescript-eslint` | `^8.0.0` | Règles TypeScript |
-| `@eslint/js` | `^9.0.0` | Règles JS de base |
-| `eslint-plugin-rxjs-x` | `^0.5.0` | Règles RxJS compatibles ESLint v9 |
+| `typescript-eslint` | `^8.0.0` | TypeScript rules |
+| `@eslint/js` | `^9.0.0` | Base JS rules |
+| `eslint-plugin-rxjs-x` | `^0.5.0` | RxJS rules compatible with ESLint v9 |
 
-**Rationale**: `@angular-eslint` v21 est aligné sur Angular 21 et supporte le flat config. `typescript-eslint` v8 est requis par `@angular-eslint` v18+. `eslint-plugin-rxjs-x` est le fork maintenu compatible ESLint v9 (le plugin original `eslint-plugin-rxjs` dépend de ESLint ^8).
+**Rationale**: `@angular-eslint` v21 is aligned with Angular 21 and supports flat config. `typescript-eslint` v8 is required by `@angular-eslint` v18+. `eslint-plugin-rxjs-x` is the maintained fork compatible with ESLint v9 (the original `eslint-plugin-rxjs` depends on ESLint ^8).
 
-**Alternatives rejetées**:
-- `eslint-plugin-rxjs` : incompatible ESLint v9 (peer dep `eslint ^8.0.0`)
-- `eslint-plugin-rxjs-angular-x` : focus Angular uniquement, moins complet pour les règles de base RxJS
+**Rejected alternatives**:
+- `eslint-plugin-rxjs`: incompatible with ESLint v9 (peer dep `eslint ^8.0.0`)
+- `eslint-plugin-rxjs-angular-x`: Angular-only focus, less complete for base RxJS rules
 
 ---
 
-## Decision 2 — Convention `$` pour les Observables
+## Decision 2 — `$` Convention for Observables
 
-**Decision**: `@typescript-eslint/naming-convention` avec selector `variable` + type `observable`
+**Decision**: `@typescript-eslint/naming-convention` with selector `variable` + type `observable`
 
 ```js
 {
@@ -49,37 +49,37 @@
 }
 ```
 
-**Rationale**: `typescript-eslint` permet de cibler les types Observable via le sélecteur `types: ['observable']`. La règle `rxjs-x/finnish` couvre également cette convention et est complémentaire.
+**Rationale**: `typescript-eslint` allows targeting Observable types via the `types: ['observable']` selector. The `rxjs-x/finnish` rule also covers this convention and is complementary.
 
-**Alternatives rejetées**: Règle custom ESLint = maintenabilité trop lourde pour un demo.
-
----
-
-## Decision 3 — Règle `no-nested-subscribe`
-
-**Decision**: `rxjs-x/no-nested-subscribe` à niveau `error`
-
-**Rationale**: La règle détecte les patterns `subscribe(() => { ..subscribe() })` dans le code TypeScript et signale une erreur avec le fichier et la ligne.
+**Rejected alternatives**: Custom ESLint rule = too much maintenance overhead for a demo.
 
 ---
 
-## Decision 4 — Règles Angular spécifiques
+## Decision 3 — `no-nested-subscribe` Rule
 
-**Decision**: Activer via `@angular-eslint` :
+**Decision**: `rxjs-x/no-nested-subscribe` at `error` level
 
-| Règle | Niveau | Objectif |
-|-------|--------|----------|
-| `@angular-eslint/prefer-on-push-component-change-detection` | `error` | OnPush obligatoire |
+**Rationale**: The rule detects `subscribe(() => { ..subscribe() })` patterns in TypeScript code and reports an error with the file and line number.
+
+---
+
+## Decision 4 — Angular-Specific Rules
+
+**Decision**: Enable via `@angular-eslint`:
+
+| Rule | Level | Objective |
+|------|-------|-----------|
+| `@angular-eslint/prefer-on-push-component-change-detection` | `error` | OnPush mandatory |
 | `@angular-eslint/prefer-inject` | `error` | inject() vs constructor |
-| `@angular-eslint/no-empty-lifecycle-hook` | `error` | Lifecycle vides |
+| `@angular-eslint/no-empty-lifecycle-hook` | `error` | Empty lifecycle hooks |
 
-**Note**: Il n'existe pas de règle ESLint officielle pour les imports standalone inutilisés — Angular 19+ le détecte au build. On combinera `@typescript-eslint/no-unused-vars` + vérification manuelle.
+**Note**: There is no official ESLint rule for unused standalone imports — Angular 19+ detects this at build time. We will combine `@typescript-eslint/no-unused-vars` + manual verification.
 
 ---
 
-## Decision 5 — Intégration `npm run lint`
+## Decision 5 — `npm run lint` Integration
 
-**Decision**: Utiliser `@angular-eslint/builder:lint` dans `angular.json` et exposer via `npm run lint` dans `package.json`.
+**Decision**: Use `@angular-eslint/builder:lint` in `angular.json` and expose via `npm run lint` in `package.json`.
 
 ```json
 "scripts": {
@@ -87,25 +87,25 @@
 }
 ```
 
-**Rationale**: `ng lint` utilise le builder Angular qui lint `.ts` et `.html` en une seule commande avec rapport formaté.
+**Rationale**: `ng lint` uses the Angular builder which lints `.ts` and `.html` in a single command with a formatted report.
 
 ---
 
-## Règles écartées / configurées en warn
+## Rules Excluded / Configured as Warn
 
-| Règle | Décision | Raison |
-|-------|----------|--------|
-| `@typescript-eslint/no-non-null-assertion` | `warn` | ViewChild avec `!` est parfois nécessaire en Angular — passer en warn pour éviter trop de bruit sur le code existant |
-| `no-console` | `warn` | Évite de bloquer le dev local, bloque seulement le CI via `--max-warnings 0` |
-| `complexity` | `warn` (max: 10) | Informatif plutôt que bloquant |
+| Rule | Decision | Reason |
+|------|----------|--------|
+| `@typescript-eslint/no-non-null-assertion` | `warn` | `@ViewChild` with `!` is sometimes necessary in Angular — set to warn to avoid too much noise on existing code |
+| `no-console` | `warn` | Avoids blocking local dev, only blocks CI via `--max-warnings 0` |
+| `complexity` | `warn` (max: 10) | Informational rather than blocking |
 
 ---
 
-## Violations anticipées dans le code existant
+## Anticipated Violations in Existing Code
 
-Analyse rapide du code actuel :
-- `chat.ts` : `@ViewChild('messagesEl') private messagesEl!` → `no-non-null-assertion` (warn)
-- Aucun subscribe imbriqué identifié (streaming via Observable natif)
-- Aucun `any` explicite identifié
-- Tous les composants : OnPush ✅, `inject()` ✅
-- Nommage observables : `streamQuery()` retourne `Observable<StreamEvent>` → doit être `streamQuery$()` ou renommé — à corriger
+Quick analysis of current code:
+- `chat.ts`: `@ViewChild('messagesEl') private messagesEl!` → `no-non-null-assertion` (warn)
+- No nested subscribes identified (streaming via native Observable)
+- No explicit `any` identified
+- All components: OnPush ✅, `inject()` ✅
+- Observable naming: `streamQuery()` returns `Observable<StreamEvent>` → must be `streamQuery$()` or renamed — to be fixed

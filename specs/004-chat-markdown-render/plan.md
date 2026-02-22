@@ -1,10 +1,10 @@
-# Implementation Plan: Rendu Markdown dans le Chat
+# Implementation Plan: Markdown Rendering in Chat
 
 ## Tech Stack
 
 - **Framework**: Angular 21, standalone components, signals, OnPush
 - **Markdown library**: `ngx-markdown@21.1.0` (already installed)
-- **Indentation**: 2 espaces
+- **Indentation**: 2 spaces
 
 ## Files to Modify
 

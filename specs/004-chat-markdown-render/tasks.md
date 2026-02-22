@@ -1,4 +1,4 @@
-# Tasks: Rendu Markdown dans le Chat
+# Tasks: Markdown Rendering in Chat
 
 **Input**: Design documents from `/specs/004-chat-markdown-render/`
 **Branch**: `004-chat-markdown-render`
@@ -13,21 +13,21 @@
 
 ## Phase 1: Foundational (Blocking Prerequisite)
 
-**Purpose**: Enregistrer le provider ngx-markdown globalement — requis par les deux user stories
+**Purpose**: Register the ngx-markdown provider globally — required by both user stories
 
 **⚠️ CRITICAL**: Must be complete before any user story work begins
 
 - [x] T001 Add `provideMarkdown()` to providers in `frontend/src/app/app.config.ts` — import from `ngx-markdown`
 
-**Checkpoint**: Provider enregistré, ngx-markdown utilisable dans tous les composants
+**Checkpoint**: Provider registered, ngx-markdown usable in all components
 
 ---
 
-## Phase 2: User Story 1 — Rendu Markdown des messages assistant (P1) 🎯 MVP
+## Phase 2: User Story 1 — Markdown Rendering of Assistant Messages (P1) 🎯 MVP
 
-**Goal**: Les réponses de l'assistant s'affichent avec le formatage riche (listes, code, titres, gras)
+**Goal**: Assistant responses display with rich formatting (lists, code, headings, bold)
 
-**Independent Test**: Poser une question qui génère une liste ou un bloc de code → vérifier le rendu HTML au lieu des symboles bruts
+**Independent Test**: Ask a question that generates a list or a code block → verify HTML rendering instead of raw symbols
 
 ### Implementation
 
@@ -35,30 +35,30 @@
 - [x] T003 [US1] Replace assistant message content in `frontend/src/app/components/chat/chat.html` — wrap in `@if (msg.role === 'assistant')` block using `<markdown [data]="msg.content">`, user messages keep `{{ msg.content }}`
 - [x] T004 [P] [US1] Add markdown content styles in `frontend/src/app/components/chat/chat.scss` — scope under `.message.assistant` : code blocks (`pre`, `code`), lists (`ul`, `ol`, `li`), headings (`h1`–`h3`), links (`a`), horizontal rules
 
-**Checkpoint**: Réponses assistant rendues en HTML riche — US1 fully functional
+**Checkpoint**: Assistant responses rendered as rich HTML — US1 fully functional
 
 ---
 
-## Phase 3: User Story 2 — Messages utilisateur non affectés (P2)
+## Phase 3: User Story 2 — User Messages Unaffected (P2)
 
-**Goal**: Les messages utilisateur restent en texte brut, aucun symbole Markdown n'est interprété
+**Goal**: User messages remain plain text, no Markdown symbol is interpreted
 
-**Independent Test**: Envoyer `*hello*` → le message affiché doit montrer `*hello*` littéralement
+**Independent Test**: Send `*hello*` → the displayed message must show `*hello*` literally
 
 ### Implementation
 
 - [x] T005 [US2] Verify in `frontend/src/app/components/chat/chat.html` that user messages use `{{ msg.content }}` without `<markdown>` — no code change required if T003 correctly conditionalizes on `msg.role`
 
-**Checkpoint**: Bulles utilisateur affichées en texte brut — US2 fully functional
+**Checkpoint**: User bubbles displayed as plain text — US2 fully functional
 
 ---
 
 ## Phase 4: Polish
 
-**Purpose**: Validation finale
+**Purpose**: Final validation
 
 - [x] T006 [P] Verify lint passes: `cd frontend && npm run lint`
-- [x] T007 [P] Manual test: poser une question avec formatage attendu (ex. "Quels endpoints API sont disponibles ?") → vérifier listes et code rendus correctement
+- [x] T007 [P] Manual test: ask a question with expected formatting (e.g. "What API endpoints are available?") → verify lists and code are rendered correctly
 
 ---
 
@@ -68,13 +68,13 @@
 
 - **Phase 1 (Foundational)**: No dependencies — start immediately
 - **Phase 2 (US1)**: Depends on Phase 1 completion
-- **Phase 3 (US2)**: Depends on T003 from Phase 2 (même fichier HTML)
+- **Phase 3 (US2)**: Depends on T003 from Phase 2 (same HTML file)
 - **Phase 4 (Polish)**: Depends on Phase 2 + 3
 
 ### Parallel Opportunities
 
-- T004 (SCSS) peut tourner en parallèle de T002+T003 (fichiers différents)
-- T006, T007 (polish) peuvent tourner en parallèle
+- T004 (SCSS) can run in parallel with T002+T003 (different files)
+- T006, T007 (polish) can run in parallel
 
 ---
 
@@ -84,7 +84,7 @@
 
 1. Complete Phase 1 — register provider
 2. Complete Phase 2 — markdown rendering
-3. **STOP and validate**: réponses assistant rendues visuellement
+3. **STOP and validate**: assistant responses visually rendered
 4. Continue Phase 3 → Phase 4
 
 ### Full delivery (~7 tasks)
@@ -104,6 +104,6 @@
 
 - No backend changes required
 - No new npm dependencies (ngx-markdown already installed)
-- `MarkdownComponent` est un composant standalone — pas de module à importer
-- `[data]` binding sur `<markdown>` accepte une string et la rend en HTML
-- Scoper les styles markdown sous `.message.assistant` pour éviter les effets de bord sur les bulles utilisateur
+- `MarkdownComponent` is a standalone component — no module to import
+- `[data]` binding on `<markdown>` accepts a string and renders it as HTML
+- Scope markdown styles under `.message.assistant` to avoid side-effects on user bubbles

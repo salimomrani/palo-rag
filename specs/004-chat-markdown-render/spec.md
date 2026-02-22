@@ -1,4 +1,4 @@
-# Feature Specification: Rendu Markdown dans le Chat
+# Feature Specification: Markdown Rendering in Chat
 
 **Feature Branch**: `004-chat-markdown-render`
 **Created**: 2026-02-20
@@ -6,65 +6,65 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Réponses assistant lisibles avec formatage riche (Priority: P1)
+### User Story 1 — Readable Assistant Responses with Rich Formatting (Priority: P1)
 
-Lorsque l'assistant répond avec du texte formaté (listes, titres, blocs de code, gras, italique), l'utilisateur voit un rendu visuel structuré plutôt qu'une suite de caractères bruts comme `**bold**` ou `- item`.
+When the assistant replies with formatted text (lists, headings, code blocks, bold, italic), the user sees a structured visual rendering rather than a sequence of raw characters like `**bold**` or `- item`.
 
-**Why this priority**: C'est le besoin principal — sans ce rendu, les réponses du LLM sont illisibles dès qu'elles contiennent du formatage.
+**Why this priority**: This is the primary need — without this rendering, LLM responses are unreadable as soon as they contain formatting.
 
-**Independent Test**: Poser une question qui génère une réponse avec une liste et un bloc de code. L'utilisateur doit voir les puces rendues et le code mis en forme, pas les symboles Markdown bruts.
+**Independent Test**: Ask a question that generates a response with a list and a code block. The user must see the rendered bullets and formatted code, not the raw Markdown symbols.
 
 **Acceptance Scenarios**:
 
-1. **Given** l'assistant répond avec `**texte important**`, **When** la réponse est affichée, **Then** le texte apparaît en gras et non comme `**texte important**`
-2. **Given** l'assistant répond avec une liste `- item1\n- item2`, **When** la réponse est affichée, **Then** une liste à puces HTML est rendue
-3. **Given** l'assistant répond avec un bloc de code, **When** la réponse est affichée, **Then** le bloc est rendu avec un fond distinct et une police monospace
-4. **Given** l'assistant répond avec des titres `## Section`, **When** la réponse est affichée, **Then** le titre est rendu hiérarchiquement
+1. **Given** the assistant replies with `**important text**`, **When** the response is displayed, **Then** the text appears in bold and not as `**important text**`
+2. **Given** the assistant replies with a list `- item1\n- item2`, **When** the response is displayed, **Then** an HTML bulleted list is rendered
+3. **Given** the assistant replies with a code block, **When** the response is displayed, **Then** the block is rendered with a distinct background and a monospace font
+4. **Given** the assistant replies with headings `## Section`, **When** the response is displayed, **Then** the heading is rendered hierarchically
 
 ---
 
-### User Story 2 — Messages utilisateur non affectés (Priority: P2)
+### User Story 2 — User Messages Unaffected (Priority: P2)
 
-Les messages envoyés par l'utilisateur continuent d'être affichés tels quels, en texte brut. Si un utilisateur tape `**hello**`, il voit `**hello**` et non du texte en gras.
+Messages sent by the user continue to be displayed as-is, in plain text. If a user types `**hello**`, they see `**hello**` and not bold text.
 
-**Why this priority**: Différencie clairement la bulle utilisateur de la bulle assistant. Cohérent avec les conventions des interfaces de chat IA.
+**Why this priority**: Clearly differentiates the user bubble from the assistant bubble. Consistent with AI chat interface conventions.
 
-**Independent Test**: Envoyer un message contenant des symboles Markdown. Le message utilisateur doit s'afficher en texte brut, non rendu.
+**Independent Test**: Send a message containing Markdown symbols. The user message must display as plain text, not rendered.
 
 **Acceptance Scenarios**:
 
-1. **Given** l'utilisateur envoie `*hello*`, **When** le message est affiché, **Then** il s'affiche comme `*hello*` sans interprétation
-2. **Given** l'assistant répond et l'utilisateur répond à nouveau, **When** les deux messages sont affichés, **Then** seul le message assistant est rendu en Markdown
+1. **Given** the user sends `*hello*`, **When** the message is displayed, **Then** it displays as `*hello*` without interpretation
+2. **Given** the assistant responds and the user replies again, **When** both messages are displayed, **Then** only the assistant message is rendered in Markdown
 
 ---
 
 ### Edge Cases
 
-- Que se passe-t-il si la réponse est vide ou ne contient aucun Markdown ? → Affichage du texte tel quel, sans erreur
-- Que se passe-t-il si la réponse est en cours de streaming (tokens partiels) ? → Le rendu progressif reste stable et ne produit pas de HTML cassé
-- Que se passe-t-il si le contenu Markdown est malformé ? → Rendu best-effort sans erreur visible
+- What happens if the response is empty or contains no Markdown? → Display the text as-is, without error
+- What happens if the response is mid-stream (partial tokens)? → Progressive rendering remains stable and does not produce broken HTML
+- What happens if the Markdown content is malformed? → Best-effort rendering with no visible error
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Le système DOIT rendre le contenu Markdown des messages assistant en HTML visuel (gras, italique, listes, titres, blocs de code)
-- **FR-002**: Les messages utilisateur DOIVENT être affichés en texte brut, sans interprétation Markdown
-- **FR-003**: Le rendu DOIT fonctionner durant le streaming token-par-token sans casser l'affichage
-- **FR-004**: Les styles du rendu Markdown DOIVENT être cohérents avec la charte graphique existante (thème sombre du chat)
-- **FR-005**: Le rendu DOIT gérer gracieusement le Markdown malformé sans erreur d'interface
+- **FR-001**: The system MUST render the Markdown content of assistant messages as visual HTML (bold, italic, lists, headings, code blocks)
+- **FR-002**: User messages MUST be displayed as plain text, without Markdown interpretation
+- **FR-003**: Rendering MUST work during token-by-token streaming without breaking the display
+- **FR-004**: Markdown rendering styles MUST be consistent with the existing design (dark theme of the chat)
+- **FR-005**: Rendering MUST gracefully handle malformed Markdown without UI errors
 
 ### Assumptions
 
-- La bibliothèque de rendu Markdown est déjà disponible dans le projet frontend
-- Les réponses du LLM peuvent contenir tout sous-ensemble de Markdown standard
-- Aucune donnée sensible n'est impliquée dans ce rendu
+- The Markdown rendering library is already available in the frontend project
+- LLM responses can contain any subset of standard Markdown
+- No sensitive data is involved in this rendering
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% des éléments Markdown courants (gras, listes, code, titres) sont rendus visuellement dans les messages assistant
-- **SC-002**: 0 régression sur les messages utilisateur — aucun symbole Markdown n'est interprété côté utilisateur
-- **SC-003**: Le rendu fonctionne sans délai perceptible ni flash visuel durant le streaming
-- **SC-004**: Les styles du rendu s'intègrent sans rupture visuelle dans l'interface existante
+- **SC-001**: 100% of common Markdown elements (bold, lists, code, headings) are visually rendered in assistant messages
+- **SC-002**: 0 regressions on user messages — no Markdown symbol is interpreted on the user side
+- **SC-003**: Rendering works without noticeable delay or visual flash during streaming
+- **SC-004**: Rendering styles integrate without visual breakage in the existing interface
