@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = 50
 
     # Guardrails
+    guardrail_min_length: int = 6
     guardrail_max_length: int = 500
 
     # API tuning

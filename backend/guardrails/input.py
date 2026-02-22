@@ -5,11 +5,12 @@ from core.config import settings
 
 OFFENSIVE_PATTERNS = [
     r"\bfuck\b", r"\bshit\b", r"\basshole\b", r"\bbitch\b",
-    r"\bcunt\b", r"\bdick\b", r"\bputa\b", r"\bputain\b",
+    r"\bcunt\b", r"\bdick\b", r"\bputa\b", r"\bpute\b", r"\bputain\b",
     r"\bsalope\b", r"\bconnard\b", r"\bmerde\b",
 ]
 INJECTION_PATTERNS = [
-    r"ignore (previous|prior|all) instructions",
+    # English
+    r"ignore (all\s+)?(previous|prior|all)\s+instructions",
     r"jailbreak",
     r"forget your (system prompt|instructions|context)",
     r"you are now",
@@ -17,6 +18,13 @@ INJECTION_PATTERNS = [
     r"disregard (your|the) (instructions|guidelines|rules)",
     r"(system|assistant)\s*:",
     r"<\|im_start\|>",
+    # French
+    r"oublie (tout ce qu|tes instructions|tes consignes)",
+    r"ignore (tes|vos) (instructions|consignes|règles)",
+    r"réponds (librement|sans restriction)",
+    r"tu es (maintenant|désormais) (un|une)",
+    r"comporte-toi comme",
+    r"fais semblant d'être",
 ]
 
 
@@ -57,6 +65,8 @@ class InputGuardrail:
         """
         if not question or not question.strip():
             return GuardrailResult(passed=False, reason="guardrail:empty_question")
+        if len(question.strip()) < settings.guardrail_min_length:
+            return GuardrailResult(passed=False, reason="guardrail:too_short")
         if len(question) > settings.guardrail_max_length:
             return GuardrailResult(passed=False, reason="guardrail:length_exceeded")
         if self._injection_re.search(question):
