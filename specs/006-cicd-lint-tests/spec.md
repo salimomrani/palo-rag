@@ -87,6 +87,8 @@ On every push touching `backend/` or `frontend/`, an extended analysis job runs 
 - **FR-007**: The system MUST provide readable error messages on failure (lint or test).
 - **FR-008**: The system MUST run a non-blocking code review job on every push that touches backend or frontend files.
 - **FR-009**: The code review job MUST report findings as inline annotations in the PR but MUST NOT prevent merge.
+- **FR-010**: The system MUST run a non-blocking conventions check on every push, validating branch naming and conventional commit format (as defined in CLAUDE.md).
+- **FR-011**: The conventions job MUST emit `::warning::` annotations for violations without failing the pipeline.
 
 ## Success Criteria *(mandatory)*
 
@@ -97,3 +99,4 @@ On every push touching `backend/` or `frontend/`, an extended analysis job runs 
 - **SC-003**: Total pipeline duration (lint + tests) does not exceed 5 minutes with a warm dependency cache.
 - **SC-004**: All four blocking jobs run in parallel when both scopes are modified.
 - **SC-005**: The non-blocking review job never prevents a PR from being merged, even when it reports findings.
+- **SC-006**: The conventions job reports branch naming and commit message violations as warnings visible in the Actions tab on every push.
