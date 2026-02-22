@@ -1,9 +1,12 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from api import api_router
+from core.config import settings
 from core.exceptions import (
     GuardrailException,
     ProviderUnavailableException,
@@ -13,7 +16,6 @@ from core.exceptions import (
     vectorstore_exception_handler,
 )
 from core.logging import get_logger
-from core.config import settings
 
 logger = get_logger(__name__)
 

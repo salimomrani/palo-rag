@@ -1,8 +1,9 @@
-import math
-from models.db import EvaluationResult
 from sqlalchemy.orm import Session
-from quality.dataset import REFERENCE_DATASET
+
 from core.config import settings
+from models.db import EvaluationResult
+from quality.dataset import REFERENCE_DATASET
+
 
 def run_quality_check(provider, vectorstore, engine, limit: int = 0):
     """Run the reference evaluation dataset and persist results to PostgreSQL.

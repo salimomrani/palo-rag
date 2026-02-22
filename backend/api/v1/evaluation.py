@@ -1,8 +1,10 @@
 import json
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
+from dependencies import get_engine, get_provider, get_vectorstore
 from models.db import EvaluationResult
-from dependencies import get_provider, get_vectorstore, get_engine
 
 router = APIRouter(tags=["evaluation"])
 
@@ -26,8 +28,9 @@ def run_quality_check(
     engine=Depends(get_engine),
 ):
     import os
-    from quality.runner import run_quality_check as _run
+
     from quality.report import generate_quality_report_md
+    from quality.runner import run_quality_check as _run
 
     scores = _run(provider=provider, vectorstore=vectorstore, engine=engine, limit=None)
 

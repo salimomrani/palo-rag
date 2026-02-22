@@ -1,7 +1,9 @@
 import os
 import uuid
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from langchain.schema import Document as LCDocument
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from core.config import settings
 
 

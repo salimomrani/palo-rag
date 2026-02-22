@@ -1,8 +1,10 @@
 import json
+
 from fastapi import APIRouter, Depends
-from logging_service.store import LogStore
-from dependencies import get_engine
+
 from core.config import settings
+from dependencies import get_engine
+from logging_service.store import LogStore
 
 router = APIRouter(tags=["logs"])
 

@@ -1,7 +1,9 @@
 import uuid
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from models.db import Base, Document, QueryLog, EvaluationResult
+
+from models.db import Base, Document, EvaluationResult, QueryLog
 
 engine = create_engine("sqlite:///:memory:")
 

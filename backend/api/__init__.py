@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from api.v1 import query, ingest, logs, evaluation
+
+from api.v1 import evaluation, ingest, logs, query
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(query.router)

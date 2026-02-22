@@ -1,19 +1,22 @@
 """Ingest all corpus documents into ChromaDB and SQLite."""
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from pathlib import Path
-from sqlalchemy.orm import Session
 import uuid
-from models.db import Base, Document
-from dependencies import get_provider, get_vectorstore, get_engine
-from rag.ingestion import IngestionService
+from pathlib import Path
+
+from sqlalchemy.orm import Session
+
 from core.logging import get_logger
+from dependencies import get_engine, get_provider, get_vectorstore
+from models.db import Document
+from rag.ingestion import IngestionService
 
 logger = get_logger(__name__)
 
