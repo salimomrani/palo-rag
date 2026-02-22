@@ -1,4 +1,4 @@
-# Feature Specification: Tests Unitaires Frontend
+# Feature Specification: Frontend Unit Tests
 
 **Feature Branch**: `005-frontend-unit-tests`
 **Created**: 2026-02-20
@@ -6,87 +6,87 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Configuration et exécution de la suite de tests (Priority: P1)
+### User Story 1 — Test Suite Configuration and Execution (Priority: P1)
 
-Un développeur peut lancer la suite de tests avec une seule commande depuis le dossier frontend, et obtenir un rapport clair indiquant quels tests passent ou échouent.
+A developer can launch the test suite with a single command from the frontend folder and obtain a clear report showing which tests pass or fail.
 
-**Why this priority**: Sans infrastructure de test fonctionnelle, aucun test ne peut être écrit ni exécuté. C'est le prérequis bloquant.
+**Why this priority**: Without a working test infrastructure, no test can be written or executed. This is the blocking prerequisite.
 
-**Independent Test**: Exécuter `npm test` dans le frontend → la commande s'exécute sans erreur de configuration et affiche un rapport de résultats.
+**Independent Test**: Run `npm test` in the frontend → the command runs without configuration error and displays a results report.
 
 **Acceptance Scenarios**:
 
-1. **Given** un dépôt cloné proprement, **When** le développeur exécute la commande de test, **Then** la suite démarre sans erreur de configuration et un rapport s'affiche
-2. **Given** un test qui échoue intentionnellement, **When** la suite tourne, **Then** l'échec est clairement identifié avec le nom du test et la cause
+1. **Given** a freshly cloned repository, **When** the developer runs the test command, **Then** the suite starts without configuration error and a report is displayed
+2. **Given** an intentionally failing test, **When** the suite runs, **Then** the failure is clearly identified with the test name and the cause
 
 ---
 
-### User Story 2 — Tests du composant Chat (Priority: P2)
+### User Story 2 — Chat Component Tests (Priority: P2)
 
-Les comportements clés du composant Chat sont couverts par des tests : envoi de message, affichage des chips de suggestion, et rendu Markdown des réponses assistant.
+The key behaviours of the Chat component are covered by tests: message sending, display of suggestion chips, and Markdown rendering of assistant responses.
 
-**Why this priority**: Le Chat est le composant principal de l'application — ses régressions ont le plus d'impact utilisateur.
+**Why this priority**: Chat is the main component of the application — its regressions have the greatest user impact.
 
-**Independent Test**: Exécuter uniquement les tests Chat → tous passent, les comportements critiques sont vérifiés sans lancer l'application.
+**Independent Test**: Run only the Chat tests → all pass, critical behaviours are verified without launching the application.
 
 **Acceptance Scenarios**:
 
-1. **Given** le composant Chat initialisé, **When** la conversation est vide, **Then** les chips de suggestion sont visibles
-2. **Given** les chips visibles, **When** l'utilisateur clique sur un chip, **Then** le message est envoyé et les chips disparaissent
-3. **Given** le composant Chat, **When** `sendMessage()` est appelé avec un prompt vide, **Then** aucun message n'est ajouté
-4. **Given** une réponse assistant reçue, **When** le contenu est affiché, **Then** les messages assistant utilisent le rendu riche et les messages utilisateur restent en texte brut
-5. **Given** le composant en cours de chargement, **When** `isLoading` est vrai, **Then** le bouton d'envoi est désactivé
+1. **Given** the Chat component initialised, **When** the conversation is empty, **Then** the suggestion chips are visible
+2. **Given** chips visible, **When** the user clicks a chip, **Then** the message is sent and the chips disappear
+3. **Given** the Chat component, **When** `sendMessage()` is called with an empty prompt, **Then** no message is added
+4. **Given** an assistant response received, **When** the content is displayed, **Then** assistant messages use rich rendering and user messages remain plain text
+5. **Given** the component in loading state, **When** `isLoading` is true, **Then** the send button is disabled
 
 ---
 
-### User Story 3 — Tests du composant Ingest (Priority: P3)
+### User Story 3 — Ingest Component Tests (Priority: P3)
 
-Les comportements de sélection et suppression groupée du composant Ingest sont couverts : sélection individuelle, sélection totale, état du bouton de suppression.
+The selection and bulk-delete behaviours of the Ingest component are covered: individual selection, full selection, delete button state.
 
-**Why this priority**: L'Ingest contient une logique d'état complexe (signals dérivés, Set mutable) — les tests protègent contre les régressions de cette logique.
+**Why this priority**: Ingest contains complex state logic (derived signals, mutable Set) — tests protect against regressions in this logic.
 
-**Independent Test**: Exécuter uniquement les tests Ingest → les scénarios de sélection et de suppression passent sans lancer l'API.
+**Independent Test**: Run only the Ingest tests → selection and deletion scenarios pass without launching the API.
 
 **Acceptance Scenarios**:
 
-1. **Given** une liste de documents, **When** l'utilisateur coche une ligne, **Then** `selectedIds` contient cet ID et `noneSelected` devient faux
-2. **Given** tous les documents cochés, **When** `allSelected` est évalué, **Then** il retourne vrai
-3. **Given** une sélection partielle, **When** `someSelected` est évalué, **Then** il retourne vrai et `allSelected` retourne faux
-4. **Given** aucune sélection, **When** l'état est évalué, **Then** le bouton "Supprimer la sélection" est désactivé
-5. **Given** une sélection active, **When** `toggleAll()` est appelé, **Then** tous les documents sont sélectionnés ; un second appel vide la sélection
+1. **Given** a list of documents, **When** the user checks a row, **Then** `selectedIds` contains that ID and `noneSelected` becomes false
+2. **Given** all documents checked, **When** `allSelected` is evaluated, **Then** it returns true
+3. **Given** a partial selection, **When** `someSelected` is evaluated, **Then** it returns true and `allSelected` returns false
+4. **Given** no selection, **When** the state is evaluated, **Then** the "Delete Selection" button is disabled
+5. **Given** an active selection, **When** `toggleAll()` is called, **Then** all documents are selected; a second call clears the selection
 
 ---
 
 ### Edge Cases
 
-- Que se passe-t-il si un test dépend d'un service HTTP réel ? → Les appels HTTP doivent être interceptés/mockés, jamais exécutés réellement
-- Que se passe-t-il si un composant utilise `inject()` ? → L'injection de dépendances doit fonctionner dans le contexte de test
-- Que se passe-t-il si les signaux Angular ne se mettent pas à jour synchronement dans les tests ? → Les assertions sur les signaux doivent être faites après propagation des changements
+- What happens if a test depends on a real HTTP service? → HTTP calls must be intercepted/mocked, never actually executed
+- What happens if a component uses `inject()`? → Dependency injection must work in the test context
+- What happens if Angular signals do not update synchronously in tests? → Signal assertions must be made after change propagation
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: La suite de tests DOIT s'exécuter avec une commande unique sans configuration manuelle supplémentaire
-- **FR-002**: Les tests DOIVENT être isolés — aucun test ne doit dépendre de l'état d'un autre test
-- **FR-003**: Les appels réseau (API RAG) DOIVENT être interceptés et remplacés par des données fictives dans tous les tests
-- **FR-004**: Les tests du composant Chat DOIVENT couvrir : état vide (chips), envoi de message, validation du prompt vide, distinction assistant/utilisateur, état de chargement
-- **FR-005**: Les tests du composant Ingest DOIVENT couvrir : sélection individuelle, computed signals (`allSelected`, `someSelected`, `noneSelected`), `toggleAll()`, état des boutons de suppression
-- **FR-006**: Les tests DOIVENT s'exécuter en moins de 30 secondes pour l'ensemble de la suite
-- **FR-007**: Un rapport de couverture DOIT être disponible sur demande (commande séparée)
+- **FR-001**: The test suite MUST run with a single command without additional manual configuration
+- **FR-002**: Tests MUST be isolated — no test must depend on the state of another test
+- **FR-003**: Network calls (RAG API) MUST be intercepted and replaced with mock data in all tests
+- **FR-004**: Chat component tests MUST cover: empty state (chips), message sending, empty prompt validation, assistant/user distinction, loading state
+- **FR-005**: Ingest component tests MUST cover: individual selection, computed signals (`allSelected`, `someSelected`, `noneSelected`), `toggleAll()`, delete button state
+- **FR-006**: Tests MUST run in under 30 seconds for the entire suite
+- **FR-007**: A coverage report MUST be available on demand (separate command)
 
 ### Assumptions
 
-- L'outil de test (Vitest) est déjà installé — seule la configuration manque
-- Les composants sont standalone Angular 21 avec signals et OnPush — les utilitaires de test doivent le supporter
-- Aucune base de données ni serveur réel n'est requis pour les tests unitaires
+- The test tool (Vitest) is already installed — only configuration is missing
+- Components are standalone Angular 21 with signals and OnPush — test utilities must support this
+- No database or real server is required for unit tests
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: La commande de test s'exécute en moins de 30 secondes sur un poste de développement standard
-- **SC-002**: 100% des scénarios d'acceptance définis dans les user stories sont couverts par au moins un test
-- **SC-003**: 0 appel réseau réel effectué durant l'exécution des tests
-- **SC-004**: Chaque test peut être exécuté indépendamment et produit le même résultat
-- **SC-005**: Un test en échec identifie clairement le composant, le scénario et la valeur attendue vs reçue
+- **SC-001**: The test command runs in under 30 seconds on a standard developer workstation
+- **SC-002**: 100% of the acceptance scenarios defined in the user stories are covered by at least one test
+- **SC-003**: 0 real network calls made during test execution
+- **SC-004**: Each test can be run independently and produces the same result
+- **SC-005**: A failing test clearly identifies the component, the scenario, and the expected vs received value

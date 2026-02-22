@@ -7,7 +7,7 @@
 
 ## Summary
 
-Configurer ESLint v9 (flat config) sur le frontend Angular 21 avec un ensemble de règles couvrant : qualité TypeScript (`no-explicit-any`, `no-non-null-assertion`), bonnes pratiques Angular (`OnPush`, `inject()`), conventions RxJS (subscribe imbriqué interdit, suffixe `$` pour les Observables), et qualité générale (`no-console`, complexité). Le code existant sera corrigé pour atteindre 0 erreur. La commande `npm run lint` sera ajoutée et passera à 0 erreur/0 warning.
+Configure ESLint v9 (flat config) on the Angular 21 frontend with a set of rules covering: TypeScript quality (`no-explicit-any`, `no-non-null-assertion`), Angular best practices (`OnPush`, `inject()`), RxJS conventions (nested subscribe banned, `$` suffix for Observables), and general quality (`no-console`, complexity). Existing code will be fixed to reach 0 errors. The `npm run lint` command will be added and will pass with 0 errors / 0 warnings.
 
 ---
 
@@ -16,33 +16,33 @@ Configurer ESLint v9 (flat config) sur le frontend Angular 21 avec un ensemble d
 **Language/Version**: TypeScript 5.9.2 / Angular 21.1.0 / Node.js 22 LTS
 **Primary Dependencies**:
 - `eslint ^9.0.0` — core linter (flat config)
-- `@angular-eslint/eslint-plugin ^21.0.0` — règles Angular
-- `@angular-eslint/eslint-plugin-template ^21.0.0` — règles templates HTML
+- `@angular-eslint/eslint-plugin ^21.0.0` — Angular rules
+- `@angular-eslint/eslint-plugin-template ^21.0.0` — HTML template rules
 - `@angular-eslint/builder ^21.0.0` — ng lint builder
 - `angular-eslint ^21.0.0` — meta-package configs
-- `typescript-eslint ^8.0.0` — règles TypeScript
-- `@eslint/js ^9.0.0` — règles JS base
-- `eslint-plugin-rxjs-x ^0.5.0` — règles RxJS (ESLint v9 compatible)
+- `typescript-eslint ^8.0.0` — TypeScript rules
+- `@eslint/js ^9.0.0` — base JS rules
+- `eslint-plugin-rxjs-x ^0.5.0` — RxJS rules (ESLint v9 compatible)
 
-**Storage**: N/A — feature purement tooling, aucune persistance
-**Testing**: Vérification via `npm run lint` (exit code 0)
+**Storage**: N/A — purely a tooling feature, no persistence
+**Testing**: Verified via `npm run lint` (exit code 0)
 **Target Platform**: macOS / Linux (local dev), Angular CLI 21
-**Performance Goals**: Lint complet < 30 secondes
-**Constraints**: Zéro erreur, zéro warning sur `npm run lint` après correction du code existant
+**Performance Goals**: Full lint < 30 seconds
+**Constraints**: Zero errors, zero warnings on `npm run lint` after fixing existing code
 
 ---
 
 ## Constitution Check
 
-| Principe | Impact | Statut |
-|----------|--------|--------|
-| I. Local-First | Aucun — tooling pur, aucune donnée traitée | ✅ N/A |
-| II. Traceability | Aucun | ✅ N/A |
-| III. Fail transparently | Aucun | ✅ N/A |
-| IV. Separation of Concerns | Le linter est un outil de dev, pas un module applicatif | ✅ Conforme |
-| V. Demo-Ready Reproducibility | `npm run lint` doit être reproductible depuis un clean checkout | ✅ Conforme — les deps seront en `devDependencies` |
+| Principle | Impact | Status |
+|-----------|--------|--------|
+| I. Local-First | None — pure tooling, no data processed | ✅ N/A |
+| II. Traceability | None | ✅ N/A |
+| III. Fail transparently | None | ✅ N/A |
+| IV. Separation of Concerns | The linter is a dev tool, not an application module | ✅ Compliant |
+| V. Demo-Ready Reproducibility | `npm run lint` must be reproducible from a clean checkout | ✅ Compliant — deps will be in `devDependencies` |
 
-**Gate**: ✅ PASS — aucune violation constitutionnelle.
+**Gate**: ✅ PASS — no constitutional violation.
 
 ---
 
@@ -52,54 +52,54 @@ Configurer ESLint v9 (flat config) sur le frontend Angular 21 avec un ensemble d
 
 ```text
 specs/002-angular-eslint-rules/
-├── plan.md         ✅ (ce fichier)
+├── plan.md         ✅ (this file)
 ├── research.md     ✅ (Phase 0)
 └── tasks.md        (Phase 2 — /speckit.tasks)
 ```
 
-### Source Code (fichiers modifiés/créés)
+### Source Code (files modified/created)
 
 ```text
 frontend/
-├── eslint.config.mjs          # NOUVEAU — configuration ESLint flat config
-├── package.json               # Ajout deps + script "lint"
-├── angular.json               # Ajout cible "lint" avec @angular-eslint/builder
+├── eslint.config.mjs          # NEW — ESLint flat config
+├── package.json               # Add deps + "lint" script
+├── angular.json               # Add "lint" target with @angular-eslint/builder
 └── src/app/
     ├── services/
-    │   └── rag-api.service.ts # Fix: renommer méthodes Observable$ si nécessaire
+    │   └── rag-api.service.ts # Fix: rename Observable$ methods if needed
     └── components/
         └── chat/
-            └── chat.ts        # Fix: ViewChild ! → assertion typée si possible
+            └── chat.ts        # Fix: ViewChild ! → typed assertion if possible
 ```
 
-**Structure Decision**: Frontend uniquement — aucun changement backend.
+**Structure Decision**: Frontend only — no backend changes.
 
 ---
 
 ## Phase 0: Research ✅
 
-Voir [research.md](./research.md).
+See [research.md](./research.md).
 
-**Décisions clés** :
+**Key decisions**:
 - ESLint v9 flat config (`eslint.config.mjs`)
-- `eslint-plugin-rxjs-x` pour les règles RxJS (compatible ESLint v9)
-- `@angular-eslint/builder` pour `ng lint`
-- `no-non-null-assertion` → `warn` (ViewChild pattern courant en Angular)
+- `eslint-plugin-rxjs-x` for RxJS rules (ESLint v9 compatible)
+- `@angular-eslint/builder` for `ng lint`
+- `no-non-null-assertion` → `warn` (ViewChild pattern common in Angular)
 - `no-console` → `warn`
 
 ---
 
 ## Phase 1: Design
 
-### Configuration ESLint (`frontend/eslint.config.mjs`)
+### ESLint Configuration (`frontend/eslint.config.mjs`)
 
-Structure en 3 blocs :
+Structure in 3 blocks:
 
 ```
-Block 1 — Ignores globaux
+Block 1 — Global ignores
   dist/, node_modules/, .angular/, coverage/
 
-Block 2 — Fichiers TypeScript (*.ts)
+Block 2 — TypeScript files (*.ts)
   extends: js.recommended + tseslint.recommended + angular.tsRecommended
   processor: angular.processInlineTemplates
   rules:
@@ -114,25 +114,25 @@ Block 2 — Fichiers TypeScript (*.ts)
       @angular-eslint/no-empty-lifecycle-hook: error
     RxJS:
       rxjs-x/no-nested-subscribe: error
-      rxjs-x/finnish: error ($ suffix sur propriétés/variables Observable)
-    Général:
+      rxjs-x/finnish: error ($ suffix on Observable properties/variables)
+    General:
       no-console: warn
       complexity: warn (max: 10)
 
-Block 3 — Templates HTML (*.html)
+Block 3 — HTML templates (*.html)
   extends: angular.templateRecommended + angular.templateAccessibility
 ```
 
-### Corrections du code existant anticipées
+### Anticipated fixes on existing code
 
-| Fichier | Violation | Correction |
-|---------|-----------|------------|
-| `chat.ts:34` | `messagesEl!` → `no-non-null-assertion` (warn) | Accepté en warn — pattern ViewChild valide |
-| `rag-api.service.ts` | `streamQuery()` retourne `Observable<StreamEvent>` sans `$` | Renommer `streamQuery$()` **ou** exclure la règle sur les méthodes de service |
+| File | Violation | Fix |
+|------|-----------|-----|
+| `chat.ts:34` | `messagesEl!` → `no-non-null-assertion` (warn) | Accepted as warn — valid ViewChild pattern |
+| `rag-api.service.ts` | `streamQuery()` returns `Observable<StreamEvent>` without `$` | Rename to `streamQuery$()` **or** exclude rule for Angular service methods |
 
-> **Note**: La règle `rxjs-x/finnish` s'applique aux variables/propriétés de classe. Les méthodes retournant un Observable dans un service Angular sont un cas-limite — à configurer en `warn` pour les méthodes de service Angular (`@Injectable`).
+> **Note**: The `rxjs-x/finnish` rule applies to class variables/properties. Methods returning an Observable in an Angular service are an edge case — configure as `warn` for Angular service methods (`@Injectable`).
 
-### `package.json` — script lint
+### `package.json` — lint script
 
 ```json
 "scripts": {
@@ -140,7 +140,7 @@ Block 3 — Templates HTML (*.html)
 }
 ```
 
-### `angular.json` — cible lint
+### `angular.json` — lint target
 
 ```json
 "lint": {
@@ -156,17 +156,17 @@ Block 3 — Templates HTML (*.html)
 
 ---
 
-## Trade-offs documentés
+## Trade-offs documented
 
-| Décision | Avantage | Inconvénient |
-|----------|----------|--------------|
-| `no-non-null-assertion: warn` au lieu de `error` | Évite de casser `@ViewChild('el') el!` pattern | Moins strict |
-| `no-console: warn` | Préserve la productivité dev local | Visible en CI seulement avec `--max-warnings 0` |
-| `eslint-plugin-rxjs-x` au lieu de `eslint-plugin-rxjs` | Compatible ESLint v9 | Fork moins connu, dépend de la maintenance communautaire |
-| Convention `$` sur variables seulement (pas méthodes de service) | Évite de casser les APIs publiques du service | Couverture partielle de la convention |
+| Decision | Advantage | Disadvantage |
+|----------|-----------|--------------|
+| `no-non-null-assertion: warn` instead of `error` | Avoids breaking `@ViewChild('el') el!` pattern | Less strict |
+| `no-console: warn` | Preserves local dev productivity | Only visible in CI with `--max-warnings 0` |
+| `eslint-plugin-rxjs-x` instead of `eslint-plugin-rxjs` | Compatible with ESLint v9 | Less well-known fork, depends on community maintenance |
+| `$` convention on variables only (not service methods) | Avoids breaking public service APIs | Partial coverage of the convention |
 
 ---
 
 ## Complexity Tracking
 
-Aucune violation constitutionnelle. Section non applicable.
+No constitutional violations. Section not applicable.

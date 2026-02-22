@@ -1,35 +1,35 @@
 # Research: Frontend Unit Testing — Angular 21 + Vitest
 
-## Decision 1: Test runner — @angular/build:unit-test natif
+## Decision 1: Test runner — native @angular/build:unit-test
 
-**Decision**: Utiliser le builder `@angular/build:unit-test` avec `runner: "vitest"` (natif Angular 21)
-**Rationale**: Angular 21 supporte Vitest nativement via `@angular/build`. Pas besoin d'`@analogjs/vitest-angular` ni de `vitest.config.ts` séparé. Le `tsconfig.spec.json` avec `vitest/globals` est déjà en place. Seul ajout dans `angular.json` : `"runner": "vitest"` sous la cible `test`.
-**Alternatives écartées**: `@analogjs/vitest-angular` (overhead inutile), Karma (obsolète depuis Angular 16), Jest (non aligné avec le tooling Angular CLI)
+**Decision**: Use the `@angular/build:unit-test` builder with `runner: "vitest"` (native Angular 21)
+**Rationale**: Angular 21 supports Vitest natively via `@angular/build`. No need for `@analogjs/vitest-angular` or a separate `vitest.config.ts`. The `tsconfig.spec.json` with `vitest/globals` is already in place. The only addition in `angular.json` is `"runner": "vitest"` under the `test` target.
+**Rejected alternatives**: `@analogjs/vitest-angular` (unnecessary overhead), Karma (deprecated since Angular 16), Jest (not aligned with Angular CLI tooling)
 
-## Decision 2: Mocking HTTP — provideHttpClientTesting
+## Decision 2: HTTP mocking — provideHttpClientTesting
 
-**Decision**: `provideHttpClientTesting()` + `HttpTestingController` depuis `@angular/common/http/testing`
-**Rationale**: Solution officielle Angular, compatible avec `inject()`, intercepte tous les appels HTTP sans configuration supplémentaire.
-**Alternatives écartées**: `vi.fn()` sur HttpClient (fragile, couple les tests à l'implémentation)
+**Decision**: `provideHttpClientTesting()` + `HttpTestingController` from `@angular/common/http/testing`
+**Rationale**: Official Angular solution, compatible with `inject()`, intercepts all HTTP calls without additional configuration.
+**Rejected alternatives**: `vi.fn()` on HttpClient (fragile, couples tests to implementation)
 
-## Decision 3: Mocking services — vi.fn() + useValue
+## Decision 3: Service mocking — vi.fn() + useValue
 
-**Decision**: `{ provide: RagApiService, useValue: mockService }` avec `vi.fn()` pour les méthodes
-**Rationale**: Les composants utilisent `inject(RagApiService)` — le provider override via `TestBed.configureTestingModule` est le seul moyen propre de substituer le service.
+**Decision**: `{ provide: RagApiService, useValue: mockService }` with `vi.fn()` for methods
+**Rationale**: Components use `inject(RagApiService)` — provider override via `TestBed.configureTestingModule` is the only clean way to substitute the service.
 
-## Decision 4: Signaux et détection de changements
+## Decision 4: Signals and change detection
 
-**Decision**: `fixture.detectChanges()` après chaque mutation, `TestBed.flushEffects()` pour les effets de signaux
-**Rationale**: Angular 21 en mode OnPush ne déclenche pas automatiquement la détection. `flushEffects()` est requis pour propager les effets de signaux dans les tests.
+**Decision**: `fixture.detectChanges()` after each mutation, `TestBed.flushEffects()` for signal effects
+**Rationale**: Angular 21 in OnPush mode does not automatically trigger detection. `flushEffects()` is required to propagate signal effects in tests.
 
-## Decision 5: Aucun nouveau package npm requis
+## Decision 5: No new npm packages required
 
-**Decision**: 0 nouvelle dépendance — `vitest@4.0.8` et `jsdom@27` déjà installés, `@angular/build` inclut le support Vitest.
-**Rationale**: Le projet est déjà correctement équipé. Seuls ajouts : config `angular.json` + fichiers `*.spec.ts`.
+**Decision**: 0 new dependencies — `vitest@4.0.8` and `jsdom@27` already installed, `@angular/build` includes Vitest support.
+**Rationale**: The project is already correctly equipped. Only additions: `angular.json` config + `*.spec.ts` files.
 
-## Compatibilité confirmée
+## Confirmed compatibility
 
 - Angular 21 + `@angular/build:unit-test` + Vitest ✓
-- `tsconfig.spec.json` avec `"types": ["vitest/globals"]` déjà présent ✓
-- `jsdom@27` déjà installé ✓
-- `ng test` lancera Vitest une fois `runner: "vitest"` ajouté ✓
+- `tsconfig.spec.json` with `"types": ["vitest/globals"]` already present ✓
+- `jsdom@27` already installed ✓
+- `ng test` will launch Vitest once `runner: "vitest"` is added ✓
