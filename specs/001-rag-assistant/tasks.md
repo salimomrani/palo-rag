@@ -181,8 +181,8 @@
 - [x] T057 Run `pytest tests/ -v --tb=short` — all PASSED ✅
 - [x] T058 Run quality check to generate `reports/eval.md`
 - [x] T059 **Commit**: `docs: README, DECISIONS.md — deliverables complete`
-- [ ] T060 Run `/cost` in Claude Code terminal — copy session tokens/cost into `reports/costs.md`
-- [ ] T061 **Commit**: `chore: update costs report — project complete`
+- [x] T060 Run `/cost` in Claude Code terminal — copy session tokens/cost into `reports/costs.md`
+- [x] T061 **Commit**: `chore: update costs report — project complete`
 
 ---
 
