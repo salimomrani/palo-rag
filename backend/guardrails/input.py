@@ -37,7 +37,7 @@ class GuardrailResult:
 class InputGuardrail:
     """Validates user input before it reaches the LLM.
 
-    Checks (in order): empty input → length limit → prompt injection → offensive content.
+    Checks (in order): empty input → min length → max length → prompt injection → offensive content.
     Any failure returns immediately with a reason string; no LLM call is made.
     """
 
@@ -52,6 +52,7 @@ class InputGuardrail:
             GuardrailResult(passed=True) if the input is safe.
             GuardrailResult(passed=False, reason=...) otherwise, where reason is one of:
               - "guardrail:empty_question"
+              - "guardrail:too_short"
               - "guardrail:length_exceeded"
               - "guardrail:prompt_injection"
               - "guardrail:offensive_content"
