@@ -1,12 +1,14 @@
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+from core.logging import get_logger
+from dependencies import get_engine, get_provider, get_vectorstore
 from models.db import Document
 from rag.ingestion import IngestionService
 from rag.vectorstore import delete_by_source
-from dependencies import get_provider, get_vectorstore, get_engine
-from core.logging import get_logger
 
 router = APIRouter(tags=["ingest"])
 logger = get_logger(__name__)

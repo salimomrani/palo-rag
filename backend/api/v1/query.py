@@ -1,12 +1,14 @@
 import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from rag.pipeline import RAGPipeline
+
+from core.logging import get_logger
+from dependencies import get_engine, get_provider, get_vectorstore
 from guardrails.input import InputGuardrail
 from logging_service.store import LogStore
-from dependencies import get_provider, get_vectorstore, get_engine
-from core.logging import get_logger
+from rag.pipeline import RAGPipeline
 
 router = APIRouter(tags=["query"])
 _guardrail = InputGuardrail()

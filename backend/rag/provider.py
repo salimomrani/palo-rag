@@ -1,5 +1,7 @@
 from typing import Generator, Protocol
-from langchain_ollama import OllamaEmbeddings, ChatOllama
+
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+
 from core.config import settings
 
 

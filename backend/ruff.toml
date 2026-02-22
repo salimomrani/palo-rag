@@ -1,0 +1,7 @@
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I"]
+ignore = ["E402", "E501"]
+
+exclude = ["chroma_data", "scripts"]

@@ -1,10 +1,12 @@
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
+
+from dependencies import get_engine, get_provider, get_vectorstore
 from models.db import Base
-from dependencies import get_provider, get_vectorstore, get_engine
 
 
 @pytest.fixture

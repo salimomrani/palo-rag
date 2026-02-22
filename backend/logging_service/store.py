@@ -1,7 +1,9 @@
 import uuid
+
 from sqlalchemy.orm import Session
-from models.db import QueryLog
+
 from logging_service.pii import mask_pii
+from models.db import QueryLog
 
 
 class LogStore:

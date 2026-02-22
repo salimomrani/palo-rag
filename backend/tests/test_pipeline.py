@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
-from rag.pipeline import RAGPipeline, QueryResult
+
+from rag.pipeline import QueryResult, RAGPipeline
 
 
 def make_pipeline():

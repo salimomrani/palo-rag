@@ -1,6 +1,8 @@
 from functools import lru_cache
-from sqlalchemy import create_engine
+
 from langchain_community.vectorstores import Chroma
+from sqlalchemy import create_engine
+
 from core.config import settings
 from rag.provider import get_provider as _get_provider
 

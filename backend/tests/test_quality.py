@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
+
 from models.db import Base
 
 
@@ -34,15 +36,15 @@ def mock_vectorstore():
 
 
 def test_runner_evaluates_full_dataset_by_default(mock_provider, mock_vectorstore, engine):
-    from quality.runner import run_quality_check
     from quality.dataset import REFERENCE_DATASET
+    from quality.runner import run_quality_check
     scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
     assert len(scores["per_question"]) == len(REFERENCE_DATASET)
 
 
 def test_runner_uses_top_k_for_retrieval(mock_provider, mock_vectorstore, engine):
-    from quality.runner import run_quality_check
     from core.config import settings
+    from quality.runner import run_quality_check
     run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
     call_args = mock_vectorstore.similarity_search_with_score.call_args
     k_used = call_args[1].get("k") or call_args[0][1]
@@ -76,9 +78,10 @@ def test_runner_returns_scores(mock_provider, mock_vectorstore, engine):
 
 
 def test_runner_persists_evaluation_result(mock_provider, mock_vectorstore, engine):
-    from quality.runner import run_quality_check
-    from models.db import EvaluationResult
     from sqlalchemy.orm import Session
+
+    from models.db import EvaluationResult
+    from quality.runner import run_quality_check
     run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
     with Session(engine) as session:
         result = session.query(EvaluationResult).first()
@@ -87,8 +90,8 @@ def test_runner_persists_evaluation_result(mock_provider, mock_vectorstore, engi
 
 
 def test_report_generates_markdown(mock_provider, mock_vectorstore, engine, tmp_path):
-    from quality.runner import run_quality_check
     from quality.report import generate_quality_report_md
+    from quality.runner import run_quality_check
     scores = run_quality_check(provider=mock_provider, vectorstore=mock_vectorstore, engine=engine)
     report_path = tmp_path / "eval.md"
     generate_quality_report_md(scores=scores, output_path=str(report_path))

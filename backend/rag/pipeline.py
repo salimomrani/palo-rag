@@ -2,6 +2,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from typing import Generator
+
 from core.config import settings
 from rag.prompts import RAG_PROMPT
 
