@@ -66,5 +66,10 @@
     >
     </textarea>
     <button (click)="sendMessage()" [disabled]="!canSend()">Envoyer</button>
+    @if (messages().length > 0 && !isLoading()) {
+      <button class="btn-clear" (click)="clearConversation()" title="Effacer la conversation">
+        Effacer
+      </button>
+    }
   </div>
 </div>

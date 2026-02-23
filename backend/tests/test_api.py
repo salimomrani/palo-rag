@@ -106,3 +106,42 @@ def test_list_documents_after_ingest(client):
     assert docs[0]["name"] == "doc-a.md"
     assert "id" in docs[0]
     assert "ingested_at" in docs[0]
+
+
+# T005 — RED: POST /query accepts optional history field
+def test_query_endpoint_accepts_history(client):
+    payload = {
+        "question": "Comment configurer Slack ?",
+        "history": [
+            {"role": "user", "content": "Qu'est-ce que PALO Platform ?"},
+            {"role": "assistant", "content": "C'est une plateforme SaaS."},
+        ],
+    }
+    r = client.post("/api/v1/query", json=payload)
+    assert r.status_code == 200
+    assert "answer" in r.json()
+
+
+# T006 — RED: POST /query/stream accepts optional history field
+def test_stream_endpoint_accepts_history(client):
+    payload = {
+        "question": "Comment configurer Slack ?",
+        "history": [
+            {"role": "user", "content": "Qu'est-ce que PALO Platform ?"},
+            {"role": "assistant", "content": "C'est une plateforme SaaS."},
+        ],
+    }
+    with client.stream("POST", "/api/v1/query/stream", json=payload) as r:
+        assert r.status_code == 200
+
+
+# T015 — US3: POST /query with >10 history entries returns 200 (backend accepts and truncates)
+def test_query_with_history_exceeding_cap_is_accepted(client):
+    history = [
+        {"role": "user" if i % 2 == 0 else "assistant", "content": f"message {i}"}
+        for i in range(11)
+    ]
+    payload = {"question": "Comment configurer Slack ?", "history": history}
+    r = client.post("/api/v1/query", json=payload)
+    assert r.status_code == 200
+    assert "answer" in r.json()

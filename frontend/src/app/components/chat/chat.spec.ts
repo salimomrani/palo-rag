@@ -52,15 +52,50 @@ describe('Chat', () => {
     expect(component.canSend()).toBe(false);
   });
 
-  it('should call streamQuery with the prompt when sendMessage is called', () => {
+  it('should call streamQuery with the prompt and empty history when sendMessage is called with no prior messages', () => {
     component.prompt.set('hello');
     component.sendMessage();
-    expect(mockApi.streamQuery).toHaveBeenCalledWith('hello');
+    expect(mockApi.streamQuery).toHaveBeenCalledWith('hello', []);
   });
 
   it('should not call streamQuery when prompt is empty', () => {
     component.prompt.set('');
     component.sendMessage();
     expect(mockApi.streamQuery).not.toHaveBeenCalled();
+  });
+
+  // T012 — US2: clearConversation resets messages and next query sends empty history
+  it('should clear messages when clearConversation is called', () => {
+    component.messages.set([
+      { id: '1', role: 'user', content: 'Q1' },
+      { id: '2', role: 'assistant', content: 'A1' },
+    ]);
+    component.clearConversation();
+    expect(component.messages()).toEqual([]);
+  });
+
+  it('should send empty history after clearConversation', () => {
+    component.messages.set([
+      { id: '1', role: 'user', content: 'Q1' },
+      { id: '2', role: 'assistant', content: 'A1' },
+    ]);
+    component.clearConversation();
+    component.prompt.set('question suivante');
+    component.sendMessage();
+    expect(mockApi.streamQuery).toHaveBeenCalledWith('question suivante', []);
+  });
+
+  // T016 — US3: sendMessage caps history at 12 entries
+  it('should send at most 12 history entries regardless of message count', () => {
+    const manyMessages = Array.from({ length: 20 }, (_, i) => ({
+      id: String(i),
+      role: (i % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+      content: `msg ${i}`,
+    }));
+    component.messages.set(manyMessages);
+    component.prompt.set('nouvelle question');
+    component.sendMessage();
+    const [, historyArg] = mockApi.streamQuery.mock.calls[0];
+    expect(historyArg.length).toBeLessThanOrEqual(12);
   });
 });

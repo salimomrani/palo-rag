@@ -1,4 +1,20 @@
-# Skill: speckit + superpowers — Integrated Workflow
+# Skill: Integrated Workflow (speckit + superpowers)
+
+## Description
+
+Use this skill automatically when the user wants to implement a feature, develop a
+component, build a module, start a non-trivial task, or asks for a full development
+workflow.
+
+Trigger keywords (EN): "new feature", "implement", "develop", "build", "add feature",
+"create feature", "start a task", "full workflow", "spec and implement".
+
+Trigger keywords (FR): "nouvelle feature", "implémenter", "développer", "construire",
+"ajouter une feature", "créer un composant", "nouvelle tâche", "workflow complet",
+"from spec to PR".
+
+Do NOT trigger for: typo fixes, label changes, 1-2 line edits, documentation-only
+updates, or any change explicitly described as "small fix".
 
 ## When to apply
 
@@ -55,11 +71,11 @@ Use `superpowers:dispatching-parallel-agents` when backend and frontend tasks ar
 
 ## Quick reference
 
-| Situation | Action |
-|---|---|
-| New feature | `/speckit.specify` → full pipeline |
+| Situation                  | Action                                    |
+| -------------------------- | ----------------------------------------- |
+| New feature                | `/speckit.specify` → full pipeline        |
 | Spec exists, ready to code | `superpowers:subagent-driven-development` |
-| Blocked on a bug | `superpowers:systematic-debugging` |
-| Before PR | `superpowers:requesting-code-review` |
-| PR ready | `commit-commands:commit-push-pr` |
-| Small fix | Direct edit, no skill |
+| Blocked on a bug           | `superpowers:systematic-debugging`        |
+| Before PR                  | `superpowers:requesting-code-review`      |
+| PR ready                   | `commit-commands:commit-push-pr`          |
+| Small fix                  | Direct edit, no skill                     |

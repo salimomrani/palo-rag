@@ -3,6 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface HistoryEntry {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export type StreamEvent =
   | {
       type: 'meta';
@@ -71,13 +76,13 @@ export class RagApiService {
     return this.http.post<QueryResponse>(`${this.apiUrl}/query`, { question });
   }
 
-  streamQuery(question: string): Observable<StreamEvent> {
+  streamQuery(question: string, history: HistoryEntry[] = []): Observable<StreamEvent> {
     return new Observable((observer) => {
       const controller = new AbortController();
       fetch(`${this.apiUrl}/query/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, history }),
         signal: controller.signal,
       })
         .then((res) => {

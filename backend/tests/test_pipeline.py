@@ -14,6 +14,13 @@ def make_pipeline():
     return RAGPipeline(provider=provider, vectorstore=vectorstore)
 
 
+def _make_history_entry(role: str, content: str):
+    entry = MagicMock()
+    entry.role = role
+    entry.content = content
+    return entry
+
+
 def test_query_returns_answer():
     result = make_pipeline().query("Quels protocoles ?")
     assert isinstance(result, QueryResult)
@@ -41,3 +48,32 @@ def test_query_no_results_returns_low_confidence():
     result = pipeline.query("Hors corpus")
     assert result.confidence_score == 0.0
     assert result.low_confidence is True
+
+
+# T003 — RED: query() with history must pass history-aware prompt to provider
+def test_query_with_history_uses_history_prompt():
+    pipeline = make_pipeline()
+    history = [
+        _make_history_entry("user", "Quelles sont les étapes d'onboarding ?"),
+        _make_history_entry("assistant", "Il y a 3 étapes : A, B, C."),
+    ]
+    pipeline.query("Qui est responsable de l'étape A ?", history=history)
+    called_prompt = pipeline._provider.generate.call_args[0][0]
+    assert "Historique" in called_prompt
+    assert "Utilisateur" in called_prompt
+    assert "étapes d'onboarding" in called_prompt
+
+
+# T004 — RED: stream_query() with history must pass history-aware prompt
+def test_stream_query_with_history_uses_history_prompt():
+    pipeline = make_pipeline()
+    pipeline._provider.stream_generate.return_value = iter(["token"])
+    history = [
+        _make_history_entry("user", "Comment configurer l'API ?"),
+        _make_history_entry("assistant", "Via le fichier config.yaml."),
+    ]
+    list(pipeline.stream_query("Et pour l'authentification ?", history=history))
+    called_prompt = pipeline._provider.stream_generate.call_args[0][0]
+    assert "Historique" in called_prompt
+    assert "Utilisateur" in called_prompt
+    assert "config.yaml" in called_prompt
