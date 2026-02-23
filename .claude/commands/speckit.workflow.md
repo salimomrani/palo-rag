@@ -62,6 +62,12 @@ Use this command as the default orchestration workflow when the user asks to imp
 - If request is a small fix: do a direct edit and skip spec workflow.
 - If no argument is provided: resume the latest spec and continue from the current phase based on existing artifacts.
 
+## Brainstorming Integration (superpowers)
+
+- For a **new feature / new component / non-trivial request with user input**: invoke `superpowers:brainstorming` **before** `/speckit.specify`.
+- For **resume mode (no arguments)**: do **not** invoke `brainstorming` by default; resume directly from the detected phase.
+- Rationale: brainstorming is for problem framing; resume mode already has framing in `spec.md` / `plan.md` / `tasks.md`.
+
 ## No-Argument Resume Behavior (Default)
 
 When `/speckit.workflow` is invoked with no arguments, do **not** ask for a new feature request by default.
@@ -95,6 +101,7 @@ Notes:
 Run these in order (clarify/analyze optional as noted):
 
 ```text
+superpowers:brainstorming  -> required for new feature requests before spec creation (skip in resume mode)
 /speckit.specify    -> create spec in specs/<NNN>-<name>/spec.md
 /speckit.clarify    -> optional, resolve ambiguities if spec contains [NEEDS CLARIFICATION]
 /speckit.plan       -> generate plan.md (architecture, tech decisions)
@@ -143,7 +150,7 @@ Rule:
 
 | Situation | Action |
 |---|---|
-| New feature | `/speckit.specify` then full pipeline |
+| New feature | `superpowers:brainstorming` -> `/speckit.specify` -> full pipeline |
 | `/speckit.workflow` with no args | Resume latest `specs/<NNN>-*` at current phase |
 | Spec exists, ready to code | `superpowers:subagent-driven-development` |
 | Blocked on a bug | `superpowers:systematic-debugging` |

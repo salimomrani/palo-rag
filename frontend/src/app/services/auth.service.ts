@@ -11,6 +11,25 @@ interface LoginResponse {
 
 const AUTH_TOKEN_STORAGE_KEY = 'auth_token';
 
+function decodeJwtPayload(token: string): { exp?: number } | null {
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+    const decoded = atob(padded);
+    return JSON.parse(decoded) as { exp?: number };
+  } catch {
+    return null;
+  }
+}
+
+function isExpiredJwt(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) return false;
+  return payload.exp <= Math.floor(Date.now() / 1000);
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -21,9 +40,11 @@ export class AuthService {
 
   constructor() {
     const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-    if (storedToken) {
+    if (storedToken && !isExpiredJwt(storedToken)) {
       this.token.set(storedToken);
       this.isAuthenticated.set(true);
+    } else if (storedToken) {
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
     }
 
     effect(() => {

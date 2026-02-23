@@ -46,6 +46,16 @@ describe('App', () => {
     expect(button).toBeTruthy();
   });
 
+  it('should hide app navigation links when not authenticated', () => {
+    mockAuthService.isAuthenticated.mockReturnValue(false);
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    const navLinks = fixture.nativeElement.querySelectorAll('.nav-links a');
+    expect(navLinks.length).toBe(0);
+  });
+
   it('should call authService.logout on button click', () => {
     mockAuthService.isAuthenticated.mockReturnValue(true);
 

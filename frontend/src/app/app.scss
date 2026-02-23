@@ -33,6 +33,7 @@
 
   .nav-links {
     display: flex;
+    align-items: center;
     gap: 0.25rem;
 
     a {
@@ -52,6 +53,46 @@
       &.active {
         color: var(--color-accent);
         background: rgba(45, 212, 191, 0.1);
+      }
+    }
+
+    .logout-btn {
+      margin-left: 0.5rem;
+      padding: 0.42rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      background:
+        linear-gradient(180deg, rgba(248, 113, 113, 0.16), rgba(239, 68, 68, 0.1)),
+        rgba(255, 255, 255, 0.02);
+      color: #fecaca;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition:
+        transform 0.12s ease,
+        border-color 0.12s ease,
+        background 0.12s ease,
+        box-shadow 0.12s ease;
+
+      &:hover {
+        border-color: rgba(248, 113, 113, 0.65);
+        background:
+          linear-gradient(180deg, rgba(248, 113, 113, 0.22), rgba(239, 68, 68, 0.16)),
+          rgba(255, 255, 255, 0.03);
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.18);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:focus-visible {
+        outline: none;
+        box-shadow:
+          0 0 0 2px rgba(15, 23, 42, 0.95),
+          0 0 0 4px rgba(248, 113, 113, 0.45);
       }
     }
   }

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -72,6 +73,7 @@ export interface LogEntry {
 export class RagApiService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly apiUrl = environment.apiUrl;
 
   query(question: string): Observable<QueryResponse> {
@@ -92,7 +94,15 @@ export class RagApiService {
         signal: controller.signal,
       })
         .then((res) => {
-          if (!res.ok) return res.json().then((e) => observer.error(e));
+          if (!res.ok) {
+            return res.json().then((e) => {
+              if (res.status === 401) {
+                this.authService.logout();
+                void this.router.navigate(['/login']);
+              }
+              observer.error(e);
+            });
+          }
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const reader = res.body!.getReader();
           const decoder = new TextDecoder();

@@ -15,6 +15,5 @@ export function authGuard(
   }
 
   sessionStorage.setItem('redirectUrl', state.url);
-  void router.navigate(['/login']);
-  return false;
+  return router.createUrlTree(['/login']);
 }

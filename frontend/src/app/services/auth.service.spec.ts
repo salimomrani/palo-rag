@@ -55,6 +55,25 @@ describe('AuthService', () => {
     expect(reloaded.isAuthenticated()).toBe(true);
   });
 
+  it('should ignore expired token from localStorage', () => {
+    const expiredPayload = btoa(
+      JSON.stringify({
+        sub: 'admin',
+        exp: Math.floor(Date.now() / 1000) - 60,
+      }),
+    )
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
+    localStorage.setItem('auth_token', `eyJhbGciOiJIUzI1NiJ9.${expiredPayload}.signature`);
+
+    const reloaded = TestBed.runInInjectionContext(() => new AuthService());
+
+    expect(reloaded.token()).toBeNull();
+    expect(reloaded.isAuthenticated()).toBe(false);
+    expect(localStorage.getItem('auth_token')).toBeNull();
+  });
+
   it('should set isAuthenticated on login', () => {
     let completed = false;
 

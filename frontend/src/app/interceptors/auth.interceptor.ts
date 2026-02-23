@@ -26,7 +26,14 @@ export function authInterceptor(
 
   return nextHandler$(nextReq).pipe(
     catchError((err: unknown) => {
-      if (err instanceof HttpErrorResponse && err.status === 401) {
+      const status =
+        err instanceof HttpErrorResponse
+          ? err.status
+          : typeof err === 'object' && err !== null && 'status' in err
+            ? Number((err as { status: unknown }).status)
+            : undefined;
+
+      if (status === 401) {
         authService.logout();
         void router.navigate(['/login']);
       }

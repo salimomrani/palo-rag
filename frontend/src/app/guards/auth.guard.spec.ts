@@ -56,12 +56,13 @@ describe('authGuard', () => {
   it('should redirect to /login when not authenticated', () => {
     authService.isAuthenticated.mockReturnValue(false);
 
-    const result: boolean = TestBed.runInInjectionContext(() =>
+    const redirectUrlTree = TestBed.runInInjectionContext(() =>
       authGuard({} as never, { url: '/logs' } as never),
-    ) as boolean;
+    ) as ReturnType<Router['createUrlTree']>;
 
-    expect(result).toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(typeof redirectUrlTree).toBe('object');
+    expect(router.serializeUrl(redirectUrlTree)).toBe('/login');
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('should store redirectUrl in sessionStorage', () => {
