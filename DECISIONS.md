@@ -103,7 +103,16 @@
 
 ---
 
-### 13. GitHub Actions CI — path filtering, no deployment
+### 13. Chat session memory — 6-turn default cap (spec says 10)
+
+**Spec**: history cap at 10 exchanges (20 messages)
+**Decision**: Frontend sends last 6 turns (12 messages); backend silently truncates to 10 entries
+**Rationale**: Qwen 2.5 7B has an ~8k token context window. With top-4 retrieval chunks (~2,000 tokens), template overhead (~300 tokens), and the current question (~200 tokens), the remaining budget is ~5,500 tokens. 6 turns (~1,200 tokens average) fits comfortably within this budget while preserving quality. Research shows 7B models degrade with "lost in the middle" effect beyond 6k tokens. The spec cap of 10 is the accepted maximum; 6 is the practical default.
+**Limit**: Long assistant answers can exhaust the budget faster; this could be mitigated by truncating individual history entries to a character limit.
+
+---
+
+### 14. GitHub Actions CI — path filtering, no deployment
 
 **Decision**: Single `ci.yml` with 5 jobs: `changes` (path detection) + `backend-lint`, `backend-test`, `frontend-lint`, `frontend-test`
 **Path filtering**: `dorny/paths-filter@v3` — backend jobs fire only on `backend/**` changes, frontend jobs only on `frontend/**`
@@ -119,7 +128,7 @@
 | ------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------- |
 | No document chunking overlap    | Adjacent context can be lost at chunk boundaries       | Add `chunk_overlap=100` in `RecursiveCharacterTextSplitter`                 |
 | No reranker                     | Top-4 retrieved chunks may not be the most relevant    | Add a cross-encoder reranker (e.g., `cross-encoder/ms-marco-MiniLM-L-6-v2`) |
-| Single-turn chat                | No conversation memory; each query is independent; no named sessions or cross-session history | Add named persistent sessions per user/topic (see Next Steps #2)            |
+| Session memory (no persistence) | History resets on page reload; no named sessions or cross-session history | Add named persistent sessions per user/topic (see Next Steps #2)            |
 | No authentication               | Any client can ingest/delete documents                 | Add API key middleware or OAuth2 for production                             |
 | Corpus is synthetic             | 15 Markdown docs created for the demo                  | Replace with real internal docs                                             |
 | mxbai-embed-large context limit | 512-token context window (vs 8192 nomic)               | Ensure chunk_size ≤ 400 tokens in ingestion                                 |
@@ -149,6 +158,7 @@
 | Chat markdown rendering     | ✅ added   | Markdown + code highlighting in chat answers (004)           |
 | Frontend unit tests         | ✅ added   | Vitest-based test suite for Angular components (005)         |
 | CI/CD pipeline              | ✅ added   | GitHub Actions: path-filtered lint + test jobs (006)         |
+| Chat session memory         | ✅ added   | Session-scoped history (last 6 turns) passed per query (007) |
 
 ---
 

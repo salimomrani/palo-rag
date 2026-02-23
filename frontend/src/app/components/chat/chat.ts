@@ -10,7 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
-import { RagApiService } from '../../services/rag-api.service';
+import { HistoryEntry, RagApiService } from '../../services/rag-api.service';
 
 interface Message {
   id: string;
@@ -57,11 +57,20 @@ export class Chat {
     });
   }
 
+  clearConversation(): void {
+    this.messages.set([]);
+  }
+
   sendMessage(): void {
     if (!this.canSend()) return;
 
     const question = this.prompt().trim();
     const msgId = crypto.randomUUID();
+
+    const history: HistoryEntry[] = this.messages()
+      .filter((m) => !m.streaming)
+      .slice(-12)
+      .map((m) => ({ role: m.role, content: m.content }));
 
     this.messages.update((msgs) => [
       ...msgs,
@@ -73,7 +82,7 @@ export class Chat {
     this.error.set(null);
     this.scrollToBottom();
 
-    this.api.streamQuery(question).subscribe({
+    this.api.streamQuery(question, history).subscribe({
       next: (event) => {
         if (event.type === 'meta') {
           const seen = new Map<string, { source: string; excerpt: string; score: number }>();

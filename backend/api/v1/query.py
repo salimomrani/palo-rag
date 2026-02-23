@@ -1,4 +1,5 @@
 import json
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -15,8 +16,14 @@ _guardrail = InputGuardrail()
 logger = get_logger(__name__)
 
 
+class HistoryEntry(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
 class QueryRequest(BaseModel):
     question: str
+    history: list[HistoryEntry] = []
 
 
 @router.post("/query")
@@ -40,7 +47,7 @@ def query(
         )
         raise HTTPException(status_code=400, detail=check.reason)
 
-    result = RAGPipeline(provider=provider, vectorstore=vectorstore).query(request.question)
+    result = RAGPipeline(provider=provider, vectorstore=vectorstore).query(request.question, history=request.history)
     LogStore(engine=engine).save(
         question=request.question,
         retrieved_sources=[s["source"] for s in result.sources],
@@ -86,7 +93,7 @@ def query_stream(
     def generate():
         meta = None
         done = None
-        for event in pipeline.stream_query(request.question):
+        for event in pipeline.stream_query(request.question, history=request.history):
             yield event
             try:
                 payload = json.loads(event.removeprefix("data: ").strip())

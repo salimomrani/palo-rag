@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Generator
 
 from core.config import settings
-from rag.prompts import RAG_PROMPT
+from rag.prompts import RAG_PROMPT, RAG_PROMPT_WITH_HISTORY
 
 
 @dataclass
@@ -45,6 +45,26 @@ def _build_context(results) -> str:
     )
 
 
+def _format_history(history: list) -> str:
+    """Format conversation history as labelled plain-text for the prompt."""
+    lines = []
+    for entry in history:
+        label = "Utilisateur" if entry.role == "user" else "Assistant"
+        lines.append(f"{label} : {entry.content}")
+    return "\n".join(lines)
+
+
+def _build_prompt(context: str, question: str, history: list) -> str:
+    """Return history-aware prompt when history is present, plain prompt otherwise."""
+    if not history:
+        return RAG_PROMPT.format(context=context, question=question)
+    return RAG_PROMPT_WITH_HISTORY.format(
+        history=_format_history(history),
+        context=context,
+        question=question,
+    )
+
+
 class RAGPipeline:
     def __init__(self, provider, vectorstore):
         """
@@ -55,11 +75,12 @@ class RAGPipeline:
         self._provider = provider
         self._vectorstore = vectorstore
 
-    def query(self, question: str) -> QueryResult:
+    def query(self, question: str, history: list | None = None) -> QueryResult:
         """Run a blocking RAG query: retrieve → generate → return structured result.
 
         Returns a refusal QueryResult if retrieval confidence is below MIN_RETRIEVAL_SCORE.
         """
+        history = (history or [])[-10:]
         start = time.time()
         results, avg_score = _retrieve(self._vectorstore, question)
 
@@ -73,7 +94,7 @@ class RAGPipeline:
             )
 
         answer = self._provider.generate(
-            RAG_PROMPT.format(context=_build_context(results), question=question)
+            _build_prompt(_build_context(results), question, history)
         )
         return QueryResult(
             answer=answer,
@@ -83,8 +104,9 @@ class RAGPipeline:
             latency_ms=int((time.time() - start) * 1000),
         )
 
-    def stream_query(self, question: str) -> Generator[str, None, None]:
+    def stream_query(self, question: str, history: list | None = None) -> Generator[str, None, None]:
         """Yield SSE-formatted events: meta → tokens → done."""
+        history = (history or [])[-10:]
         start = time.time()
         results, avg_score = _retrieve(self._vectorstore, question)
 
@@ -98,7 +120,7 @@ class RAGPipeline:
         yield f"data: {json.dumps({'type': 'meta', 'sources': sources, 'confidence_score': avg_score, 'low_confidence': avg_score < settings.low_confidence_threshold})}\n\n"
 
         full_answer = ""
-        for token in self._provider.stream_generate(RAG_PROMPT.format(context=_build_context(results), question=question)):
+        for token in self._provider.stream_generate(_build_prompt(_build_context(results), question, history)):
             full_answer += token
             yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 
