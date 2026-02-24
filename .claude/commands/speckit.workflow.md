@@ -10,9 +10,19 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+If user input is empty, interpret it as:
+
+- "Resume the latest Speckit workflow from where it stopped" (continue the last spec instead of starting a new one).
+
 ## Goal
 
 Use this command as the default orchestration workflow when the user asks to implement a feature, develop a component, build a module, start a non-trivial task, or requests an end-to-end development workflow.
+
+## Superpowers Integration (Codex)
+
+- If `superpowers` skills are installed and available in this Codex session, explicitly invoke them by name during the relevant phases (especially `subagent-driven-development`, `test-driven-development`, `systematic-debugging`, `requesting-code-review`, `finishing-a-development-branch`).
+- If `superpowers` is not available in the current session (for example before restart after install), follow the same workflow manually and state that you are applying the superpowers process by hand.
+- Prefer explicit mentions like `use superpowers:subagent-driven-development` so skill activation is unambiguous.
 
 ## Trigger Hints (EN)
 
@@ -50,12 +60,48 @@ Use this command as the default orchestration workflow when the user asks to imp
 
 - If request is a feature or non-trivial change: follow the full workflow below.
 - If request is a small fix: do a direct edit and skip spec workflow.
+- If no argument is provided: resume the latest spec and continue from the current phase based on existing artifacts.
+
+## Brainstorming Integration (superpowers)
+
+- For a **new feature / new component / non-trivial request with user input**: invoke `superpowers:brainstorming` **before** `/speckit.specify`.
+- For **resume mode (no arguments)**: do **not** invoke `brainstorming` by default; resume directly from the detected phase.
+- Rationale: brainstorming is for problem framing; resume mode already has framing in `spec.md` / `plan.md` / `tasks.md`.
+
+## No-Argument Resume Behavior (Default)
+
+When `/speckit.workflow` is invoked with no arguments, do **not** ask for a new feature request by default.
+
+Instead:
+
+1. Locate the latest spec directory in `specs/` (highest numeric prefix: `specs/<NNN>-<name>/`).
+2. Inspect workflow artifacts in that directory.
+3. Resume exactly where the workflow stopped.
+
+Definition of "latest spec":
+
+- The spec folder with the highest numeric prefix (`NNN`) in `specs/<NNN>-*`.
+
+Resume routing rules:
+
+- `spec.md` missing -> stop and report invalid/incomplete spec folder.
+- `spec.md` exists, `plan.md` missing -> resume at `/speckit.plan`.
+- `plan.md` exists, `tasks.md` missing -> resume at `/speckit.tasks`.
+- `tasks.md` exists and has unchecked tasks (`[ ]`) -> resume implementation with `superpowers:subagent-driven-development` and continue remaining tasks.
+- `tasks.md` exists and all tasks are checked (`[x]`) -> continue Phase 3 (`superpowers:requesting-code-review` -> `superpowers:finishing-a-development-branch` -> PR flow).
+
+Notes:
+
+- Do not create a new spec on empty input.
+- Announce the selected spec directory and the phase being resumed.
+- If multiple specs are active, default to the latest one unless the user explicitly names another spec.
 
 ## Phase 1 - SPEC (speckit)
 
 Run these in order (clarify/analyze optional as noted):
 
 ```text
+superpowers:brainstorming  -> required for new feature requests before spec creation (skip in resume mode)
 /speckit.specify    -> create spec in specs/<NNN>-<name>/spec.md
 /speckit.clarify    -> optional, resolve ambiguities if spec contains [NEEDS CLARIFICATION]
 /speckit.plan       -> generate plan.md (architecture, tech decisions)
@@ -81,6 +127,7 @@ superpowers:subagent-driven-development   -> orchestrates implementation from pl
 Mandatory task tracking:
 
 - Update `specs/<feature>/tasks.md` after each completed task: `[ ]` -> `[x]`.
+- When superpowers is available, announce which `superpowers:*` skill is being invoked for each step/task batch.
 
 ## Phase 3 - COMPLETION
 
@@ -93,6 +140,7 @@ commit-commands:commit-push-pr             -> commit, push, open PR
 Rule:
 
 - Never push directly to `master`; always open a PR.
+- If superpowers is available, prefer explicit invocation of `superpowers:requesting-code-review` before any commit/push/PR command.
 
 ## Parallel Execution
 
@@ -102,7 +150,8 @@ Rule:
 
 | Situation | Action |
 |---|---|
-| New feature | `/speckit.specify` then full pipeline |
+| New feature | `superpowers:brainstorming` -> `/speckit.specify` -> full pipeline |
+| `/speckit.workflow` with no args | Resume latest `specs/<NNN>-*` at current phase |
 | Spec exists, ready to code | `superpowers:subagent-driven-development` |
 | Blocked on a bug | `superpowers:systematic-debugging` |
 | Before PR | `superpowers:requesting-code-review` |
