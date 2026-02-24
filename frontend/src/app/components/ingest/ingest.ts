@@ -28,6 +28,10 @@ export class Ingest implements OnInit {
   documents = signal<Document[]>([]);
   isLoadingDocs = signal(false);
 
+  // T002 — Document Viewer State
+  viewingDocument = signal<{ name: string; content: string } | null>(null);
+  isLoadingContent = signal(false);
+
   // T001 — selection state
   selectedIds = signal<Set<string>>(new Set());
   isDeleting = signal(false);
@@ -179,6 +183,28 @@ export class Ingest implements OnInit {
         this.isLoadingDocs.set(false);
       },
     });
+  }
+
+  viewDocument(doc: Document): void {
+    this.isLoadingContent.set(true);
+    this.viewingDocument.set({ name: doc.name, content: '' });
+    this.error.set(null);
+
+    this.api.getDocumentContent(doc.id).subscribe({
+      next: (res) => {
+        this.viewingDocument.set({ name: doc.name, content: res.content });
+        this.isLoadingContent.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.detail ?? 'Erreur lors de la récupération du contenu.');
+        this.isLoadingContent.set(false);
+        this.viewingDocument.set(null);
+      },
+    });
+  }
+
+  closeDocumentView(): void {
+    this.viewingDocument.set(null);
   }
 
   formatDate(isoString: string): string {

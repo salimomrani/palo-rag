@@ -20,6 +20,7 @@ describe('Ingest', () => {
       getDocuments: vi.fn().mockReturnValue(of(mockDocs)),
       ingest: vi.fn().mockReturnValue(of({ chunk_count: 3 })),
       deleteDocument: vi.fn().mockReturnValue(of(null)),
+      getDocumentContent: vi.fn().mockReturnValue(of({ id: 'a', content: 'Mock chunk content here.' })),
     };
 
     await TestBed.configureTestingModule({
@@ -125,5 +126,26 @@ describe('Ingest', () => {
     const justNow = new Date(Date.now() - 5000).toISOString(); // 5 seconds ago
     const result = component.formatDate(justNow);
     expect(result).toContain("à l'instant");
+  });
+
+  // --- New: Document Viewer (T004) ---
+
+  it('viewDocument triggers API call and sets viewingDocument state', () => {
+    const doc = mockDocs[0];
+    component.viewDocument(doc);
+
+    expect(component.isLoadingContent()).toBe(false);
+    const state = component.viewingDocument();
+    expect(state).toBeTruthy();
+    expect(state?.name).toBe('alpha.md');
+    expect(state?.content).toBe('Mock chunk content here.');
+  });
+
+  it('closeDocumentView clears the viewingDocument state', () => {
+    component.viewDocument(mockDocs[0]);
+    expect(component.viewingDocument()).toBeTruthy();
+
+    component.closeDocumentView();
+    expect(component.viewingDocument()).toBeNull();
   });
 });

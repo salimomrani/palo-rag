@@ -21,6 +21,18 @@ def client():
     mock_vs.similarity_search_with_relevance_scores.return_value = [(mock_doc, 0.85)]
     mock_vs.add_documents.return_value = ["id1"]
 
+    # Mock for testing GET /documents/{doc_id}/content
+    mock_collection = MagicMock()
+    def mock_get(where=None):
+        if where and where.get("doc_id") == "fake-uuid-123":
+            return {"documents": [], "metadatas": []}
+        return {
+            "documents": ["[test-content.md] Chunk 1.", "[test-content.md] Chunk 2."],
+            "metadatas": [{"chunk_index": 0}, {"chunk_index": 1}]
+        }
+    mock_collection.get.side_effect = mock_get
+    mock_vs._collection = mock_collection
+
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -145,3 +157,26 @@ def test_query_with_history_exceeding_cap_is_accepted(client):
     r = client.post("/api/v1/query", json=payload)
     assert r.status_code == 200
     assert "answer" in r.json()
+
+
+# T001 — RED: GET /documents/{doc_id}/content returns the document content
+def test_get_document_content(client):
+    # Setup: ingest a document to get an ID
+    res = client.post("/api/v1/ingest", json={"text": "Chunk 1.\n\nChunk 2.", "name": "test-content.md"})
+    assert res.status_code == 200
+    doc_id = res.json()["document_id"]
+
+    # Action: fetch its content
+    r = client.get(f"/api/v1/documents/{doc_id}/content")
+
+    # Assert
+    assert r.status_code == 200
+    body = r.json()
+    assert body["id"] == doc_id
+    # Since text is small, it might be 1 or 2 chunks depending on splitter, but content must be present
+    assert "Chunk 1" in body["content"]
+
+
+def test_get_document_content_not_found(client):
+    r = client.get("/api/v1/documents/fake-uuid-123/content")
+    assert r.status_code == 404
