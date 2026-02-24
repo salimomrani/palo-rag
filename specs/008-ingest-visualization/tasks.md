@@ -31,5 +31,5 @@
 ## Phase 3 — Completion
 - [x] `npm test -- --watch=false` — 43/43 pass
 - [x] `npm run lint` — 0 errors
-- [ ] Commit on feature branch `feat/008-ingest-visualization`
-- [ ] Open PR
+- [x] Commit on feature branch `feat/008-ingest-visualization`
+- [x] Open PR
