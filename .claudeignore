@@ -4,6 +4,8 @@
 **/*.pyc
 **/.venv/
 **/venv/
+**/.pytest_cache/
+**/.ruff_cache/
 **/.env
 
 # Build outputs
@@ -23,6 +25,7 @@
 **/*.db
 **/*.sqlite
 **/chroma_db/
+**/chroma_data/
 corpus/
 
 # Logs
