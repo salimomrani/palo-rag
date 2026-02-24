@@ -74,3 +74,50 @@ def list_documents(engine=Depends(get_engine)):
             }
             for d in docs
         ]
+
+
+@router.get("/documents/{doc_id}/content")
+def get_document_content(
+    doc_id: str,
+    vectorstore=Depends(get_vectorstore),
+    engine=Depends(get_engine),
+):
+    with Session(engine) as session:
+        doc = session.get(Document, doc_id)
+        if not doc:
+            raise HTTPException(status_code=404, detail=f"Document '{doc_id}' introuvable.")
+
+    # Access the underlying Chroma collection
+    collection = getattr(vectorstore, "_collection", None)
+    if not collection:
+        raise HTTPException(status_code=500, detail="Vector store API unavailable.")
+
+    # Fetch chunks by doc_id
+    results = collection.get(where={"doc_id": doc_id})
+    if not results or not results.get("documents"):
+        return {"id": doc_id, "content": ""}
+
+    # Reconstruct document content by sorting chunks based on their index
+    docs = results["documents"]
+    metadatas = results["metadatas"]
+
+    # Bundle chunk text and its index, then sort
+    chunks_with_index = [
+        (meta.get("chunk_index", 0), text)
+        for text, meta in zip(docs, metadatas)
+    ]
+    chunks_with_index.sort(key=lambda x: x[0])
+
+    # Strip the '[filename.md] ' prefix added during ingestion
+    clean_chunks = []
+    prefix = f"[{doc.name}] "
+    for _, text in chunks_with_index:
+        if text.startswith(prefix):
+            clean_chunks.append(text[len(prefix):])
+        else:
+            clean_chunks.append(text)
+
+    # Join with double newlines
+    content = "\n\n".join(clean_chunks)
+
+    return {"id": doc_id, "content": content}

@@ -144,6 +144,10 @@ export class RagApiService {
     return this.http.delete<void>(`${this.apiUrl}/documents/${id}`);
   }
 
+  getDocumentContent(id: string): Observable<{ id: string; content: string }> {
+    return this.http.get<{ id: string; content: string }>(`${this.apiUrl}/documents/${id}/content`);
+  }
+
   getLogs(): Observable<LogEntry[]> {
     return this.http.get<LogEntry[]>(`${this.apiUrl}/logs`);
   }
