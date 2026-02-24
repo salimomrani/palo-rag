@@ -1,11 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .ingest-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  padding: 2rem;
-  max-width: 960px;
-  margin: 0 auto;
-  height: 100%;
+  padding: 1.75rem 2rem;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   align-content: start;
 
   @media (max-width: 700px) {
