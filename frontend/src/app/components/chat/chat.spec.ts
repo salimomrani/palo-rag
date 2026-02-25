@@ -85,6 +85,44 @@ describe('Chat', () => {
     expect(mockApi.streamQuery).toHaveBeenCalledWith('question suivante', []);
   });
 
+  // Confidence badge visibility
+  it('should not show confidence badge when lowConfidence is false', () => {
+    component.messages.set([
+      { id: '1', role: 'assistant', content: 'ok', confidence: 0.55, lowConfidence: false },
+    ]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.confidence')).toBeNull();
+  });
+
+  it('should not show confidence badge when confidence is defined but lowConfidence is absent', () => {
+    component.messages.set([{ id: '1', role: 'assistant', content: 'ok', confidence: 0.75 }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.confidence')).toBeNull();
+  });
+
+  it('should show confidence badge with low class when lowConfidence is true', () => {
+    component.messages.set([
+      { id: '1', role: 'assistant', content: 'ok', confidence: 0.35, lowConfidence: true },
+    ]);
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('.confidence');
+    expect(el).not.toBeNull();
+    expect(el.classList.contains('low')).toBe(true);
+  });
+
+  it('should not show similarity score next to sources', () => {
+    component.messages.set([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'ok',
+        sources: [{ source: 'faq.md', excerpt: '', score: 0.61 }],
+      },
+    ]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.source-score')).toBeNull();
+  });
+
   // T016 — US3: sendMessage caps history at 12 entries
   it('should send at most 12 history entries regardless of message count', () => {
     const manyMessages = Array.from({ length: 20 }, (_, i) => ({
