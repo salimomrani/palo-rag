@@ -17,7 +17,7 @@
 
 ## Git
 
-- Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead (unless the user clearly requests an exception to this rule)
+- Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead
 - Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
 ## Architecture Constraints
