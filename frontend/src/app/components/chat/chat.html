@@ -29,16 +29,15 @@
               @for (source of msg.sources; track source.source) {
                 <li>
                   <span class="source-file">{{ source.source }}</span>
-                  <span class="source-score">{{ source.score * 100 | number: '1.0-0' }}%</span>
                 </li>
               }
             </ul>
           </div>
         }
 
-        @if (msg.confidence !== undefined && msg.confidence < 0.7) {
-          <div class="confidence" [class.low]="msg.confidence < 0.5">
-            Confiance : {{ msg.confidence * 100 | number: '1.0-0' }}%
+        @if (msg.lowConfidence) {
+          <div class="confidence low">
+            Confiance faible : {{ msg.confidence! * 100 | number: '1.0-0' }}%
           </div>
         }
       </div>
