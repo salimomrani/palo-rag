@@ -55,6 +55,9 @@
   </div>
 
   <div class="input-area">
+    <button class="btn-history" (click)="conversationService.toggleHistory()" title="Historique">
+      Historique
+    </button>
     <textarea
       #promptInput
       [value]="prompt()"
@@ -73,3 +76,4 @@
     }
   </div>
 </div>
+<app-history-panel></app-history-panel>

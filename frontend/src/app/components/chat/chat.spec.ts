@@ -5,6 +5,7 @@ import { provideMarkdown } from 'ngx-markdown';
 
 import { Chat } from './chat';
 import { RagApiService } from '../../services/rag-api.service';
+import { ConversationService } from '../../services/conversation.service';
 
 describe('Chat', () => {
   let component: Chat;
@@ -55,7 +56,7 @@ describe('Chat', () => {
   it('should call streamQuery with the prompt and empty history when sendMessage is called with no prior messages', () => {
     component.prompt.set('hello');
     component.sendMessage();
-    expect(mockApi.streamQuery).toHaveBeenCalledWith('hello', []);
+    expect(mockApi.streamQuery).toHaveBeenCalledWith('hello', [], expect.any(String));
   });
 
   it('should not call streamQuery when prompt is empty', () => {
@@ -82,7 +83,7 @@ describe('Chat', () => {
     component.clearConversation();
     component.prompt.set('question suivante');
     component.sendMessage();
-    expect(mockApi.streamQuery).toHaveBeenCalledWith('question suivante', []);
+    expect(mockApi.streamQuery).toHaveBeenCalledWith('question suivante', [], expect.any(String));
   });
 
   // Confidence badge visibility
@@ -135,5 +136,31 @@ describe('Chat', () => {
     component.sendMessage();
     const [, historyArg] = mockApi.streamQuery.mock.calls[0];
     expect(historyArg.length).toBeLessThanOrEqual(12);
+  });
+
+  // T017 — US4: sendMessage passes sessionId to streamQuery
+  it('should pass sessionId to streamQuery in sendMessage()', () => {
+    const convService = TestBed.inject(ConversationService);
+    component.prompt.set('hello');
+    component.sendMessage();
+    expect(mockApi.streamQuery).toHaveBeenCalledWith('hello', [], convService.sessionId);
+  });
+
+  // T026 — US2: loadHistory() called after successful sendMessage (done event)
+  it('should call loadHistory after sendMessage completes with done event', async () => {
+    const { Subject } = await import('rxjs');
+    const subject$ = new Subject<{ type: string; content?: string }>();
+    mockApi.streamQuery.mockReturnValue(subject$.asObservable());
+
+    const convService = TestBed.inject(ConversationService);
+    vi.spyOn(convService, 'loadHistory').mockImplementation(() => {});
+
+    component.prompt.set('test question');
+    component.sendMessage();
+
+    subject$.next({ type: 'done' });
+    subject$.complete();
+
+    expect(convService.loadHistory).toHaveBeenCalled();
   });
 });

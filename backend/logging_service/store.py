@@ -27,6 +27,7 @@ class LogStore:
         faithfulness_score: float,
         latency_ms: int,
         guardrail_triggered: str | None,
+        session_id: str | None = None,
     ) -> QueryLog:
         """Persist a query log entry with the question PII-masked.
 
@@ -46,6 +47,7 @@ class LogStore:
             faithfulness_score=faithfulness_score,
             latency_ms=latency_ms,
             guardrail_triggered=guardrail_triggered,
+            session_id=session_id,
         )
         with Session(self._engine) as session:
             session.add(log)

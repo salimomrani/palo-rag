@@ -24,6 +24,7 @@ class HistoryEntry(BaseModel):
 class QueryRequest(BaseModel):
     question: str
     history: list[HistoryEntry] = []
+    session_id: str | None = None
 
 
 @router.post("/query")
@@ -45,6 +46,7 @@ def query(
             faithfulness_score=0.0,
             latency_ms=0,
             guardrail_triggered=check.reason,
+            session_id=request.session_id,
         )
         raise HTTPException(status_code=400, detail=check.reason)
 
@@ -57,6 +59,7 @@ def query(
         faithfulness_score=result.confidence_score,
         latency_ms=result.latency_ms,
         guardrail_triggered=None,
+        session_id=request.session_id,
     )
     logger.info("Query answered: confidence=%.3f latency=%dms", result.confidence_score, result.latency_ms)
     return {
@@ -87,6 +90,7 @@ def query_stream(
             faithfulness_score=0.0,
             latency_ms=0,
             guardrail_triggered=check.reason,
+            session_id=request.session_id,
         )
         raise HTTPException(status_code=400, detail=check.reason)
 
@@ -115,6 +119,7 @@ def query_stream(
                 faithfulness_score=meta.get("confidence_score", 0.0),
                 latency_ms=done.get("latency_ms", 0),
                 guardrail_triggered=None,
+                session_id=request.session_id,
             )
 
     #    Return a streaming response with appropriate headers for SSE

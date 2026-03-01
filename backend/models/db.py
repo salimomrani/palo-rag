@@ -36,6 +36,7 @@ class QueryLog(Base):
     faithfulness_score: Mapped[float] = mapped_column(Float, default=0.0)
     latency_ms: Mapped[int] = mapped_column(Integer, default=0)
     guardrail_triggered: Mapped[str | None] = mapped_column(String, nullable=True)
+    session_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
 
 
 class EvaluationResult(Base):

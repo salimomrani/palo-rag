@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from langchain_chroma import Chroma
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from core.config import settings
 from rag.provider import get_provider as _get_provider
@@ -34,4 +34,12 @@ def get_engine():
     from models.db import Base
     engine = create_engine(settings.db_url)
     Base.metadata.create_all(engine)
+    with engine.connect() as conn:
+        conn.execute(text(
+            "ALTER TABLE query_logs ADD COLUMN IF NOT EXISTS session_id VARCHAR;"
+        ))
+        conn.execute(text(
+            "CREATE INDEX IF NOT EXISTS ix_query_logs_session_id ON query_logs(session_id);"
+        ))
+        conn.commit()
     return engine
