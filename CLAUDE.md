@@ -17,7 +17,6 @@
 
 ## Git
 
-- Even if explicitly asked to "push", do not push to `master`; create/use a branch and open/update a PR instead
 - Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
 
 ## Architecture Constraints
@@ -45,4 +44,3 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
-
