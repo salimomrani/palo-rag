@@ -144,7 +144,7 @@ describe('Logs', () => {
         td.textContent?.includes('👎') ||
         td.textContent?.includes('—'),
     );
-    const thumbsUp = Array.from(feedbackCells).some((td) => td.textContent?.includes('👍'));
+    const thumbsUp = feedbackCells.some((td) => td.textContent?.includes('👍'));
     expect(thumbsUp).toBe(true);
   });
 

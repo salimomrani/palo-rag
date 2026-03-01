@@ -38,8 +38,11 @@ def get_logs(limit: int = settings.default_logs_limit, engine=Depends(get_engine
         feedback_data = None
         if feedback is not None:
             feedback_data = {
+                "id": feedback.id,
+                "log_id": feedback.log_id,
                 "is_positive": feedback.is_positive,
                 "comment": feedback.comment,
+                "created_at": feedback.created_at.isoformat(),
                 "updated_at": feedback.updated_at.isoformat(),
             }
         result.append(
