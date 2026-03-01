@@ -512,6 +512,7 @@ def test_feedback_upsert_updates_rating(client):
 def test_feedback_404_for_unknown_log_id(client):
     r = client.post("/api/v1/feedback", json={"log_id": "nonexistent-uuid", "is_positive": True, "comment": None})
     assert r.status_code == 404
+    assert r.json()["detail"] == "Query log not found"
 
 
 def test_feedback_422_comment_too_long(client):
@@ -519,6 +520,7 @@ def test_feedback_422_comment_too_long(client):
     long_comment = "a" * 501
     r = client.post("/api/v1/feedback", json={"log_id": log_id, "is_positive": True, "comment": long_comment})
     assert r.status_code == 422
+    assert any("Comment must not exceed 500 characters" in e["msg"] for e in r.json()["detail"])
 
 
 # T025 — US2: Most recent session appears first

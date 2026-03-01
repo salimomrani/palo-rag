@@ -6,7 +6,9 @@ import {
   ElementRef,
   ViewChild,
   ChangeDetectionStrategy,
+  DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -40,6 +42,7 @@ interface Message {
 export class Chat {
   @ViewChild('messagesEl') private messagesEl!: ElementRef<HTMLElement>;
   private readonly api = inject(RagApiService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly conversationService = inject(ConversationService);
 
   prompt = signal('');
@@ -100,49 +103,52 @@ export class Chat {
     this.error.set(null);
     this.scrollToBottom();
 
-    this.api.streamQuery(question, history, this.conversationService.sessionId).subscribe({
-      next: (event) => {
-        if (event.type === 'meta') {
-          const seen = new Map<string, { source: string; excerpt: string; score: number }>();
-          for (const s of event.sources) {
-            if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) seen.set(s.source, s);
+    this.api
+      .streamQuery(question, history, this.conversationService.sessionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event) => {
+          if (event.type === 'meta') {
+            const seen = new Map<string, { source: string; excerpt: string; score: number }>();
+            for (const s of event.sources) {
+              if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) seen.set(s.source, s);
+            }
+            this.messages.update((msgs) =>
+              msgs.map((m) =>
+                m.id === msgId
+                  ? {
+                      ...m,
+                      sources: [...seen.values()].sort((a, b) => b.score - a.score),
+                      confidence: event.confidence_score,
+                      lowConfidence: event.low_confidence,
+                      feedbackEnabled: !event.guardrail_triggered,
+                    }
+                  : m,
+              ),
+            );
+          } else if (event.type === 'token') {
+            this.messages.update((msgs) =>
+              msgs.map((m) => (m.id === msgId ? { ...m, content: m.content + event.content } : m)),
+            );
+            this.scrollToBottom();
+          } else if (event.type === 'done') {
+            this.messages.update((msgs) =>
+              msgs.map((m) => (m.id === msgId ? { ...m, streaming: false } : m)),
+            );
+            this.isLoading.set(false);
+            this.conversationService.loadHistory();
+          } else if (event.type === 'log') {
+            this.messages.update((msgs) =>
+              msgs.map((m) => (m.id === msgId ? { ...m, logId: event.log_id } : m)),
+            );
           }
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === msgId
-                ? {
-                    ...m,
-                    sources: [...seen.values()].sort((a, b) => b.score - a.score),
-                    confidence: event.confidence_score,
-                    lowConfidence: event.low_confidence,
-                    feedbackEnabled: !event.guardrail_triggered,
-                  }
-                : m,
-            ),
-          );
-        } else if (event.type === 'token') {
-          this.messages.update((msgs) =>
-            msgs.map((m) => (m.id === msgId ? { ...m, content: m.content + event.content } : m)),
-          );
-          this.scrollToBottom();
-        } else if (event.type === 'done') {
-          this.messages.update((msgs) =>
-            msgs.map((m) => (m.id === msgId ? { ...m, streaming: false } : m)),
-          );
+        },
+        error: (err) => {
+          this.messages.update((msgs) => msgs.filter((m) => m.id !== msgId));
+          this.error.set(this._translateError(err?.detail));
           this.isLoading.set(false);
-          this.conversationService.loadHistory();
-        } else if (event.type === 'log') {
-          this.messages.update((msgs) =>
-            msgs.map((m) => (m.id === msgId ? { ...m, logId: event.log_id } : m)),
-          );
-        }
-      },
-      error: (err) => {
-        this.messages.update((msgs) => msgs.filter((m) => m.id !== msgId));
-        this.error.set(this._translateError(err?.detail));
-        this.isLoading.set(false);
-      },
-    });
+        },
+      });
   }
 
   private _translateError(detail: string | undefined): string {
@@ -173,22 +179,27 @@ export class Chat {
       ),
     );
 
-    this.api.submitFeedback(msg.logId, isPositive).subscribe({
-      next: (_entry: FeedbackEntry) => {
-        this.messages.update((m) =>
-          m.map((item, i) => (i === msgIndex ? { ...item, isPositive, submitting: false } : item)),
-        );
-      },
-      error: () => {
-        this.messages.update((m) =>
-          m.map((item, i) =>
-            i === msgIndex
-              ? { ...item, submitting: false, feedbackError: "Erreur lors de l'envoi." }
-              : item,
-          ),
-        );
-      },
-    });
+    this.api
+      .submitFeedback(msg.logId, isPositive)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (_entry: FeedbackEntry) => {
+          this.messages.update((m) =>
+            m.map((item, i) =>
+              i === msgIndex ? { ...item, isPositive, submitting: false } : item,
+            ),
+          );
+        },
+        error: () => {
+          this.messages.update((m) =>
+            m.map((item, i) =>
+              i === msgIndex
+                ? { ...item, submitting: false, feedbackError: "Erreur lors de l'envoi." }
+                : item,
+            ),
+          );
+        },
+      });
   }
 
   selectSuggestion(q: string): void {

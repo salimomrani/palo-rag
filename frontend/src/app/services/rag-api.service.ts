@@ -21,8 +21,11 @@ export type StreamEvent =
   | { type: 'log'; log_id: string };
 
 export interface FeedbackEntry {
+  id: string;
+  log_id: string;
   is_positive: boolean;
   comment: string | null;
+  created_at: string;
   updated_at: string;
 }
 

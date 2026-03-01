@@ -242,7 +242,7 @@ describe('Chat', () => {
     ]);
     fixture.detectChanges();
 
-    const thumbsUp = fixture.nativeElement.querySelector('.feedback-btn');
+    const thumbsUp = fixture.nativeElement.querySelector('.feedback-btn[title="Utile"]');
     thumbsUp.click();
     fixture.detectChanges();
 
