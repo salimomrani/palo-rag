@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
 import { HistoryEntry, RagApiService } from '../../services/rag-api.service';
+import { ConversationService } from '../../services/conversation.service';
+import { HistoryPanel } from './history-panel/history-panel';
 
 interface Message {
   id: string;
@@ -25,7 +27,7 @@ interface Message {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule, DecimalPipe, MarkdownComponent],
+  imports: [FormsModule, DecimalPipe, MarkdownComponent, HistoryPanel],
   templateUrl: './chat.html',
   styleUrls: ['./chat.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +35,7 @@ interface Message {
 export class Chat {
   @ViewChild('messagesEl') private messagesEl!: ElementRef<HTMLElement>;
   private readonly api = inject(RagApiService);
+  readonly conversationService = inject(ConversationService);
 
   prompt = signal('');
   messages = signal<Message[]>([]);
@@ -82,7 +85,7 @@ export class Chat {
     this.error.set(null);
     this.scrollToBottom();
 
-    this.api.streamQuery(question, history).subscribe({
+    this.api.streamQuery(question, history, this.conversationService.sessionId).subscribe({
       next: (event) => {
         if (event.type === 'meta') {
           const seen = new Map<string, { source: string; excerpt: string; score: number }>();
@@ -111,6 +114,7 @@ export class Chat {
             msgs.map((m) => (m.id === msgId ? { ...m, streaming: false } : m)),
           );
           this.isLoading.set(false);
+          this.conversationService.loadHistory();
         }
       },
       error: (err) => {

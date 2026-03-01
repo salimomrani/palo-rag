@@ -67,6 +67,27 @@ export interface LogEntry {
   rejection_reason: string | null;
 }
 
+export interface ConversationSummary {
+  session_id: string;
+  started_at: string;
+  first_question: string;
+  exchange_count: number;
+}
+
+export interface ConversationExchange {
+  id: string;
+  timestamp: string;
+  question_masked: string;
+  answer: string;
+  guardrail_triggered: string | null;
+  rejected: boolean;
+}
+
+export interface ConversationDetail {
+  session_id: string;
+  exchanges: ConversationExchange[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class RagApiService {
   private readonly http = inject(HttpClient);
@@ -76,13 +97,17 @@ export class RagApiService {
     return this.http.post<QueryResponse>(`${this.apiUrl}/query`, { question });
   }
 
-  streamQuery(question: string, history: HistoryEntry[] = []): Observable<StreamEvent> {
+  streamQuery(
+    question: string,
+    history: HistoryEntry[] = [],
+    session_id?: string,
+  ): Observable<StreamEvent> {
     return new Observable((observer) => {
       const controller = new AbortController();
       fetch(`${this.apiUrl}/query/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, ...(session_id ? { session_id } : {}) }),
         signal: controller.signal,
       })
         .then((res) => {
@@ -162,5 +187,19 @@ export class RagApiService {
 
   runEval(): Observable<{ status: string }> {
     return this.http.post<{ status: string }>(`${this.apiUrl}/evaluation/run`, {});
+  }
+
+  getHistory(limit = 50, offset = 0): Observable<ConversationSummary[]> {
+    return this.http.get<ConversationSummary[]>(`${this.apiUrl}/history`, {
+      params: { limit: limit.toString(), offset: offset.toString() },
+    });
+  }
+
+  getConversation(sessionId: string): Observable<ConversationDetail> {
+    return this.http.get<ConversationDetail>(`${this.apiUrl}/history/${sessionId}`);
+  }
+
+  deleteConversation(sessionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/history/${sessionId}`);
   }
 }

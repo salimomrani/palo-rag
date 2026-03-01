@@ -1,0 +1,68 @@
+<div class="history-panel" [class.open]="conversationService.historyOpen()">
+  <div class="history-header">
+    @if (conversationService.selectedConversation()) {
+      <button class="btn-back" (click)="back()">← retour</button>
+    } @else {
+      <span class="header-dot"></span>
+    }
+    <h2>Historique</h2>
+    <button class="btn-close" (click)="close()" aria-label="Fermer">✕</button>
+  </div>
+
+  @if (!conversationService.selectedConversation()) {
+    @if (conversationService.conversations().length === 0) {
+      <div class="history-empty">
+        <span class="empty-icon">◫</span>
+        <p>aucune conversation<br />sauvegardée.</p>
+      </div>
+    } @else {
+      <ul class="conversation-list">
+        @for (conv of conversationService.conversations(); track conv.session_id) {
+          <li class="conversation-card">
+            <div
+              class="card-content"
+              role="button"
+              tabindex="0"
+              (click)="selectConversation(conv.session_id)"
+              (keyup.enter)="selectConversation(conv.session_id)"
+            >
+              <div class="conv-meta">
+                <span class="conv-date">{{ conv.started_at | date: 'dd/MM/yy · HH:mm' }}</span>
+                <span class="conv-badge">{{ conv.exchange_count }}×</span>
+              </div>
+              <span class="conv-preview">{{ conv.first_question }}</span>
+            </div>
+            <button
+              class="btn-delete"
+              (click)="deleteConversation(conv.session_id)"
+              aria-label="Supprimer la conversation"
+            >
+              ✕
+            </button>
+          </li>
+        }
+      </ul>
+      @if (conversationService.hasMore()) {
+        <button class="btn-load-more" (click)="loadMore()">charger plus</button>
+      }
+    }
+  } @else {
+    <div class="conversation-detail">
+      <ul class="exchange-list">
+        @for (ex of conversationService.selectedConversation()!.exchanges; track ex.id) {
+          <li class="exchange-item" [class.rejected]="ex.rejected">
+            <div class="exchange-question">
+              <span class="q-mark">▶</span>
+              <span class="q-text">{{ ex.question_masked }}</span>
+            </div>
+            @if (!ex.rejected) {
+              <p class="exchange-answer">{{ ex.answer }}</p>
+            } @else {
+              <p class="exchange-rejected-label">// rejeté par guardrail</p>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>
