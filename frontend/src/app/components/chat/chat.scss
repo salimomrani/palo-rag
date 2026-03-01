@@ -216,6 +216,98 @@
   }
 }
 
+.feedback {
+  margin-top: 0.7rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeUp 0.15s ease;
+
+  .feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .feedback-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+    margin-right: 0.25rem;
+  }
+
+  .feedback-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background 0.15s,
+      transform 0.1s;
+    color: var(--color-muted);
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-accent);
+      background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+      transform: translateY(-1px);
+    }
+    &:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+
+    &.active-positive {
+      border-color: var(--color-accent);
+      background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+      color: var(--color-accent);
+    }
+    &.active-negative {
+      border-color: var(--color-danger);
+      background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+      color: var(--color-danger);
+    }
+    &.error {
+      border-color: var(--color-danger);
+      animation: shake 0.3s ease;
+    }
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  .feedback-error {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-danger);
+    margin-left: 0.25rem;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
 /* Typing dots */
 .dot {
   width: 6px;

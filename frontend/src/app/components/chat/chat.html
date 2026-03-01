@@ -40,6 +40,37 @@
             Confiance faible : {{ msg.confidence! * 100 | number: '1.0-0' }}%
           </div>
         }
+
+        @if (msg.role === 'assistant' && msg.streaming === false && msg.feedbackEnabled !== false) {
+          <div class="feedback">
+            <div class="feedback-actions">
+              <span class="feedback-label">Utile ?</span>
+              <button
+                class="feedback-btn"
+                [class.active-positive]="msg.isPositive === true"
+                [class.error]="msg.feedbackError"
+                [disabled]="msg.submitting"
+                (click)="submitRating($index, true)"
+                title="Utile"
+              >
+                👍
+              </button>
+              <button
+                class="feedback-btn"
+                [class.active-negative]="msg.isPositive === false"
+                [class.error]="msg.feedbackError"
+                [disabled]="msg.submitting"
+                (click)="submitRating($index, false)"
+                title="Pas utile"
+              >
+                👎
+              </button>
+              @if (msg.feedbackError) {
+                <span class="feedback-error">{{ msg.feedbackError }}</span>
+              }
+            </div>
+          </div>
+        }
       </div>
     }
 

@@ -14,9 +14,17 @@ export type StreamEvent =
       sources: { source: string; excerpt: string; score: number }[];
       confidence_score: number;
       low_confidence: boolean;
+      guardrail_triggered?: string;
     }
   | { type: 'token'; content: string }
-  | { type: 'done'; latency_ms: number; answer: string };
+  | { type: 'done'; latency_ms: number; answer: string }
+  | { type: 'log'; log_id: string };
+
+export interface FeedbackEntry {
+  is_positive: boolean;
+  comment: string | null;
+  updated_at: string;
+}
 
 export interface QueryResponse {
   answer: string;
@@ -201,5 +209,13 @@ export class RagApiService {
 
   deleteConversation(sessionId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/history/${sessionId}`);
+  }
+
+  submitFeedback(logId: string, isPositive: boolean, comment?: string): Observable<FeedbackEntry> {
+    return this.http.post<FeedbackEntry>(`${this.apiUrl}/feedback`, {
+      log_id: logId,
+      is_positive: isPositive,
+      comment: comment ?? null,
+    });
   }
 }

@@ -10,7 +10,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
-import { HistoryEntry, RagApiService } from '../../services/rag-api.service';
+import { HistoryEntry, RagApiService, FeedbackEntry } from '../../services/rag-api.service';
 import { ConversationService } from '../../services/conversation.service';
 import { HistoryPanel } from './history-panel/history-panel';
 
@@ -22,6 +22,11 @@ interface Message {
   confidence?: number;
   lowConfidence?: boolean;
   streaming?: boolean;
+  logId?: string | null;
+  feedbackEnabled?: boolean;
+  isPositive?: boolean | null;
+  submitting?: boolean;
+  feedbackError?: string | null;
 }
 
 @Component({
@@ -78,7 +83,17 @@ export class Chat {
     this.messages.update((msgs) => [
       ...msgs,
       { id: crypto.randomUUID(), role: 'user', content: question },
-      { id: msgId, role: 'assistant', content: '', streaming: true },
+      {
+        id: msgId,
+        role: 'assistant',
+        content: '',
+        streaming: true,
+        logId: null,
+        feedbackEnabled: true,
+        isPositive: null,
+        submitting: false,
+        feedbackError: null,
+      },
     ]);
     this.prompt.set('');
     this.isLoading.set(true);
@@ -100,6 +115,7 @@ export class Chat {
                     sources: [...seen.values()].sort((a, b) => b.score - a.score),
                     confidence: event.confidence_score,
                     lowConfidence: event.low_confidence,
+                    feedbackEnabled: !event.guardrail_triggered,
                   }
                 : m,
             ),
@@ -115,6 +131,10 @@ export class Chat {
           );
           this.isLoading.set(false);
           this.conversationService.loadHistory();
+        } else if (event.type === 'log') {
+          this.messages.update((msgs) =>
+            msgs.map((m) => (m.id === msgId ? { ...m, logId: event.log_id } : m)),
+          );
         }
       },
       error: (err) => {
@@ -140,6 +160,35 @@ export class Chat {
       default:
         return detail || 'Erreur de communication avec le RAG.';
     }
+  }
+
+  submitRating(msgIndex: number, isPositive: boolean): void {
+    const msgs = this.messages();
+    const msg = msgs[msgIndex];
+    if (!msg || !msg.logId || msg.submitting) return;
+
+    this.messages.update((m) =>
+      m.map((item, i) =>
+        i === msgIndex ? { ...item, submitting: true, feedbackError: null } : item,
+      ),
+    );
+
+    this.api.submitFeedback(msg.logId, isPositive).subscribe({
+      next: (_entry: FeedbackEntry) => {
+        this.messages.update((m) =>
+          m.map((item, i) => (i === msgIndex ? { ...item, isPositive, submitting: false } : item)),
+        );
+      },
+      error: () => {
+        this.messages.update((m) =>
+          m.map((item, i) =>
+            i === msgIndex
+              ? { ...item, submitting: false, feedbackError: "Erreur lors de l'envoi." }
+              : item,
+          ),
+        );
+      },
+    });
   }
 
   selectSuggestion(q: string): void {
