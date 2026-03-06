@@ -3,6 +3,8 @@ import {
   signal,
   computed,
   inject,
+  viewChild,
+  ElementRef,
   OnInit,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -20,6 +22,7 @@ import { RagApiService, Document } from '../../services/rag-api.service';
 })
 export class Ingest implements OnInit {
   private readonly api = inject(RagApiService);
+  private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   selectedFile = signal<File | null>(null);
   isUploading = signal(false);
@@ -85,7 +88,7 @@ export class Ingest implements OnInit {
         this.selectedFile.set(null);
         this.isUploading.set(false);
         this.loadDocuments();
-        const el = document.getElementById('fileInput') as HTMLInputElement | null;
+        const el = this.fileInput()?.nativeElement;
         if (el) el.value = '';
       },
       error: (err) => {
@@ -201,6 +204,14 @@ export class Ingest implements OnInit {
         this.viewingDocument.set(null);
       },
     });
+  }
+
+  onModalContentClick(event: Event): void {
+    event.stopPropagation();
+  }
+
+  onModalContentKeydown(event: Event): void {
+    event.stopPropagation();
   }
 
   closeDocumentView(): void {

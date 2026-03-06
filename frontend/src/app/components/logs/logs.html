@@ -61,7 +61,7 @@
                   <span class="badge" [class.low]="log.faithfulness_score < 0.6">
                     {{ log.faithfulness_score * 100 | number: '1.0-0' }}%
                   </span>
-                } @else if (log.rejected) {
+                } @else {
                   <span class="badge rejected">—</span>
                 }
               </td>
@@ -79,8 +79,9 @@
                       [class]="log.feedback.is_positive ? 'feedback-positive' : 'feedback-negative'"
                       role="button"
                       tabindex="0"
+                      aria-label="Afficher le commentaire de feedback"
                       class="feedback-expandable"
-                      (click)="toggleFeedback(log.id); $event.stopPropagation()"
+                      (click)="onFeedbackClick($event, log.id)"
                       (keyup.enter)="toggleFeedback(log.id)"
                       >{{ log.feedback.is_positive ? '👍' : '👎' }}</span
                     >

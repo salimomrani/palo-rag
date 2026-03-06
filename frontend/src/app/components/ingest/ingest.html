@@ -17,6 +17,7 @@
 
     <div class="drop-zone" [class.has-file]="selectedFile()">
       <input
+        #fileInput
         type="file"
         id="fileInput"
         accept=".md,.txt"
@@ -25,7 +26,7 @@
       />
       <label for="fileInput">
         @if (selectedFile()) {
-          <span class="file-name">{{ selectedFile()!.name }}</span>
+          <span class="file-name">{{ selectedFile()?.name }}</span>
           <span class="file-hint">Cliquer pour changer</span>
         } @else {
           <span class="drop-icon">⊕</span>
@@ -126,11 +127,7 @@
                 <td class="doc-meta">{{ doc.chunk_count }} chunks</td>
                 <td class="doc-date">{{ formatDate(doc.ingested_at) }}</td>
                 <td class="td-actions">
-                  <button
-                    class="btn-icon"
-                    (click)="viewDocument(doc)"
-                    title="Voir le contenu"
-                  >
+                  <button class="btn-icon" (click)="viewDocument(doc)" title="Voir le contenu">
                     👁
                   </button>
                   <button
@@ -159,12 +156,12 @@
     >
       <div
         class="modal-content"
-        (click)="$event.stopPropagation()"
-        (keydown)="$event.stopPropagation()"
+        (click)="onModalContentClick($event)"
+        (keydown)="onModalContentKeydown($event)"
         tabindex="0"
       >
         <header class="modal-header">
-          <h3>{{ viewingDocument()!.name }}</h3>
+          <h3>{{ viewingDocument()?.name }}</h3>
           <button class="btn-close" (click)="closeDocumentView()" aria-label="Fermer">✕</button>
         </header>
 
@@ -174,8 +171,8 @@
               <span class="spinner spinner--dark"></span>
               <p>Récupération du contenu depuis Chroma...</p>
             </div>
-          } @else if (viewingDocument()!.content) {
-            <pre class="document-text">{{ viewingDocument()!.content }}</pre>
+          } @else if (viewingDocument()?.content) {
+            <pre class="document-text">{{ viewingDocument()?.content }}</pre>
           } @else {
             <p class="muted">Aucun texte ou document vide.</p>
           }

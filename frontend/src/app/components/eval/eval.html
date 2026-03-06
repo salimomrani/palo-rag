@@ -32,22 +32,28 @@
 
   @if (!isLoading() && report()) {
     <div class="report-date">
-      Généré le {{ report()!.run_at | date: 'dd/MM/yyyy à HH:mm:ss' }} —
-      {{ report()!.per_question.length }} questions
+      Généré le {{ report()?.run_at | date: 'dd/MM/yyyy à HH:mm:ss' }} —
+      {{ report()?.per_question?.length }} questions
     </div>
 
     <div class="summary-grid">
-      <div class="metric-card" [class.low]="report()!.faithfulness < 0.6">
+      <div class="metric-card" [class.low]="(report()?.faithfulness ?? 0) < 0.6">
         <span class="metric-label">Faithfulness</span>
-        <span class="metric-value">{{ report()!.faithfulness * 100 | number: '1.0-0' }}%</span>
+        <span class="metric-value"
+          >{{ (report()?.faithfulness ?? 0) * 100 | number: '1.0-0' }}%</span
+        >
       </div>
-      <div class="metric-card" [class.low]="report()!.answer_relevancy < 0.6">
+      <div class="metric-card" [class.low]="(report()?.answer_relevancy ?? 0) < 0.6">
         <span class="metric-label">Answer Relevancy</span>
-        <span class="metric-value">{{ report()!.answer_relevancy * 100 | number: '1.0-0' }}%</span>
+        <span class="metric-value"
+          >{{ (report()?.answer_relevancy ?? 0) * 100 | number: '1.0-0' }}%</span
+        >
       </div>
-      <div class="metric-card" [class.low]="report()!.context_recall < 0.6">
+      <div class="metric-card" [class.low]="(report()?.context_recall ?? 0) < 0.6">
         <span class="metric-label">Context Recall</span>
-        <span class="metric-value">{{ report()!.context_recall * 100 | number: '1.0-0' }}%</span>
+        <span class="metric-value"
+          >{{ (report()?.context_recall ?? 0) * 100 | number: '1.0-0' }}%</span
+        >
       </div>
       <div class="metric-card avg" [class.low]="avg() < 0.6">
         <span class="metric-label">Moyenne</span>
@@ -66,7 +72,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of report()!.per_question; track $index) {
+          @for (item of report()?.per_question ?? []; track $index) {
             <tr [class.miss]="!item.source_found">
               <td class="cell-num">{{ $index + 1 }}</td>
               <td class="cell-question">{{ item.question }}</td>
