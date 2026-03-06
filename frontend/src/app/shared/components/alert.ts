@@ -6,7 +6,7 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (message()) {
-      <div class="alert" [class]="'alert ' + type()">{{ message() }}</div>
+      <div class="alert" [class]="type()">{{ message() }}</div>
     }
   `,
   styles: `
