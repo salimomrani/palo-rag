@@ -4,7 +4,9 @@ import {
   computed,
   inject,
   ElementRef,
-  ViewChild,
+  Injector,
+  viewChild,
+  afterNextRender,
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
@@ -15,23 +17,7 @@ import { MarkdownComponent } from 'ngx-markdown';
 import { HistoryEntry, RagApiService, FeedbackEntry } from '../../services/rag-api.service';
 import { ConversationService } from '../../services/conversation.service';
 import { HistoryPanel } from './history-panel/history-panel';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  sources?: { source: string; excerpt: string; score: number }[];
-  confidence?: number;
-  lowConfidence?: boolean;
-  streaming?: boolean;
-  logId?: string | null;
-  feedbackEnabled?: boolean;
-  isPositive?: boolean | null;
-  submitting?: boolean;
-  feedbackError?: string | null;
-  comment?: string;
-  showComment?: boolean;
-}
+import { Message } from '../../models/message';
 
 @Component({
   selector: 'app-chat',
@@ -42,7 +28,8 @@ interface Message {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Chat {
-  @ViewChild('messagesEl') private messagesEl!: ElementRef<HTMLElement>;
+  private readonly messagesEl = viewChild<ElementRef<HTMLElement>>('messagesEl');
+  private readonly injector = inject(Injector);
   private readonly api = inject(RagApiService);
   private readonly destroyRef = inject(DestroyRef);
   readonly conversationService = inject(ConversationService);
@@ -64,10 +51,13 @@ export class Chat {
   ];
 
   private scrollToBottom(): void {
-    setTimeout(() => {
-      const el = this.messagesEl?.nativeElement;
-      if (el) el.scrollTop = el.scrollHeight;
-    });
+    afterNextRender(
+      () => {
+        const el = this.messagesEl()?.nativeElement;
+        if (el) el.scrollTop = el.scrollHeight;
+      },
+      { injector: this.injector },
+    );
   }
 
   clearConversation(): void {
@@ -113,7 +103,8 @@ export class Chat {
           if (event.type === 'meta') {
             const seen = new Map<string, { source: string; excerpt: string; score: number }>();
             for (const s of event.sources) {
-              if (!seen.has(s.source) || s.score > seen.get(s.source)!.score) seen.set(s.source, s);
+              const existing = seen.get(s.source);
+              if (!existing || s.score > existing.score) seen.set(s.source, s);
             }
             this.messages.update((msgs) =>
               msgs.map((m) =>

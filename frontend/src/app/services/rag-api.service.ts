@@ -124,8 +124,11 @@ export class RagApiService {
       })
         .then((res) => {
           if (!res.ok) return res.json().then((e) => observer.error(e));
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const reader = res.body!.getReader();
+          if (!res.body) {
+            observer.error(new Error('Response body is null'));
+            return;
+          }
+          const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
           const pump = (): Promise<void> =>

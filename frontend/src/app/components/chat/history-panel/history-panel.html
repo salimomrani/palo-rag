@@ -23,6 +23,7 @@
               class="card-content"
               role="button"
               tabindex="0"
+              aria-label="Ouvrir la conversation"
               (click)="selectConversation(conv.session_id)"
               (keyup.enter)="selectConversation(conv.session_id)"
             >
@@ -49,7 +50,7 @@
   } @else {
     <div class="conversation-detail">
       <ul class="exchange-list">
-        @for (ex of conversationService.selectedConversation()!.exchanges; track ex.id) {
+        @for (ex of conversationService.selectedConversation()?.exchanges ?? []; track ex.id) {
           <li class="exchange-item" [class.rejected]="ex.rejected">
             <div class="exchange-question">
               <span class="q-mark">▶</span>

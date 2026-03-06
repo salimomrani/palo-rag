@@ -4,8 +4,8 @@
 
 - **Feature / non-trivial change** → use `/speckit.workflow`
 - **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
-- **Frontend implementation conventions** → `~/.claude/skills/angular-conventions.md`
-- **Python/backend conventions** → `~/.claude/skills/python-conventions.md`
+- **Frontend implementation conventions** → skill `applying-angular-conventions`
+- **Python/backend conventions** → skill `applying-python-conventions`
 
 ## TDD (mandatory)
 
@@ -13,7 +13,7 @@
 
 - Use `superpowers:test-driven-development` for features/bugfixes.
 - Tests and lint must pass before any commit.
-- Use the stack-specific commands from the repo and skill files (`angular-conventions.md`, `python-conventions.md`).
+- Use the stack-specific commands from the repo and skills (`applying-angular-conventions`, `applying-python-conventions`).
 
 ## Git
 
@@ -40,14 +40,14 @@ Read `.specify/memory/constitution.md` before any architectural decision.
 - Frontend (dev): `cd frontend && npm start`
 - Backend health check: `curl http://127.0.0.1:8000/health`
 
+## Test / Lint Commands
+
+- Backend tests: `cd backend && .venv/bin/pytest tests/ -v`
+- Backend lint: `cd backend && .venv/bin/ruff check .`
+- Frontend tests: `cd frontend && npm test -- --watch=false`
+- Frontend lint: `cd frontend && npm run lint`
+
 ## Source of Truth
 
 - **Code > plan.md > tasks.md** — code wins on divergence
 - Deviations from spec → document in `DECISIONS.md`
-
-## Active Technologies
-- Python 3.12 (backend), TypeScript / Angular (frontend) + FastAPI, SQLAlchemy, PostgreSQL (backend) · Angular 17+, RxJS, Signals (frontend) (011-response-feedback)
-- PostgreSQL 16 (port 5444) — new `response_feedback` table (011-response-feedback)
-
-## Recent Changes
-- 011-response-feedback: Added Python 3.12 (backend), TypeScript / Angular (frontend) + FastAPI, SQLAlchemy, PostgreSQL (backend) · Angular 17+, RxJS, Signals (frontend)

@@ -46,6 +46,11 @@ export class Logs implements OnInit {
     this.expandedFeedbackId.set(this.expandedFeedbackId() === id ? null : id);
   }
 
+  onFeedbackClick(event: Event, id: string): void {
+    event.stopPropagation();
+    this.toggleFeedback(id);
+  }
+
   reasonLabel(reason: string | null): string {
     switch (reason) {
       case 'guardrail:empty_question':

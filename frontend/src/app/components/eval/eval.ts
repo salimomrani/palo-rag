@@ -1,4 +1,11 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RagApiService, EvalReport } from '../../services/rag-api.service';
 
@@ -67,9 +74,9 @@ export class Eval implements OnInit {
     });
   }
 
-  avg(): number {
+  avg = computed(() => {
     const r = this.report();
     if (!r) return 0;
     return (r.faithfulness + r.answer_relevancy + r.context_recall) / 3;
-  }
+  });
 }

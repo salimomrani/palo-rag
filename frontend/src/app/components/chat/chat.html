@@ -11,7 +11,7 @@
       </div>
     }
 
-    @for (msg of messages(); track $index) {
+    @for (msg of messages(); track msg.id) {
       <div class="message" [class]="msg.role">
         <div class="message-content">
           @if (msg.role === 'assistant') {
@@ -22,7 +22,7 @@
           <span class="cursor" [class.visible]="msg.streaming">▋</span>
         </div>
 
-        @if (msg.sources && msg.sources.length > 0) {
+        @if (msg.sources?.length) {
           <div class="sources">
             <span class="sources-label">Sources</span>
             <ul>
@@ -81,16 +81,16 @@
                 <div class="comment-footer">
                   <span
                     class="comment-counter"
-                    [class.over-limit]="(msg.comment?.length || 0) > 500"
+                    [class.over-limit]="(msg.comment?.length ?? 0) > 500"
                   >
-                    {{ msg.comment?.length || 0 }}/500
+                    {{ msg.comment?.length ?? 0 }}/500
                   </span>
-                  @if ((msg.comment?.length || 0) > 500) {
+                  @if ((msg.comment?.length ?? 0) > 500) {
                     <span class="feedback-error">Commentaire trop long (max 500 caractères).</span>
                   }
                   <button
                     class="btn-submit-feedback"
-                    [disabled]="msg.submitting || (msg.comment?.length || 0) > 500"
+                    [disabled]="msg.submitting || (msg.comment?.length ?? 0) > 500"
                     (click)="submitWithComment($index)"
                   >
                     Envoyer
