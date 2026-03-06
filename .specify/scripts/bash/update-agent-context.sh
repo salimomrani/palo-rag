@@ -379,21 +379,9 @@ update_existing_agent_file() {
     local new_tech_entries=()
     local new_change_entry=""
     
-    # Prepare new technology entries
-    if [[ -n "$tech_stack" ]] && ! grep -q "$tech_stack" "$target_file"; then
-        new_tech_entries+=("- $tech_stack ($CURRENT_BRANCH)")
-    fi
-    
-    if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]] && ! grep -q "$NEW_DB" "$target_file"; then
-        new_tech_entries+=("- $NEW_DB ($CURRENT_BRANCH)")
-    fi
-    
-    # Prepare new change entry
-    if [[ -n "$tech_stack" ]]; then
-        new_change_entry="- $CURRENT_BRANCH: Added $tech_stack"
-    elif [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]]; then
-        new_change_entry="- $CURRENT_BRANCH: Added $NEW_DB"
-    fi
+    # Disabled: no longer inject Active Technologies / Recent Changes into CLAUDE.md
+    new_tech_entries=()
+    new_change_entry=""
     
     # Check if sections exist in the file
     local has_active_technologies=0
