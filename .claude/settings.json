@@ -23,7 +23,15 @@
       "Read(**/chroma_data/**)",
       "Read(**/*.db)",
       "Read(**/*.sqlite)",
-      "Read(**/*.log)"
+      "Read(**/*.log)",
+      "Read(**/*.key)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*secret*)",
+      "Read(**/*credential*)",
+      "Read(**/*token*)",
+      "Read(**/*password*)"
     ]
   },
   "hooks": {
