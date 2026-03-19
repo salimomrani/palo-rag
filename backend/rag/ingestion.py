@@ -39,7 +39,7 @@ class IngestionService:
             Number of chunks created and stored.
 
         Example:
-            >>> svc.ingest_text("Palo IT est une ESN fondée en 2009.", "about.md")
+            >>> svc.ingest_text("Acme Corp est une entreprise fondée en 2009.", "about.md")
             1
         """
         doc_id = doc_id or str(uuid.uuid4())

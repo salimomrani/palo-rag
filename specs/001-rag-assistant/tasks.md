@@ -25,7 +25,7 @@
 - [x] T009 **Commit**: `feat: SQLAlchemy models — Document, QueryLog, EvaluationResult`
 - [x] T010 Write failing tests `backend/tests/test_provider.py` (AIProvider, OllamaProvider)
 - [x] T011 Implement `backend/rag/provider.py` (AIProvider protocol + OllamaProvider) — make T010 pass
-- [x] T012 **Commit**: `feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)`
+- [x] T012 **Commit**: `feat: AIProvider protocol + OllamaProvider (provider-agnostic)`
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 

@@ -66,7 +66,7 @@ Existing endpoint extended to include embedded feedback per log entry. No breaki
     "question_masked": "Quels sont les produits ?",
     "retrieved_sources": ["doc-1", "doc-2"],
     "similarity_scores": [0.91, 0.87],
-    "answer": "Palo IT propose...",
+    "answer": "La plateforme propose...",
     "faithfulness_score": 0.95,
     "latency_ms": 1240,
     "guardrail_triggered": null,

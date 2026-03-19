@@ -19,9 +19,9 @@
 
 ### 3. Ollama local models (qwen2.5:7b + mxbai-embed-large)
 
-**Spec option**: Ollama or Gen-e2 (Palo IT's internal LLM)
+**Spec option**: Ollama or a custom internal LLM
 **Decision**: Ollama with `qwen2.5:7b` for generation, `mxbai-embed-large` for embeddings
-**Rationale**: 100% local, zero cost, no API keys. `qwen2.5:7b` offers strong multilingual support (29 languages including French) and 128K context window vs `llama3.2` 3B. `mxbai-embed-large` scores +5pts retrieval on MTEB (54.39 vs 49.01) vs `nomic-embed-text`. The `AIProvider` protocol (`backend/rag/provider.py`) isolates the LLM behind an interface — swapping to Gen-e2 requires only a new class implementing `generate()`, `stream_generate()`, and `embed()`.
+**Rationale**: 100% local, zero cost, no API keys. `qwen2.5:7b` offers strong multilingual support (29 languages including French) and 128K context window vs `llama3.2` 3B. `mxbai-embed-large` scores +5pts retrieval on MTEB (54.39 vs 49.01) vs `nomic-embed-text`. The `AIProvider` protocol (`backend/rag/provider.py`) isolates the LLM behind an interface — swapping to a custom provider requires only a new class implementing `generate()`, `stream_generate()`, and `embed()`.
 
 ---
 
@@ -163,7 +163,7 @@
 | SSE streaming               | ✅ added   | FR-019/020                                                   |
 | Duplicate ingestion guard   | ✅ added   | FR-018                                                       |
 | BDD scenarios               | ✅ done    | pytest unit tests cover all user stories (no Gherkin format) |
-| Gen-e2 integration          | 🔜 stretch | AIProvider ready, needs credentials                          |
+| Custom LLM provider         | 🔜 stretch | AIProvider ready, needs credentials                          |
 | Angular ESLint rules        | ✅ added   | Best-practice ruleset (002)                                  |
 | Bulk document delete        | ✅ added   | Multi-select delete with confirmation (003)                  |
 | Chat markdown rendering     | ✅ added   | Markdown + code highlighting in chat answers (004)           |
@@ -177,8 +177,8 @@
 
 1. **Reranker**: Add cross-encoder reranking after retrieval for better precision
 2. **Named persistent sessions**: Multi-turn chat with user-scoped, named sessions (e.g., "congé", "paye") — each session stores its turn history in PostgreSQL, users can resume any past session; inject the last N turns into the RAG prompt for contextual continuity; session list and history exposed via API + UI
-3. **Gen-e2 provider**: Implement `GenE2Provider(AIProvider)` once API credentials are available
-4. **Best practices corpus**: Replace synthetic docs with real Palo IT knowledge base
+3. **Custom LLM provider**: Implement `CustomProvider(AIProvider)` once API credentials are available
+4. **Best practices corpus**: Replace synthetic docs with a real knowledge base
 5. **Authentication**: API key or OAuth2 for document management endpoints
 6. **Evaluation automation**: Schedule daily quality runs, alert on score regression
 7. **Chunk overlap**: Enable `chunk_overlap=100` to reduce boundary-split context loss

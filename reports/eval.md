@@ -16,7 +16,7 @@
 
 | # | Question | Source Found | Answer Length |
 |---|----------|-------------|---------------|
-| 1 | Quels sont les produits proposés par Palo IT ? | ✗ | 0 |
+| 1 | Quels sont les produits proposés par la plateforme ? | ✗ | 0 |
 | 2 | Comment contacter le support technique ? | ✗ | 0 |
 | 3 | Quelles sont les étapes d'onboarding pour un nouveau client  | ✗ | 0 |
 | 4 | Quels sont les endpoints disponibles dans l'API v1 ? | ✗ | 0 |

@@ -150,11 +150,11 @@ Base URL: `http://localhost:8000/api/v1`
 ```bash
 curl -X POST http://localhost:8000/api/v1/ingest \
   -H "Content-Type: application/json" \
-  -d '{"text": "PALO IT est une ESN fondée en 2009.", "name": "about.md"}'
+  -d '{"text": "Acme Corp est une entreprise fondée en 2009.", "name": "about.md"}'
 
 curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"question": "Quand PALO IT a-t-il été fondé ?"}'
+  -d '{"question": "Quand Acme Corp a-t-elle été fondée ?"}'
 ```
 
 Sample log entry (`GET /api/v1/logs`):

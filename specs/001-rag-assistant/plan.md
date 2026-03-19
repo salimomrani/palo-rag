@@ -451,7 +451,7 @@ def get_provider() -> OllamaProvider:
     if name == "ollama":
         return OllamaProvider()
     raise ValueError(f"Unknown AI provider: {name}")
-    # Gen-e2 would be implemented here
+    # Custom provider would be implemented here
 ```
 
 **Step 4:** Run — expect 3 PASSED
@@ -460,7 +460,7 @@ def get_provider() -> OllamaProvider:
 
 ```bash
 git add backend/rag/ backend/tests/test_provider.py
-git commit -m "feat: AIProvider protocol + OllamaProvider (Gen-e2 swappable)"
+git commit -m "feat: AIProvider protocol + OllamaProvider (provider-agnostic)"
 ```
 
 ---
@@ -1437,12 +1437,12 @@ git commit -m "feat: Angular Ingest and Logs components"
 **Step 2:** Create `DECISIONS.md` covering:
 
 - ChromaDB vs pgvector (zero-config for demo)
-- Ollama vs Gen-e2 (local, AIProvider abstraction)
+- Ollama vs custom LLM (local, AIProvider abstraction)
 - FastAPI vs Spring Boot (Python AI ecosystem maturity)
 - PostgreSQL 16 via Docker (production-grade persistence)
 - Quality metric proxies vs full RAGAS (latency trade-off)
 - Known limits: no reranking, no streaming, small reference dataset, no auth
-- Next steps: reranking, SSE streaming, full RAGAS, pgvector, auth, Gen-e2
+- Next steps: reranking, SSE streaming, full RAGAS, pgvector, auth, custom LLM provider
 
 **Step 3:** Run full test suite one last time:
 
@@ -1473,6 +1473,6 @@ git commit -m "docs: README, DECISIONS.md — deliverables complete"
 [ ] PostgreSQL logs with PII masking verified
 [ ] Input guardrails verified (injection, length, empty)
 [ ] Angular 3 views functional (Chat, Ingest, Logs)
-[ ] Gen-e2 mockable via AIProvider interface
+[ ] Custom LLM provider mockable via AIProvider interface
 [ ] All backend tests PASSING
 ```
