@@ -1,6 +1,6 @@
 # Annuaire RH — Contacts internes PALO Platform
 
-> Document interne — Usage strictement limité aux collaborateurs PALO IT.
+> Document interne — Usage strictement limité aux collaborateurs PALO Platform.
 > Ne pas diffuser hors de l'organisation.
 
 ## Équipe Technique
@@ -23,7 +23,7 @@
 
 | Nom | Rôle | Email | Téléphone |
 |-----|------|-------|-----------|
-| Sami Henchiri | CTO | sami.henchiri@palo.io | 06 00 11 22 33 |
+| Marc Beaumont | CTO | marc.beaumont@palo.io | 06 00 11 22 33 |
 | Nadia Rousseau | DRH | nadia.rousseau@palo.io | 06 44 55 66 77 |
 
 ## Contacts d'urgence
@@ -36,4 +36,4 @@
 
 Ces données sont classifiées **Confidentiel**. Toute transmission non autorisée est interdite conformément à la politique de sécurité PALO (voir `politique-securite.md`). Les accès sont tracés dans le journal d'audit.
 
-Mise à jour : 2026-01-15 | Source : RH PALO IT
+Mise à jour : 2026-01-15 | Source : RH PALO Platform

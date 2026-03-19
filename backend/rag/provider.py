@@ -8,7 +8,7 @@ from core.config import settings
 class AIProvider(Protocol):
     """Structural protocol for LLM backends — implement this to swap providers.
 
-    To add a new backend (e.g. Gen-e2):
+    To add a new backend (e.g. a custom LLM):
         1. Create a class implementing all four methods.
         2. Add a branch in `get_provider()` keyed by AI_PROVIDER env var.
         3. No other file needs to change.
@@ -57,9 +57,9 @@ def get_provider() -> OllamaProvider:
     """Instantiate the configured AI provider from the AI_PROVIDER env var.
 
     Supported values: "ollama" (default).
-    Future: set AI_PROVIDER=gen-e2 and add the corresponding branch here.
+    Future: set AI_PROVIDER=custom and add the corresponding branch here.
     """
     if settings.ai_provider == "ollama":
         return OllamaProvider()
     raise ValueError(f"Unknown AI provider: {settings.ai_provider}")
-    # Gen-e2 would be wired here via AI_PROVIDER=gen-e2
+    # Custom provider would be wired here via AI_PROVIDER=custom

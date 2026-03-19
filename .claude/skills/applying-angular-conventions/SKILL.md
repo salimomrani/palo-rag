@@ -30,6 +30,30 @@ export class UserListComponent {
 
 No NgModules, no constructor injection, no `@Input()`/`@Output()`/`@ViewChild()` decorators.
 
+**No inline templates, styles, or tests** — always use separate files:
+
+```typescript
+// ✅ correct
+@Component({
+  selector: 'app-user-list',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './user-list.component.html',
+  styleUrl: './user-list.component.scss',    // Angular 17+ singular
+})
+// Tests in: user-list.component.spec.ts
+
+// ❌ forbidden
+@Component({
+  template: `<div>...</div>`,      // inline template — never
+  styles: `.foo { color: red; }`,  // inline styles — never
+})
+```
+
+- `templateUrl` → `.html` file (never `template: \`...\``)
+- `styleUrl` → `.scss` file (never `styles: \`...\``) — omit only when component has zero styles
+- Tests → `<component>.spec.ts` next to the component (never inside the `.ts` file)
+
 - **`viewChild()` signal** over `@ViewChild` decorator: `messagesEl = viewChild<ElementRef<HTMLElement>>('messagesEl');`
 - **Never use `document.getElementById`** — use `viewChild()` signal instead
 - **Never use `setTimeout` for post-render DOM access** — use `afterNextRender()` instead. `afterNextRender()` requires an injection context: if called outside the constructor, inject `Injector` and pass `{ injector: this.injector }` as the second argument

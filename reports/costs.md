@@ -8,7 +8,7 @@
 |-----------|-----------|-------------------------|-------|
 | Ollama — LLM (`qwen2.5:7b`) | €0 (local) | ~30 demo requests | **€0** |
 | Ollama — Embeddings (`mxbai-embed-large`) | €0 (local) | ~200 embeddings (ingestion + queries) | **€0** |
-| Gen-e2 (if enabled in prod) | TBD | — | — |
+| Custom LLM (if enabled in prod) | TBD | — | — |
 
 **Total AI inference: €0** (100% local stack)
 
@@ -52,7 +52,7 @@
 
 ---
 
-## Projection: production cost (Gen-e2 / cloud)
+## Projection: production cost (custom LLM / cloud)
 
 > Estimates for 100 users, 500 requests/day = ~15,000 requests/month
 
@@ -66,7 +66,7 @@
 | Frontend hosting (Vercel Pro) | $20/month | — | ~$20 |
 | **Total production (100 users)** | | | **~$82–87/month** |
 
-> **Note**: Gen-e2 (Palo IT internal LLM) would reduce LLM costs to €0 if infrastructure is shared.
+> **Note**: A custom internal LLM would reduce LLM costs to €0 if infrastructure is shared.
 > Sources: [OpenAI pricing](https://openai.com/api/pricing/) · [Weaviate pricing](https://weaviate.io/pricing) · [Cloud Run pricing](https://cloud.google.com/run/pricing)
 
 ---
@@ -79,4 +79,4 @@
 
 **Production:**
 - < €50/month for 100 users = near-immediate ROI vs manual document search
-- Gen-e2 internal could reduce LLM costs to €0 if infrastructure is shared
+- A custom internal LLM could reduce LLM costs to €0 if infrastructure is shared

@@ -2,7 +2,7 @@
 
 REFERENCE_DATASET = [
     {
-        "question": "Quels sont les produits proposés par Palo IT ?",
+        "question": "Quels sont les produits proposés par la plateforme ?",
         "expected_source": "faq-produits.md",
     },
     {

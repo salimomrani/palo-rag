@@ -1,53 +1,52 @@
-# PALO RAG — Core Rules
+# PALO RAG — Core Rules & Context
 
-## Workflow Routing (mandatory)
+<purpose>
+Ce fichier sert de guide de référence principal pour Claude Code lors des sessions de développement sur le projet PALO RAG. Il définit les protocoles de workflow, les standards techniques et les limites architecturales.
+</purpose>
 
-- **Feature / non-trivial change** → use `/speckit.workflow`
-- **Small fix** (typo, wording, label, 1-2 lines, docs-only, or explicitly called a small fix) → direct edit, no spec
-- **Frontend implementation conventions** → skill `applying-angular-conventions`
-- **Python/backend conventions** → skill `applying-python-conventions`
+## 📂 Project Context & Files
 
-## TDD (mandatory)
+- **Primary Source of Truth**: Codebase > `specs/` > `DECISIONS.md`.
+- **Architecture**: `.specify/memory/constitution.md` (À lire impérativement avant toute décision structurante).
+- **Tech Stack**: Angular (Frontend), Python/FastAPI (Backend), PostgreSQL 16 (DB), Ollama (LLM Local).
 
-**Iron law: no production code without a failing test first.** RED → GREEN → REFACTOR
+## 🛠 Workflow Routing (Mandatory)
 
-- Use `superpowers:test-driven-development` for features/bugfixes.
-- Tests and lint must pass before any commit.
-- Use the stack-specific commands from the repo and skills (`applying-angular-conventions`, `applying-python-conventions`).
+- **Feature / Non-trivial change**: Utiliser systématiquement `/speckit.workflow`.
+- **Small fix**: (Typo, wording, < 5 lignes) -> Edition directe autorisée sans spec.
+- **Frontend**: Appliquer le skill `applying-angular-conventions`.
+- **Backend**: Appliquer le skill `applying-python-conventions`.
 
-## Git
+## 🧪 Test-Driven Development (Iron Law)
 
-- Update `specs/<feature>/tasks.md` after each completed task during Speckit execution
+**Pas de code de production sans un test qui échoue d'abord (RED -> GREEN -> REFACTOR).**
 
-## Architecture Constraints
+- Utiliser `superpowers:test-driven-development`.
+- Exécuter les tests et le linting avant chaque commit.
+- **Commandes de tests** :
+  - Backend : `cd backend && .venv/bin/pytest tests/ -v`
+  - Frontend : `cd frontend && npm test -- --watch=false`
 
-Read `.specify/memory/constitution.md` before any architectural decision.
+## 🏗 Architectural Constraints (Zero-Knowledge)
 
-1. Local-first — Ollama only, no data leaves the machine
-2. Traceability — every query logged (PII-masked)
-3. Transparent failure — no hallucinated answers
-4. Separation of concerns — RAG / guardrails / eval = independent modules
+1. **Local-first** : Uniquement Ollama. Aucune donnée ne doit transiter par des API externes.
+2. **Traceability** : Chaque query doit être logguée (avec masquage PII).
+3. **Transparent failure** : Préférer "Je ne sais pas" à l'hallucination.
+4. **Separation of concerns** : Isolation stricte entre RAG, Guardrails et Modules d'évaluation.
 
-## Environment
+## 💻 Environment & Commands
 
-- Backend needs `backend/.env` — copy from `backend/.env.example` if missing
-- DB: `docker-compose up -d` (PostgreSQL 16, port 5444)
-- Ports: 8000 (backend), 4200 (frontend)
+- **Setup** : Si `backend/.env` est absent, copier `backend/.env.example`.
+- **Docker** : `docker-compose up -d` (PostgreSQL sur port 5444).
+- **Run Dev** :
+  - Backend : `cd backend && .venv/bin/uvicorn main:app --reload --port 8000`
+  - Frontend : `cd frontend && npm start`
+- **Linting** :
+  - Backend : `ruff check .`
+  - Frontend : `npm run lint`
 
-## Run / Dev Commands
+## ⚠️ Error Handling & Stuck Protocol
 
-- Backend (dev): `cd backend && .venv/bin/uvicorn main:app --reload --port 8000`
-- Frontend (dev): `cd frontend && npm start`
-- Backend health check: `curl http://127.0.0.1:8000/health`
-
-## Test / Lint Commands
-
-- Backend tests: `cd backend && .venv/bin/pytest tests/ -v`
-- Backend lint: `cd backend && .venv/bin/ruff check .`
-- Frontend tests: `cd frontend && npm test -- --watch=false`
-- Frontend lint: `cd frontend && npm run lint`
-
-## Source of Truth
-
-- **Code > plan.md > tasks.md** — code wins on divergence
-- Deviations from spec → document in `DECISIONS.md`
+- Si un test échoue de manière répétée après 3 tentatives de correction : **Arrête-toi**, analyse les logs de manière exhaustive, et propose un diagnostic avant de retenter.
+- Si une bibliothèque manque, vérifie `pyproject.toml` ou `package.json` avant d'installer quoi que ce soit.
+- Documente toute déviation majeure par rapport aux specs dans `DECISIONS.md`.

@@ -24,7 +24,7 @@ When the system cannot answer confidently (low similarity score, guardrail trigg
 
 ### IV. Separation of Concerns
 
-The RAG pipeline (ingestion, retrieval, generation), guardrails, and evaluation MUST be independent modules with clear interfaces. The AI provider MUST be abstracted behind an `AIProvider` interface to allow swapping Ollama for Gen-e2 via a single environment variable. Frontend changes MUST NOT require backend RAG changes and vice versa.
+The RAG pipeline (ingestion, retrieval, generation), guardrails, and evaluation MUST be independent modules with clear interfaces. The AI provider MUST be abstracted behind an `AIProvider` interface to allow swapping Ollama for an alternative provider via a single environment variable. Frontend changes MUST NOT require backend RAG changes and vice versa.
 
 ### V. Demo-Ready Reproducibility
 
@@ -39,7 +39,7 @@ Any reviewer MUST be able to run the complete stack in under 5 minutes from a cl
 - Query traceability with structured PostgreSQL logging
 - Automated quality evaluation with RAGAS-style metrics
 - Angular 21 UI: Chat, Ingest, Logs views
-- Gen-e2 mock via abstraction layer
+- Custom LLM provider mock via abstraction layer
 - SSE streaming responses (ChatGPT-style UX via native fetch + ReadableStream)
 
 ### Out of Scope
